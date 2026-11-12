@@ -36,7 +36,7 @@ export const landingCopy = {
     cta: "Sign in",
     ctaDashboard: "Open dashboard",
     accessLink: "How access works",
-    note: "Access is by invite only. There is no sign-up.",
+    note: "Eve works for one Candidate. Sign in with the Google account it was set up with.",
     /** r3 `landing.hero.fragment_eligibility` (F1 chip, aria-hidden). F2 and F3 render from frame.matchBadge and frame.statusConfirmed. */
     fragmentEligibility: "Passes Eligibility",
   },
@@ -135,7 +135,7 @@ export const landingCopy = {
     title: "How access works",
     invite:
       "Eve is invite-only. The person who runs this installation invites people by their Google account email.",
-    noSignup: "There's no sign-up form and no waitlist. Without an invite, sign-in won't let you in.",
+    noSignup: "There's no sign-up form and no waitlist. Only the account this instance was set up with can sign in.",
     requestNote: "No invite? Ask the person who runs Eve. They decide on invites.",
     requestButton: "Request access",
     signedInvite: "Got an invite? Sign in with the Google account it was sent to.",

@@ -14,7 +14,7 @@ interface AccessSectionProps {
 }
 
 /**
- * Section 6, "How access works": invite-only, no sign-up, the request row,
+ * Section 6, "How access works": one account per instance, no sign-up, the request row,
  * the signed-invite line, the data line and the closing filled button. The
  * heading is the in-page jump's focus target.
  */

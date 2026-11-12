@@ -1,5 +1,8 @@
 # Eve
 
+[![CI](https://github.com/Sambalicious/eve/actions/workflows/ci.yml/badge.svg)](https://github.com/Sambalicious/eve/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Eve is a personal assistant, built with Mastra AI, that works for one Candidate. It finds remote and relocation software jobs, tailors truthful application documents from the Candidate's approved Career Profile, applies through employer career sites, and reports every submission by email. Eve is open source and self-hosted: one Candidate per installation, your data on your machine. Product rules and domain language are in [CONTEXT.md](CONTEXT.md).
 
 ## Quick start

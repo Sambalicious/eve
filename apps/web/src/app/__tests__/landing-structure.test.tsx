@@ -44,7 +44,7 @@ describe("landing structure (page-structure.feature, a11y-keyboard.feature)", ()
     expect(within(hero).getByText("Eve finds roles you can be hired for and writes resumes from your record. At most five applications a day.")).toBeVisible()
     expect(within(hero).getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in")
     expect(within(hero).getByRole("link", { name: "How access works" })).toHaveAttribute("href", "#access")
-    expect(within(hero).getByText("Access is by invite only. There is no sign-up.")).toBeVisible()
+    expect(within(hero).getByText("Eve works for one Candidate. Sign in with the Google account it was set up with.")).toBeVisible()
     expect(within(hero).getByText("Example. Made-up company and role.")).toBeInTheDocument()
   })
 
@@ -72,7 +72,7 @@ describe("landing structure (page-structure.feature, a11y-keyboard.feature)", ()
     const access = screen.getByRole("region", { name: "How access works" })
     const texts = [
       "Eve is invite-only. The person who runs this installation invites people by their Google account email.",
-      "There's no sign-up form and no waitlist. Without an invite, sign-in won't let you in.",
+      "There's no sign-up form and no waitlist. Only the account this instance was set up with can sign in.",
       "No invite? Ask the person who runs Eve. They decide on invites.",
       "Request access",
       "Got an invite? Sign in with the Google account it was sent to.",

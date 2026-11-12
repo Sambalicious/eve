@@ -50,7 +50,8 @@ describe("outreachItemSchema (strict, firstFailedSentence required and nullable)
   })
 
   it("rejects the key's absence, an empty string and an unknown extra key", () => {
-    const { firstFailedSentence: _omitted, ...withoutKey } = item()
+    const withoutKey: Record<string, unknown> = { ...item() }
+    delete withoutKey.firstFailedSentence
     expect(outreachItemSchema.safeParse(withoutKey).success).toBe(false)
     expect(outreachItemSchema.safeParse(item({ firstFailedSentence: "" })).success).toBe(false)
     expect(outreachItemSchema.safeParse({ ...item(), extra: 1 }).success).toBe(false)
