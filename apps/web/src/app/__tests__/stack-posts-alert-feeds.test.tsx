@@ -375,7 +375,9 @@ describe("Alert feed verification (alert-feed-verification.feature)", () => {
         server.use(http.put(ALERT_FEED_VERIFICATION_PATH, () => apiErrorResponse("internal_error")))
         const { dialog, basis, submit } = await openDialog(user, "Record permitted use")
         await submit()
-        expect(basis).toHaveFocus()
+        // The dialog moves focus in an effect after the failed submit settles; under load the assertion
+        // can run one tick early, which is what made this test flaky on CI.
+        await waitFor(() => expect(basis).toHaveFocus())
         expect(calls).toContainEqual({ el: basis, options: { block: "nearest" } })
 
         await user.type(basis, "Reviewed Google Alerts terms.")
