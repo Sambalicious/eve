@@ -1,0 +1,308 @@
+# Local development stack (ADR 0004): postgres, api, worker; slice 5 adds the
+# Playwright MCP browser and its egress proxy (ADR 0008). The worker uses the
+# browser only when SUBMISSION_BROWSER_ENABLED=1; it is off by default, so no
+# form can be submitted from this stack unless that is set deliberately.
+# Usage: cp .env.example .env, fill it in, then `docker compose up --build`.
+# After the job-assistant -> eve rename, stop the old project once first:
+# `docker compose -p job-assistant down`. NEVER add -v: both project names now
+# share the pinned volumes below, so -v would delete the live database and files.
+name: eve
+
+x-api-image: &api-image
+  build:
+    context: .
+    dockerfile: apps/api/Dockerfile
+  image: eve-api:local
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # SEC-001: the image's superuser is used only here, to create the owner and runtime roles,
+  # and the read-only backup role (BYPASSRLS, which only a superuser can set; docs/ops/backups.md).
+  provision-roles:
+    <<: *api-image
+    command: ["node", "dist/db/provision-roles.cli.js"]
+    environment:
+      ADMIN_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env}
+      DB_OWNER_ROLE: ${DB_OWNER_ROLE:?set in .env}
+      DB_OWNER_PASSWORD: ${DB_OWNER_PASSWORD:?set in .env}
+      DB_RUNTIME_ROLE: ${DB_RUNTIME_ROLE:?set in .env}
+      DB_RUNTIME_PASSWORD: ${DB_RUNTIME_PASSWORD:?set in .env}
+      # Optional here so the stack still starts without it; scripts/backup/backup.sh refuses to run until both are set.
+      # No default password: with DB_BACKUP_PASSWORD empty the role is created NOLOGIN.
+      DB_BACKUP_ROLE: ${DB_BACKUP_ROLE:-}
+      DB_BACKUP_PASSWORD: ${DB_BACKUP_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  # Migrations and the pg-boss schema, as the owner role. Grants DML to the runtime role.
+  migrate:
+    <<: *api-image
+    command: ["node", "dist/db/migrate.cli.js"]
+    environment:
+      DATABASE_URL: ${MIGRATION_DATABASE_URL:?set in .env}
+      RUNTIME_DATABASE_ROLE: ${DB_RUNTIME_ROLE:?set in .env}
+      # Read-only backup role: SELECT on every table and sequence, now and later. The name only, never the password.
+      DB_BACKUP_ROLE: ${DB_BACKUP_ROLE:-}
+      # EPIC-0002 multi-candidate migration (0016-multi-candidate) binds the existing data to this owner, once; empty is fine on a fresh install.
+      # Remove it from .env after that run; rebind later with `operator:rebind-sub` on the host.
+      CANDIDATE_GOOGLE_SUB: ${CANDIDATE_GOOGLE_SUB:-}
+    depends_on:
+      provision-roles:
+        condition: service_completed_successfully
+    restart: "no"
+
+  api:
+    <<: *api-image
+    command: ["node", "dist/main.api.js"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?set in .env}
+      PORT: ${PORT:-3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set in .env}
+      # CANDIDATE_GOOGLE_SUB is retired (EPIC-0002 A1): the api refuses to start if it is set.
+      # Read from the environment only; never stored in the database or shown in the dashboard.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-5-5}
+      ANTHROPIC_DOCUMENTS_MODEL: ${ANTHROPIC_DOCUMENTS_MODEL:-claude-sonnet-5-5}
+      MASTRA_TELEMETRY_DISABLED: "1"
+      # EPIC-0002 A2: per-Candidate files, <root>/<candidate_id>/{resumes,documents,exports}.
+      # RESUME_STORAGE_DIR and DOCUMENT_STORAGE_DIR are retired: the api refuses to start if either is set.
+      # The api also refuses to start until storage-migrate has written its marker in this root.
+      CANDIDATE_STORAGE_DIR: /data/candidates
+      # SEC-515 repair wave 3: the form agent is off unless exactly "1".
+      SUBMISSION_FORM_AGENT_ENABLED: ${SUBMISSION_FORM_AGENT_ENABLED:-0}
+      # EPIC-0012 rule 2 (posting terms) and rule 4 (quoted company direction): off unless exactly "1".
+      DOCUMENT_BRIDGES_ENABLED: ${DOCUMENT_BRIDGES_ENABLED:-0}
+      DOCUMENT_DIRECTION_ENABLED: ${DOCUMENT_DIRECTION_ENABLED:-0}
+      # EPIC-0003 public request access. The api never gets NOTIFY_TO or GMAIL_SMTP_*.
+      ACCESS_REQUEST_SECRET: ${ACCESS_REQUEST_SECRET:?set in .env}
+      # Reverse-proxy hops in front of the api (1 behind Caddy). 0: global cap only.
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      ACCESS_REQUEST_LIMIT_IP_HOUR: ${ACCESS_REQUEST_LIMIT_IP_HOUR:-3}
+      ACCESS_REQUEST_LIMIT_IP_DAY: ${ACCESS_REQUEST_LIMIT_IP_DAY:-10}
+      ACCESS_REQUEST_LIMIT_GLOBAL_DAY: ${ACCESS_REQUEST_LIMIT_GLOBAL_DAY:-50}
+    volumes:
+      # Resumes, Tailored Documents and exports, read-write (the api is the only writer);
+      # the image creates the directory node:node 0700.
+      - candidate-data:/data/candidates
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    # SEC-201: come back after a crash or an out-of-memory kill. A process that is
+    # alive but unresponsive is marked unhealthy here; Compose itself does not
+    # restart unhealthy containers, so run an autoheal sidecar or orchestrator in
+    # deployment if that is needed.
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/v1/health',{signal:AbortSignal.timeout(4000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  worker:
+    <<: *api-image
+    command: ["node", "dist/main.worker.js"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      # EPIC-0002 A2: same root as the api, mounted read-only here. DOCUMENT_STORAGE_DIR is retired.
+      CANDIDATE_STORAGE_DIR: /data/candidates
+      # EPIC-0006 AC-7.2: the worker evaluates Job Postings, so it needs the same key and model as the api,
+      # from the same sources and defaults. Env only (ADR 0006): never stored, logged or returned.
+      # Empty key: evaluations fail as not_configured with no spend.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-5-5}
+      ANTHROPIC_DOCUMENTS_MODEL: ${ANTHROPIC_DOCUMENTS_MODEL:-claude-sonnet-5-5}
+      # ADR 0008: off unless exactly "1".
+      SUBMISSION_BROWSER_ENABLED: ${SUBMISSION_BROWSER_ENABLED:-0}
+      # SEC-515 repair wave 3: off unless exactly "1"; leftover required fields then block as Missing Approved Answer.
+      SUBMISSION_FORM_AGENT_ENABLED: ${SUBMISSION_FORM_AGENT_ENABLED:-0}
+      # EPIC-0012 rule 2 (posting terms) and rule 4 (quoted company direction): off unless exactly "1".
+      DOCUMENT_BRIDGES_ENABLED: ${DOCUMENT_BRIDGES_ENABLED:-0}
+      DOCUMENT_DIRECTION_ENABLED: ${DOCUMENT_DIRECTION_ENABLED:-0}
+      SUBMISSION_BROWSER_MCP_URL: http://browser:8931/mcp
+      SUBMISSION_UPLOAD_DIR: /data/uploads
+      SUBMISSION_UPLOAD_DIR_IN_BROWSER: /home/node/uploads
+      SUBMISSION_EGRESS_ALLOWLIST_FILE: /data/egress/allowlist.txt
+      # Slice 6 notifications (AC 7.5, 7.6): worker only, from .env only; never in the database,
+      # the api or the dashboard. Leave any of the three empty to keep the sender off.
+      GMAIL_SMTP_USER: ${GMAIL_SMTP_USER:-}
+      GMAIL_SMTP_APP_PASSWORD: ${GMAIL_SMTP_APP_PASSWORD:-}
+      NOTIFY_TO: ${NOTIFY_TO:-}
+      # Origin the email links point to (the dashboard).
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
+      # The daily summary job is off unless exactly "1".
+      NOTIFY_DAILY_SUMMARY_ENABLED: ${NOTIFY_DAILY_SUMMARY_ENABLED:-0}
+      # Automatic 12-month expiry (retention.daily, 03:00 WAT) is irreversible. Exactly "1" unschedules it.
+      # Shipped as 1 until database backups (ops/db-backups) are confirmed; set 0 to enable.
+      RETENTION_JOB_DISABLED: ${RETENTION_JOB_DISABLED:-1}
+    volumes:
+      # Per-Candidate files (read-only here; the api writes them, and the api's hourly sweep removes released files).
+      - candidate-data:/data/candidates:ro
+      # Per-attempt copies the browser uploads from (mounted read-only in browser).
+      - submission-uploads:/data/uploads
+      # The egress proxy's per-attempt allowlist (read-only in egress).
+      - egress-allowlist:/data/egress
+    networks: [default, browser-net]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    # The worker has no port: healthy while it keeps touching its heartbeat file.
+    healthcheck:
+      test: ["CMD", "node", "dist/worker/worker-healthcheck.cli.js"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # EPIC-0002 A2, one-shot and never part of a plain `up` (profile). Moves every
+  # resume and Tailored Document from the flat pre-A2 volumes into the per-Candidate
+  # layout, checks each copy's SHA-256 against its row, deletes the originals only
+  # after every check passed, then writes the marker the api and worker need to start.
+  # Owner role (it reads every Candidate's rows) and read-write on all three volumes.
+  # Exit 1 on any problem, deleting nothing. Idempotent. Take the on-demand backup
+  # first: docs/ops/deploy.md ("A2 deploy").
+  storage-migrate:
+    <<: *api-image
+    command: ["node", "dist/db/storage-migrate.cli.js"]
+    profiles: [storage-migrate]
+    environment:
+      DATABASE_URL: ${MIGRATION_DATABASE_URL:?set in .env}
+      OLD_RESUME_STORAGE_DIR: /data/resumes
+      OLD_DOCUMENT_STORAGE_DIR: /data/documents
+      CANDIDATE_STORAGE_DIR: /data/candidates
+    volumes:
+      - resume-data:/data/resumes
+      - document-data:/data/documents
+      - candidate-data:/data/candidates
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  # Creates the upload and allowlist volumes from the image's node-owned 0755
+  # directories before browser or egress mount them (otherwise the first mount
+  # makes them root-owned and the worker cannot write the allowlist).
+  submission-volumes:
+    <<: *api-image
+    command: ["node", "-e", "0"]
+    volumes:
+      - submission-uploads:/data/uploads
+      - egress-allowlist:/data/egress
+    restart: "no"
+
+  # ADR 0008: Playwright MCP over Streamable HTTP. Only on browser-net (internal:
+  # no route to postgres, api, the host or the internet); its only way out is egress.
+  # Pinned by digest (@playwright/mcp 0.0.83). Upgrade only after the wrapper
+  # contract tests pass on the fixture forms.
+  browser:
+    image: mcr.microsoft.com/playwright/mcp@sha256:690763cbb437ee7233f538a953bb5390bf03791eb5c965b471e59d17a6132fcb
+    # Appended to the image entrypoint (tini -- node cli.js --headless --browser chromium --no-sandbox).
+    command:
+      - --isolated
+      - --port=8931
+      - --host=0.0.0.0
+      - --allowed-hosts=browser:8931
+      - --snapshot-mode=none
+      - --no-webmcp
+      - --block-service-workers
+      - --image-responses=omit
+      - --codegen=none
+      - --proxy-server=http://egress:3128
+      - --init-script=/guard/submit-guard.js
+      - --timeout-navigation=30000
+      - --timeout-action=5000
+      - --output-dir=/work/out
+    volumes:
+      - ./docker/browser/submit-guard.js:/guard/submit-guard.js:ro
+      # browser_file_upload only reads inside /home/node or the output dir, hence this path.
+      - submission-uploads:/home/node/uploads:ro
+    tmpfs:
+      - /work/out:uid=1000,gid=1000,mode=0700
+      # Chromium profile cache; --isolated keeps the profile itself in memory. Lost on restart.
+      - /home/node:uid=1000,gid=1000,mode=0700
+      - /tmp
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1536m
+    pids_limit: 512
+    networks: [browser-net]
+    depends_on:
+      submission-volumes:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # ADR 0008: Squid forward proxy, the browser's only route out. Denies every host
+  # not in the per-attempt allowlist the worker writes (empty file: nothing allowed).
+  egress:
+    image: ubuntu/squid@sha256:6a097f68bae708cedbabd6188d68c7e2e7a38cedd05a176e1cc0ba29e3bbe029
+    volumes:
+      - ./docker/egress/squid.conf:/etc/squid/squid.conf:ro
+      - ./docker/egress/allowlist-helper.pl:/etc/squid/allowlist-helper.pl:ro
+      - egress-allowlist:/etc/squid/allow:ro
+    # SEC-505: the entrypoint starts as root and Squid drops to `proxy` (uid 13),
+    # which needs SETUID/SETGID; nothing else. Writable paths are tmpfs only.
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /var/spool/squid:uid=13,gid=13
+      - /var/log/squid:uid=13,gid=13
+      - /run
+      - /tmp
+    mem_limit: 256m
+    pids_limit: 128
+    networks: [browser-net, egress-out]
+    depends_on:
+      submission-volumes:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+networks:
+  default:
+  # No external route: worker, browser and egress only.
+  browser-net:
+    internal: true
+  egress-out:
+
+# Volume names are pinned to the pre-rename project name so existing data
+# (database, resumes, documents) survives the job-assistant -> eve rename.
+# resume-data and document-data hold the pre-A2 flat files; after A2 only
+# storage-migrate and the backups mount them. candidate-data is the A2 root.
+volumes:
+  postgres-data:
+    name: job-assistant_postgres-data
+  resume-data:
+    name: job-assistant_resume-data
+  document-data:
+    name: job-assistant_document-data
+  candidate-data:
+    name: job-assistant_candidate-data
+  # Slice 5 volumes are not pinned: they hold per-attempt copies and the egress
+  # allowlist, which the worker rewrites, so nothing needs to survive the rename.
+  submission-uploads:
+  egress-allowlist:

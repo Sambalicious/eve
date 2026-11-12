@@ -1,0 +1,26 @@
+# Throwaway source stack for scripts/backup/test/run-tests.sh. Fake data only.
+# Run only as project ja-ops-backup-test; the runner refuses eve/job-assistant.
+# Password auth is on for local connections so the owner-role login is real.
+services:
+  postgres:
+    image: ${BACKUP_HELPER_IMAGE:-postgres:17-alpine}
+    environment:
+      POSTGRES_USER: test_bootstrap
+      POSTGRES_PASSWORD: ${BACKUP_TEST_BOOTSTRAP_PASSWORD:?set by run-tests.sh}
+      POSTGRES_DB: job_assistant
+      POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [test]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_bootstrap -d job_assistant"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+
+networks:
+  test:
+    internal: true
+
+volumes:
+  pgdata:

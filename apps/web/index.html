@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Boot (EPIC-0003 architecture r1 section 3): theme before paint, motion-ok, session-pending; 3 s fail-safe. Keys match ThemeProvider and SESSION_HINT_KEY (boot-script.test.ts). -->
+    <script>(function(d,w){var h=d.documentElement,s=w.localStorage,t=null,k=null;try{t=s.getItem("eve-theme")||s.getItem("job-assistant-theme");k=s.getItem("eve-session-hint")}catch(e){}var m=function(q){return w.matchMedia&&w.matchMedia(q).matches};if(t==="dark"||((t==="system"||!t)&&m("(prefers-color-scheme: dark)")))h.classList.add("dark");if(m("(prefers-reduced-motion: no-preference)")&&"IntersectionObserver"in w&&Element.prototype.animate)h.classList.add("motion-ok");var p=w.location.pathname;if((p==="/"||p==="/about")&&k==="1")h.classList.add("session-pending");setTimeout(function(){if(!w.__eveReady)h.classList.remove("motion-ok","session-pending")},3000)})(document,window)</script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121520" media="(prefers-color-scheme: dark)" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Eve</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

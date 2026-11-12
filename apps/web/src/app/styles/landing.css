@@ -1,0 +1,1302 @@
+/* EPIC-0003 landing page (design-spec r1 sections 2 to 9, r2 S1 and S2).
+   Global, not chunked: the prerendered `/` HTML needs it before the landing chunk runs. */
+
+/* ── Boot classes (index.html script) ─────────────────────────── */
+html.session-pending [data-landing-root] {
+  visibility: hidden;
+}
+
+/* ── Frame and type ───────────────────────────────────────────── */
+.landing-container {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+@media (min-width: 1024px) {
+  .landing-container {
+    padding-inline: 24px;
+  }
+}
+.landing-section {
+  padding-block: 56px;
+}
+.landing-section > .landing-ruled {
+  position: relative;
+}
+/* Ledger rule spans the container's content width, not the viewport. */
+.landing-ruled::before {
+  content: "";
+  position: absolute;
+  inset-inline: 16px;
+  top: -56px;
+  border-top: 1px solid var(--border);
+}
+.landing-footer .landing-ruled {
+  position: relative;
+}
+.landing-footer .landing-ruled::before {
+  top: -24px;
+}
+@media (min-width: 768px) {
+  .landing-section {
+    padding-block: 72px;
+  }
+  .landing-ruled::before {
+    top: -72px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-section {
+    padding-block: 96px;
+  }
+  .landing-ruled::before {
+    top: -96px;
+    inset-inline: 24px;
+  }
+}
+
+.landing-h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 36px;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.landing-h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 26px;
+  line-height: 1.15;
+  max-width: 760px;
+}
+.landing-h3 {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.landing-subhead {
+  color: var(--muted-foreground);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.landing-para {
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 760px;
+}
+.landing-intro {
+  margin-top: 12px;
+  color: var(--muted-foreground);
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 640px;
+}
+.landing-small {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.landing-note {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.45;
+}
+@media (min-width: 768px) {
+  .landing-h1 {
+    font-size: 44px;
+    line-height: 1.08;
+  }
+  .landing-h2 {
+    font-size: 28px;
+  }
+  .landing-subhead {
+    font-size: 17px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-h1 {
+    font-size: 56px;
+    line-height: 1.05;
+  }
+  .landing-h2 {
+    font-size: 32px;
+  }
+  .landing-subhead {
+    font-size: 18px;
+  }
+}
+
+/* ── Persuade layer (design-spec r3 P6, landing only) ─────────── */
+/* Tokens live on the landing root, never on :root, so nothing reaches the
+   app. Azure (--persuade-accent) is for graphics only: never text, a link or
+   a control. Cobalt here also marks illustration strokes, the Stops discs
+   and the headline's second line. */
+.landing-root {
+  --persuade-accent: oklch(0.62 0.15 245);
+  --persuade-ink: oklch(0.44 0.17 265);
+  --persuade-tint: oklch(0.972 0.014 262);
+  --persuade-tint-strong: oklch(0.93 0.04 262);
+  --illo-fill: oklch(0.955 0.022 262);
+  --illo-fill-2: oklch(0.93 0.04 262);
+  --illo-stroke: var(--primary);
+  --illo-accent: var(--persuade-accent);
+  --illo-paper: var(--popover);
+  /* Radial strengths. The spec's 14% / 12% put --persuade-ink at 6.2:1 at
+     the field peak; these keep both headline lines at 7:1 or more there
+     (illustrations.feature, OPEN-FE-B2). */
+  --hero-field-a: 4%;
+  --hero-field-b: 5%;
+}
+.dark .landing-root {
+  --persuade-accent: oklch(0.75 0.11 240);
+  --persuade-ink: oklch(0.8 0.09 245);
+  --persuade-tint: oklch(0.2 0.02 262);
+  --persuade-tint-strong: oklch(0.27 0.06 262);
+  --illo-fill: oklch(0.27 0.06 262);
+  --illo-fill-2: oklch(0.32 0.08 262);
+  --hero-field-a: 20%;
+  --hero-field-b: 16%;
+}
+.landing-root .landing-h1 {
+  font-size: clamp(40px, 5.2vw + 12px, 76px);
+  line-height: 1;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+.landing-root .landing-h1-ink {
+  display: block;
+  color: var(--persuade-ink);
+}
+.landing-root .landing-h2 {
+  font-size: clamp(28px, 2.2vw + 14px, 44px);
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.landing-root .landing-h3 {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+/* Hero field: two radials (cobalt, azure) over a tint that fades to the
+   background. Static: never animates, no blur, no image. It starts behind the
+   translucent header and peaks left and right of the centred text column. */
+.landing-hero {
+  position: relative;
+  isolation: isolate;
+}
+.landing-hero::before {
+  content: "";
+  position: absolute;
+  inset: -56px 0 auto 0;
+  height: min(980px, 120%);
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 18% 22%, color-mix(in oklch, var(--primary) var(--hero-field-a), transparent), transparent 70%),
+    radial-gradient(50% 45% at 85% 30%, color-mix(in oklch, var(--persuade-accent) var(--hero-field-b), transparent), transparent 70%),
+    linear-gradient(to bottom, var(--persuade-tint) 0%, var(--background) 92%);
+}
+@media (max-width: 399px) {
+  .landing-hero::before {
+    background:
+      radial-gradient(60% 40% at 10% 15%, color-mix(in oklch, var(--primary) var(--hero-field-a), transparent), transparent 70%),
+      radial-gradient(50% 35% at 90% 25%, color-mix(in oklch, var(--persuade-accent) var(--hero-field-b), transparent), transparent 70%),
+      linear-gradient(to bottom, var(--persuade-tint) 0%, var(--background) 92%);
+  }
+}
+@media (max-height: 479px) {
+  .landing-hero::before {
+    height: min(100dvh, 120%);
+  }
+}
+
+/* Section grounds: field, white (frame, Steps), tint (Stops), white (Limits),
+   tint with a faint azure echo (Access), white (footer). A ground change is
+   the divider, so the ledger rule is dropped there; rules stay inside lists
+   and between same-ground neighbours. */
+.landing-section[data-ground="tint"] {
+  background: var(--persuade-tint);
+}
+#access.landing-section[data-ground="tint"] {
+  background:
+    radial-gradient(45% 60% at 92% 100%, color-mix(in oklch, var(--persuade-accent) 8%, transparent), transparent 70%),
+    var(--persuade-tint);
+}
+.landing-section[data-ground="tint"] > .landing-ruled::before, .landing-section[data-ground="tint"] + .landing-section > .landing-ruled::before {
+  display: none;
+}
+.landing-main:has(> .landing-section[data-ground="tint"]:last-child) + .landing-footer .landing-ruled::before {
+  display: none;
+}
+@media (min-width: 768px) {
+  .landing-section[data-ground="tint"] {
+    padding-block: 64px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-section[data-ground="tint"] {
+    padding-block: 96px;
+  }
+}
+/* Stops reason icons: cobalt in a 32px tinted disc, aligned to the text. */
+.landing-stop-disc {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--persuade-tint-strong);
+  color: var(--primary);
+}
+.landing-stop-disc svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Illustrations (design-spec r3 Illustration system) ───────── */
+/* Cobalt duotone from tokens only, so dark mode and forced colours swap them.
+   Paint classes: f (--illo-fill), f2 (--illo-fill-2), p (paper fill),
+   s (stroke), sa (accent stroke), sf (stroke-colour fill), af (accent fill),
+   pf (paper fill, no stroke), sp (paper stroke), a20 (accent at 20%), o5. */
+.illo {
+  display: block;
+  pointer-events: none;
+}
+.illo svg,
+.hero-envelope {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.illo .f { fill: var(--illo-fill); }
+.illo .f2, .hero-frags .f2 { fill: var(--illo-fill-2); }
+.illo .track { fill: none; stroke: var(--illo-fill-2); }
+.illo .p, .hero-frags .p { fill: var(--illo-paper); }
+.illo .s, .hero-frags .s { stroke: var(--illo-stroke); }
+.illo .sa { stroke: var(--illo-accent); }
+.illo .sf { fill: var(--illo-stroke); }
+.illo .af, .hero-frags .af { fill: var(--illo-accent); }
+.illo .pf { fill: var(--illo-paper); }
+.illo .sp { stroke: var(--illo-paper); }
+.illo .a20 { fill: color-mix(in oklch, var(--illo-accent) 20%, transparent); }
+.illo .o5 { opacity: 0.5; }
+/* On a tinted ground the pale blob becomes paper so it still separates. */
+[data-ground="tint"] .illo .blob { fill: color-mix(in oklch, var(--illo-paper) 70%, transparent); }
+
+/* Step spots: 56 left of the text at < 768, 72 above the title at 768, 96 atop
+   each ruled column at 1024 and up. (.landing-steps > raises specificity over
+   the r1 step rules later in this file.) */
+.landing-steps > .landing-step {
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 4px;
+}
+.landing-steps > .landing-step > .illo-step {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 56px;
+}
+.landing-steps > .landing-step > .landing-step-number { grid-column: 2; grid-row: 1; }
+.landing-steps > .landing-step > div:not(.illo) { grid-column: 2; grid-row: 2; min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 768px) {
+  .landing-steps > .landing-step {
+    column-gap: 0;
+    row-gap: 0;
+  }
+  .landing-steps > .landing-step > .illo-step {
+    grid-column: 2;
+    grid-row: 1;
+    width: 72px;
+    margin-bottom: 12px;
+  }
+  .landing-steps > .landing-step > .landing-step-number { grid-column: 1; grid-row: 2; }
+}
+@media (min-width: 1024px) {
+  .landing-steps > .landing-step {
+    grid-template-columns: none;
+    row-gap: 16px;
+  }
+  .landing-steps > .landing-step > .illo-step,
+  .landing-steps > .landing-step > .landing-step-number,
+  .landing-steps > .landing-step > div:not(.illo) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .landing-steps > .landing-step > .illo-step {
+    width: 96px;
+    margin-bottom: 8px;
+  }
+}
+
+/* Stops art: between intro and list below 1024, right column at 1024. */
+.landing-stops-art {
+  margin-top: 24px;
+  width: min(240px, 100%);
+}
+.landing-limits-art {
+  margin-top: 24px;
+  width: min(240px, 100%);
+}
+@media (min-width: 768px) {
+  .landing-stops-art,
+  .landing-limits-art {
+    width: 280px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-stops-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 640px) 1fr;
+    column-gap: 64px;
+  }
+  .landing-stops-wrap > :not(.landing-stops-head, .landing-stops-art) {
+    grid-column: 1 / -1;
+  }
+  .landing-stops-art {
+    margin-top: 0;
+    width: 320px;
+    justify-self: end;
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .landing-limits-art {
+    margin-top: 32px;
+    width: 320px;
+  }
+}
+
+/* ── Hero fragments (I-HERO layer 2) ─────────────────────────── */
+/* Positioned against the frame; never over its body text. Layers: outer
+   (parallax), drift, card (entrance). Decorative: no pointer events. */
+.hf-stage {
+  position: relative;
+}
+.hero-frags {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.hero-frag {
+  --depth: 0;
+  position: absolute;
+  display: none;
+  transform: translate3d(0, calc(var(--parallax, 0) * 1px), 0);
+}
+/* Positions keep every fragment off the frame body's text and off the
+   strip's "Example" label: below 1280 they sit in the gap above the frame or
+   break out of its bottom padding; from 1280 F1 and F2 hang outside the
+   frame's side edges, overlapping only its padding. */
+.hero-frag-1 { --depth: -0.06; left: -152px; top: 72px; }
+.hero-frag-2 { --depth: -0.1; right: 96px; top: -46px; }
+.hero-frag-3 { --depth: -0.04; left: 24px; bottom: -40px; }
+.hero-frag-4 { --depth: -0.12; right: 24px; top: -50px; width: 60px; height: 46px; }
+.hero-frag-card {
+  transform-origin: var(--frag-origin, center);
+}
+.hero-frag-1 .hero-frag-card { --frag-origin: right center; rotate: -2deg; }
+.hero-frag-2 .hero-frag-card { --frag-origin: left center; rotate: 2deg; }
+.hero-frag-3 .hero-frag-card { --frag-origin: right center; rotate: -6deg; }
+.hero-frag-4 .hero-frag-card { --frag-origin: bottom center; width: 100%; height: 100%; }
+.hero-chip {
+  display: inline-flex;
+  max-width: 200px;
+  height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 14px;
+  border-radius: 10px;
+  background: var(--popover);
+  box-shadow: 0 0 0 1px var(--border), var(--shadow-overlay);
+  color: var(--foreground);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.hero-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hero-chip-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.hero-chip-success { color: var(--success-text); }
+.hero-chip-meter { fill: var(--illo-stroke); }
+.hero-stamp {
+  height: 56px;
+  border-radius: 12px;
+  background: var(--success-muted);
+  box-shadow: inset 0 0 0 1px transparent, var(--shadow-overlay);
+  outline: 1.5px dashed var(--success);
+  outline-offset: -5px;
+  color: var(--success-text);
+  font-weight: 600;
+}
+.hero-stamp .hero-chip-icon { width: 18px; height: 18px; }
+
+/* Visible set: F2 and F4 everywhere; F3 from 768; F1 from 1280, where the
+   frame has room beside it (spec: hidden where it would cross the viewport
+   edge). None on short landscape phones. */
+.hero-frag-2,
+.hero-frag-4 { display: block; }
+@media (max-width: 767px) {
+  .hero-frag-2 { right: auto; left: 16px; top: -40px; }
+  .hero-frag-2 .hero-chip { height: 34px; max-width: 160px; padding-inline: 10px; font-size: 12px; }
+  .hero-frag-4 { right: 16px; top: -40px; width: 44px; height: 34px; }
+}
+@media (min-width: 768px) {
+  .hero-frag-3 { display: block; }
+  .hero-frag-2 .hero-chip { height: 40px; }
+  .hero-frag-3 .hero-chip { height: 48px; }
+}
+@media (min-width: 1280px) {
+  .hero-frag-1 { display: block; }
+  .hero-frag-2 { right: -156px; top: 168px; }
+  .hero-frag-2 .hero-chip,
+  .hero-frag-1 .hero-chip { height: 44px; }
+  .hero-frag-3 .hero-chip { height: 56px; }
+  .hero-frag-4 { right: 40px; top: -40px; width: 72px; height: 56px; }
+}
+@media (max-height: 479px) {
+  .hero-frag { display: none !important; }
+}
+
+/* Idle drift: CSS only, transform only, out of phase. Runs while the hook sets
+   data-drift="on"; pauses off-screen, hidden or hovered; the layer hint is
+   present only while the hero is visible and drifting. */
+@keyframes hero-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, calc(var(--amp) * -1), 0); }
+}
+@keyframes hero-drift-tilt {
+  from { transform: translate3d(0, 0, 0) rotate(-0.6deg); }
+  to { transform: translate3d(0, calc(var(--amp) * -1), 0) rotate(0.6deg); }
+}
+.hero-frag-1 .hero-frag-drift { --amp: var(--drift-amplitude-1); --period: var(--drift-period-1); --phase: -1.2s; }
+.hero-frag-2 .hero-frag-drift { --amp: var(--drift-amplitude-2); --period: var(--drift-period-2); --phase: -3.4s; }
+.hero-frag-3 .hero-frag-drift { --amp: var(--drift-amplitude-3); --period: var(--drift-period-3); --phase: -0.6s; }
+.hero-frag-4 .hero-frag-drift { --amp: var(--drift-amplitude-4); --period: var(--drift-period-4); --phase: -5s; }
+.landing-hero[data-drift="on"] .hero-frag-drift {
+  animation: hero-drift var(--period) ease-in-out var(--phase) infinite alternate;
+}
+.landing-hero[data-drift="on"] .hero-frag-3 .hero-frag-drift {
+  animation-name: hero-drift-tilt;
+}
+.landing-hero[data-drift-paused] .hero-frag-drift {
+  animation-play-state: paused;
+}
+.landing-hero[data-drift="on"][data-hero-visible]:not([data-drift-paused]) .hero-frag-drift {
+  will-change: transform;
+}
+
+/* Parallax: scroll-linked, transform only, on the outer layer. Native where
+   supported; otherwise the hook writes --hero-scroll (px) on the hero only. */
+.hero-frag {
+  --parallax: max(-24, min(24, calc(var(--depth) * min(var(--hero-scroll, 0), 200))));
+}
+@supports (animation-timeline: scroll()) {
+  @keyframes hero-parallax {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(0, calc(var(--depth) * 200px), 0); }
+  }
+  html.motion-ok .hero-frag {
+    animation: hero-parallax linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-frag,
+  .hero-frag-drift,
+  .hero-frag-card {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .hero-frag-1 .hero-frag-card { rotate: -2deg; }
+}
+@media (forced-colors: active) {
+  .illo svg *,
+  .hero-envelope * {
+    forced-color-adjust: auto;
+  }
+  .illo .f, .illo .f2, .illo .p, .illo .pf, .illo .af, .illo .sf, .illo .a20, .hero-frags .p, .hero-frags .af {
+    fill: Canvas;
+  }
+  .illo .s, .illo .sa, .illo .sp, .illo .track, .illo .f2, .illo .f, .illo .p, .hero-frags .s {
+    stroke: CanvasText;
+  }
+  .hero-chip { border: 1px solid CanvasText; box-shadow: none; }
+}
+@media print {
+  .hero-frag-card { opacity: 1 !important; transform: none !important; }
+}
+
+/* ── Links and focus (design-spec r1 6) ───────────────────────── */
+.landing-link:focus-visible,
+.landing-skip:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.landing-quiet-link {
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) ease;
+}
+.landing-inline-link {
+  color: var(--primary);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.landing-focus-target:focus {
+  outline: none;
+}
+.landing-main:focus {
+  outline: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-quiet-link:hover {
+    color: var(--foreground);
+  }
+  .landing-hero-jump:hover .landing-jump-arrow {
+    transform: translateY(2px);
+  }
+}
+@media (pointer: coarse) {
+  .landing-quiet-link,
+  .landing-hero-jump {
+    padding-block: 10px;
+    margin-block: -10px;
+  }
+}
+
+.landing-skip {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  z-index: 20;
+  transform: translateY(-200%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  padding: 6px 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.landing-skip:focus {
+  transform: none;
+}
+
+/* ── Public header (design-spec r1 2.2) ──────────────────────── */
+.public-header {
+  padding-top: env(safe-area-inset-top);
+  background-color: color-mix(in oklch, var(--background) 80%, transparent);
+  backdrop-filter: blur(12px) saturate(1.5);
+  border-color: var(--border);
+}
+@supports (animation-timeline: scroll()) {
+  .public-header {
+    border-color: transparent;
+    animation: header-edge linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 32px;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .public-header {
+    background-color: var(--background);
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-header {
+    animation: none;
+    border-color: var(--border);
+  }
+}
+
+/* ── Hero (design-spec r1 2.3 to 2.5) ─────────────────────────── */
+.landing-hero {
+  padding-top: 40px;
+  padding-bottom: 56px;
+}
+.landing-hero-text {
+  max-width: 760px;
+}
+.landing-subhead {
+  margin-top: 16px;
+  max-width: 620px;
+}
+.landing-hero-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.landing-hero-jump {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary);
+}
+.landing-jump-arrow {
+  transition: transform var(--duration-fast) ease;
+}
+.landing-hero .landing-note {
+  margin-top: 4px;
+  text-align: center;
+}
+.hero-demo {
+  /* r3: room above the frame for the fragments that sit over its top edge. */
+  margin-top: 56px;
+}
+@media (min-width: 768px) {
+  .landing-hero {
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+  .landing-hero-text {
+    margin-inline: auto;
+    text-align: center;
+  }
+  .landing-subhead {
+    margin-inline: auto;
+    max-width: 600px;
+  }
+  .landing-hero-actions {
+    margin-top: 28px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+  }
+  .landing-hero .landing-note {
+    margin-top: 12px;
+  }
+  .hero-demo {
+    margin-top: 72px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-hero {
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+  .landing-subhead {
+    margin-top: 20px;
+    max-width: 620px;
+  }
+  .landing-hero-actions {
+    margin-top: 32px;
+  }
+  .landing-hero .landing-note {
+    margin-top: 16px;
+  }
+  .hero-demo {
+    margin-top: 72px;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-primary:hover {
+    background-color: color-mix(in oklch, var(--primary) 88%, transparent);
+  }
+}
+
+/* ── Hero frame (design-spec r1 4.1, 4.2) ─────────────────────── */
+.hf {
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--border);
+  outline: 1px solid transparent;
+  background: var(--background);
+  overflow: clip;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.hf-strip {
+  display: flex;
+  height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+  padding-inline: 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+.hf-dots {
+  fill: var(--border);
+}
+.hf-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+.hf-col {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+.hf-block {
+  min-width: 0;
+}
+.hf-block + .hf-block {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.hf-col + .hf-col {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.hf-role {
+  font-weight: 600;
+}
+.hf-company,
+.hf-meta,
+.hf-text {
+  color: var(--muted-foreground);
+}
+.hf-text {
+  margin-top: 6px;
+}
+.hf-req {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+.hf-label {
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+.hf-rules {
+  display: grid;
+  gap: 6px;
+}
+.hf-rule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.hf-rule[data-wide] {
+  display: none;
+}
+.hf-quote {
+  border-left: 2px solid color-mix(in oklch, var(--primary) 35%, transparent);
+  padding-left: 12px;
+  overflow-wrap: anywhere;
+}
+.hf-chunk {
+  display: inline-block;
+}
+.hf-arrow {
+  display: block;
+  margin: 6px 0;
+  color: var(--muted-foreground);
+}
+.hf-badge-cell {
+  display: grid;
+}
+.hf-badge-cell > * {
+  grid-area: 1 / 1;
+}
+.hf-mail {
+  min-width: 0;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--border);
+  outline: 1px solid transparent;
+  padding: 12px;
+}
+.hf-mail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hf-mail-from {
+  font-weight: 600;
+}
+.hf-mail-time {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.hf-mail-subject {
+  margin-top: 4px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hf-mail-pre {
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+[data-a="status-prev"] {
+  opacity: 0;
+}
+.hero-demo-controls {
+  display: flex;
+  height: 32px;
+  margin-top: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.hf-paused {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.hf-paused[data-show] {
+  opacity: 1;
+}
+.hf-replay svg {
+  transition: transform 300ms var(--ease-standard);
+}
+.hf-replay:active svg {
+  transform: rotate(-180deg);
+}
+@media (min-width: 768px) {
+  .hf-rule[data-wide] {
+    display: flex;
+  }
+  .hf-body {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 24px;
+    padding: 20px;
+  }
+  .hf-col + .hf-col {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+@media (min-width: 1024px) {
+  .hf-body {
+    grid-template-columns: minmax(0, 33fr) minmax(0, 22fr);
+    column-gap: 32px;
+    padding: 24px;
+  }
+}
+/* Armed: the start state, only when the boot script allowed motion. */
+html.motion-ok .hf[data-motion="armed"] [data-a] {
+  opacity: 0;
+}
+html.motion-ok .hf-stage:has(> .hf[data-motion="armed"]) .hero-frag-card {
+  opacity: 0;
+}
+html.motion-ok .hf[data-motion="armed"] [data-a="status-prev"] {
+  opacity: 1;
+}
+.hf[data-motion="playing"] [data-a] {
+  will-change: transform, opacity;
+}
+
+/* ── Sections 3 to 5 ──────────────────────────────────────────── */
+.landing-steps {
+  margin-top: 24px;
+  display: grid;
+}
+.landing-step {
+  display: grid;
+  gap: 8px;
+  padding-block: 20px;
+  border-top: 1px solid var(--border);
+}
+.landing-step:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.landing-step .landing-small {
+  margin-top: 6px;
+  color: var(--muted-foreground);
+}
+.landing-step-number {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.landing-stops {
+  margin-top: 32px;
+  display: grid;
+}
+.landing-stop {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding-block: 14px;
+}
+/* The reason's first line sits on the disc's centre line (disc top + 6px). */
+.landing-stop > .landing-small {
+  min-width: 0;
+  padding-top: 6px;
+  overflow-wrap: anywhere;
+}
+.landing-stops-close {
+  margin-top: 24px;
+  max-width: 760px;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.landing-limits-list {
+  margin-top: 32px;
+}
+.landing-limit {
+  display: grid;
+  gap: 4px;
+  padding-block: 14px;
+  border-top: 1px solid var(--border);
+}
+.landing-limit:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.landing-limit dd {
+  color: var(--muted-foreground);
+}
+.landing-limit > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 768px) {
+  .landing-steps {
+    margin-top: 32px;
+  }
+  .landing-stops {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+  .landing-limit {
+    grid-template-columns: 180px minmax(0, 1fr);
+    column-gap: 24px;
+    padding-block: 16px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-steps {
+    margin-top: 40px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .landing-step {
+    grid-template-columns: none;
+    align-content: start;
+    gap: 16px;
+    padding-block: 0;
+    padding-inline: 20px;
+    border-top: 0;
+    border-left: 1px solid var(--border);
+  }
+  .landing-step:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .landing-stops {
+    margin-top: 40px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+  .landing-stops-close {
+    margin-top: 32px;
+  }
+  .landing-limits {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    column-gap: 64px;
+  }
+  .landing-limits-list {
+    margin-top: 6px;
+  }
+  .landing-limit {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+}
+
+/* ── Section 6 (design-spec r2 S1) ────────────────────────────── */
+.landing-access {
+  display: grid;
+  gap: 12px;
+  max-width: 760px;
+}
+.landing-access .landing-h2 {
+  margin-bottom: 4px;
+}
+.landing-request-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.landing-request-row > button {
+  flex-shrink: 0;
+}
+.landing-signed-invite {
+  margin-top: 12px;
+}
+.landing-data-line {
+  margin-top: 24px;
+  max-width: 760px;
+}
+.landing-access-cta {
+  margin-top: 32px;
+}
+@media (min-width: 768px) {
+  .landing-request-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 12px;
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.landing-footer {
+  padding-top: 24px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.landing-outline-wordmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 24px;
+  stroke: var(--border);
+}
+@media (min-width: 768px) {
+  .landing-outline-wordmark {
+    margin-top: 32px;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-footer {
+    padding-top: 32px;
+  }
+  .landing-outline-wordmark {
+    margin-top: 40px;
+  }
+}
+
+/* ── Scroll reveals (design-spec r1 5; architecture r1 motion-ready) ── */
+[data-reveal="steps"] {
+  --reveal-distance: 12px;
+  --reveal-duration: 280ms;
+  --reveal-stagger: 50ms;
+}
+[data-reveal="stops"] {
+  --reveal-distance: 10px;
+  --reveal-duration: 260ms;
+  --reveal-stagger: 60ms;
+}
+[data-reveal="limits"] {
+  --reveal-distance: 8px;
+  --reveal-duration: 260ms;
+  --reveal-stagger: 60ms;
+}
+[data-reveal="access"] {
+  --reveal-distance: 8px;
+  --reveal-duration: 240ms;
+  --reveal-stagger: 60ms;
+}
+html.motion-ok.motion-ready [data-reveal] .reveal-item {
+  transition:
+    opacity var(--reveal-duration) var(--ease-standard),
+    transform var(--reveal-duration) var(--ease-emphasized);
+  transition-delay: calc(var(--i, 0) * var(--reveal-stagger));
+}
+html.motion-ok.motion-ready [data-reveal]:not([data-revealed]) .reveal-item {
+  opacity: 0;
+  transform: translateY(var(--reveal-distance));
+}
+[data-reveal][data-reveal-instant] .reveal-item {
+  transition: none !important;
+}
+
+/* ── Preferences (design-spec r1 7) ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .landing-jump-arrow,
+  .hf-replay svg {
+    transition: none;
+    transform: none !important;
+  }
+}
+@media (prefers-contrast: more) {
+  .landing-root {
+    --persuade-tint: oklch(0.95 0.02 262);
+    --illo-fill-2: oklch(0.88 0.06 262);
+  }
+  .landing-section[data-ground="tint"] > .landing-ruled::before, .landing-section[data-ground="tint"] + .landing-section > .landing-ruled::before {
+    display: block;
+  }
+  .hf-strip {
+    background: var(--background);
+  }
+  .hf-quote {
+    border-left-color: var(--primary);
+  }
+  .landing-outline-wordmark {
+    stroke: var(--muted-foreground);
+  }
+}
+@media (forced-colors: active) {
+  .hf,
+  .hf-mail {
+    outline: 1px solid CanvasText;
+  }
+  .landing-hero::before, #access.landing-section[data-ground="tint"]::before {
+    display: none;
+  }
+  .landing-section[data-ground="tint"] {
+    background: Canvas;
+  }
+  .landing-section[data-ground="tint"] > .landing-ruled::before, .landing-section[data-ground="tint"] + .landing-section > .landing-ruled::before, .landing-main:has(> .landing-section[data-ground="tint"]:last-child) + .landing-footer .landing-ruled::before {
+    display: block;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .landing-hero::before {
+    display: none;
+  }
+}
+@media print {
+  .reveal-item,
+  .hf [data-a] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hf [data-a="status-prev"] {
+    opacity: 0 !important;
+  }
+  .public-header {
+    position: static;
+  }
+}
+
+/* ── Request access dialog (design-spec r3 S2, Toasts > Containing block) ── */
+/* Grid centring: the fixed viewport centres the popup, so the popup has no
+   transform at rest and the in-dialog toaster (position: fixed) is placed
+   against the viewport. Only enter and exit scale it. Below 640px, and on
+   short viewports, the popup is top-anchored. The body scrolls inside the
+   capped panel (overlay-body); while a dialog toast shows the cap shrinks by
+   the toast's height so Send request is never under it. */
+.request-dialog-viewport {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.request-dialog {
+  --dialog-toast-reserve: 0px;
+  pointer-events: auto;
+  max-height: calc(100dvh - 32px - var(--dialog-toast-reserve));
+  overflow: hidden;
+  transform: none;
+  transition:
+    opacity var(--duration-dialog-in) var(--ease-standard),
+    transform var(--duration-dialog-in) var(--ease-standard);
+  transform-origin: center;
+}
+.request-dialog:has(.request-toaster [data-sonner-toast]:not([data-removed="true"])) {
+  --dialog-toast-reserve: calc(var(--front-toast-height, 64px) + 16px);
+}
+.request-dialog[data-starting-style] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+.request-dialog[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.98);
+  transition-duration: var(--duration-dialog-out);
+}
+.request-dialog-backdrop {
+  transition: opacity var(--duration-dialog-in) var(--ease-standard);
+}
+.request-dialog-backdrop[data-starting-style],
+.request-dialog-backdrop[data-ending-style] {
+  opacity: 0;
+}
+.request-dialog-backdrop[data-ending-style] {
+  transition-duration: var(--duration-dialog-out);
+}
+@media (max-width: 639px) {
+  .request-dialog-viewport {
+    align-items: start;
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  .request-dialog {
+    transform-origin: top center;
+  }
+}
+@media (max-height: 479px) {
+  .request-dialog-viewport {
+    align-items: start;
+    padding-top: 8px;
+  }
+  .request-dialog {
+    max-height: calc(100dvh - 16px - var(--dialog-toast-reserve));
+  }
+}
+/* The dialog's toaster sits above the popup content; it enters in 200ms and
+   exits in 150ms (matches the dialog), transform and opacity only. */
+.request-toaster[data-sonner-toaster] {
+  z-index: 1;
+}
+.request-toaster [data-sonner-toast] {
+  transition:
+    transform var(--duration-toast-in) var(--ease-standard),
+    opacity var(--duration-toast-in) var(--ease-standard),
+    height var(--duration-toast-in) var(--ease-standard);
+}
+.request-toaster [data-sonner-toast][data-removed="true"] {
+  transition-duration: var(--duration-toast-out);
+}
+.request-swap {
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .request-dialog,
+  .request-dialog-backdrop,
+  .request-swap {
+    transition: none;
+  }
+}
+/* A frozen skeleton (failed load) never pulses. */
+.request-skeleton[data-frozen] * {
+  animation: none;
+}
+@media (forced-colors: active) {
+  .request-dialog {
+    border: 1px solid CanvasText;
+  }
+}
+@media (prefers-contrast: more) {
+  .request-dialog [data-slot="overlay-header"] {
+    border-color: var(--border);
+  }
+}

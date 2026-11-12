@@ -1,0 +1,3687 @@
+{
+  "note": "EPIC-0002 A0 owner Eligibility golden. Regenerate only in its own commit with a reason.",
+  "capturedOn": "main b17e786 (pre-A1), proved on epic-0002/slice-a0-a1",
+  "owner": {
+    "matchThreshold": 0.7,
+    "hours": {
+      "hoursCutoff": "23:00",
+      "hoursTimeZone": "Africa/Lagos"
+    },
+    "evaluatedOn": "2026-10-20T09:00:00.000Z"
+  },
+  "fxRateDate": "2026-10-16",
+  "postings": [
+    {
+      "id": "golden-01",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to candidates in Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "met",
+          "quote": "Salary USD 60,000–80,000 per year",
+          "normalizedMonthlyMaxUsd": "6666.67",
+          "source": "posting",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "met",
+          "quote": "Core hours 10:00–18:00 WAT"
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-02",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "We hire in Lagos, Nigeria and across Africa"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-03",
+      "title": "Tech Lead, Web",
+      "preFilter": "pass",
+      "titleFolded": "tech lead, web",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, Lagos, Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "technical_lead"
+    },
+    {
+      "id": "golden-04",
+      "title": "Full Stack Engineer",
+      "preFilter": "pass",
+      "titleFolded": "full stack engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Location: Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 3,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "fullstack"
+    },
+    {
+      "id": "golden-05",
+      "title": "Product Engineer",
+      "preFilter": "pass",
+      "titleFolded": "product engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Applicants in Nigeria are welcome"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 5,
+        "unmetMandatory": []
+      },
+      "roleFamily": "product_engineering"
+    },
+    {
+      "id": "golden-06",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "location",
+      "eligible": false,
+      "violatedRules": [
+        "location"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "violated",
+          "quote": "Remote, US only"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-07",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "location",
+      "eligible": false,
+      "violatedRules": [
+        "location"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "violated",
+          "quote": "we cannot hire in Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-08",
+      "title": "React Engineer",
+      "preFilter": "pass",
+      "titleFolded": "react engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "location",
+      "eligible": false,
+      "violatedRules": [
+        "location"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "violated",
+          "quote": "Remote (excluding Nigeria and Ghana)"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-09",
+      "title": "UI Engineer",
+      "preFilter": "pass",
+      "titleFolded": "ui engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "location",
+      "eligible": false,
+      "violatedRules": [
+        "location"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "violated",
+          "quote": "United States, Canada"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-10",
+      "title": "Web Engineer",
+      "preFilter": "pass",
+      "titleFolded": "web engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-11",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "location",
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "unverified",
+          "quote": "Remote, work from anywhere in the world"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-12",
+      "title": "Frontend Developer",
+      "preFilter": "pass",
+      "titleFolded": "frontend developer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "location",
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "unverified",
+          "quote": null
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-13",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "relocation",
+      "relocationCountry": "Germany",
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "You must relocate to Berlin"
+        },
+        "sponsorship": {
+          "result": "met",
+          "quote": "We offer visa sponsorship"
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-14",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "location",
+      "eligible": false,
+      "violatedRules": [
+        "location"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "relocation",
+      "relocationCountry": "Turkey",
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "violated",
+          "quote": "You will relocate to Istanbul"
+        },
+        "sponsorship": {
+          "result": "met",
+          "quote": "Visa sponsorship is available"
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-15",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "sponsorship",
+      "eligible": false,
+      "violatedRules": [
+        "sponsorship"
+      ],
+      "unverifiedLabels": [
+        "location",
+        "pay",
+        "hours"
+      ],
+      "arrangement": "relocation",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "unverified",
+          "quote": "Relocation required"
+        },
+        "sponsorship": {
+          "result": "violated",
+          "quote": "We cannot sponsor visas"
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-16",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "sponsorship",
+        "pay",
+        "hours"
+      ],
+      "arrangement": "relocation",
+      "relocationCountry": "Netherlands",
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "You must relocate to Amsterdam"
+        },
+        "sponsorship": {
+          "result": "unverified",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-17",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "sponsorship",
+        "pay",
+        "hours"
+      ],
+      "arrangement": "relocation",
+      "relocationCountry": "United Kingdom",
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "London, United Kingdom"
+        },
+        "sponsorship": {
+          "result": "unverified",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-18",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "pay",
+      "eligible": false,
+      "violatedRules": [
+        "pay"
+      ],
+      "unverifiedLabels": [
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "violated",
+          "quote": "Salary USD 1,000 per month",
+          "normalizedMonthlyMaxUsd": "1000.00",
+          "source": "posting",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-19",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "met",
+          "quote": "Pay EUR 45,000 per year",
+          "normalizedMonthlyMaxUsd": "4219.88",
+          "source": "posting",
+          "fxRateDate": "2026-10-16"
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-20",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "met",
+          "quote": "USD 30–45 per hour",
+          "normalizedMonthlyMaxUsd": "7800.00",
+          "source": "structured",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-21",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "pay",
+      "eligible": false,
+      "violatedRules": [
+        "pay"
+      ],
+      "unverifiedLabels": [
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "violated",
+          "quote": "Compensation GBP 1,200 per month",
+          "normalizedMonthlyMaxUsd": "1600.24",
+          "source": "posting",
+          "fxRateDate": "2026-10-16"
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-22",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "hours",
+      "eligible": false,
+      "violatedRules": [
+        "hours"
+      ],
+      "unverifiedLabels": [
+        "pay"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "violated",
+          "quote": "Hours 9am–5pm PST"
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-23",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "met",
+          "quote": "Core hours 09:00–17:00 CET"
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-24",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "hours",
+      "eligible": false,
+      "violatedRules": [
+        "hours"
+      ],
+      "unverifiedLabels": [
+        "pay"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "violated",
+          "quote": "Overlap 2pm-10pm EST required"
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-25",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "industry",
+      "eligible": false,
+      "violatedRules": [
+        "industry"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "violated",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-26",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "industry",
+      "eligible": false,
+      "violatedRules": [
+        "industry"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "violated",
+          "quote": "Our sportsbook serves millions"
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-27",
+      "title": "Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": "Gamified learning for schools"
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-28",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "skipped",
+      "skipReason": "weak_core_match",
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "weak",
+        "weakReason": "coverage_below_threshold",
+        "coveredCount": 3,
+        "totalCount": 5,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-29",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "skipped",
+      "skipReason": "uncovered_mandatory_prerequisite",
+      "skipDetail": "Professional Kotlin Android experience",
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "weak",
+        "weakReason": "unmet_mandatory",
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": [
+          "Professional Kotlin Android experience"
+        ]
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-30",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "skipped",
+      "skipReason": "no_core_responsibilities",
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "weak",
+        "weakReason": "no_core_responsibilities",
+        "coveredCount": 0,
+        "totalCount": 0,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-31",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-32",
+      "title": "Engineering Manager",
+      "preFilter": "pass",
+      "titleFolded": "engineering manager",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 1,
+        "totalCount": 1,
+        "unmetMandatory": []
+      },
+      "roleFamily": "people_management"
+    },
+    {
+      "id": "golden-33",
+      "title": "Backend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "backend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "backend"
+    },
+    {
+      "id": "golden-34",
+      "title": "iOS Engineer",
+      "preFilter": "pass",
+      "titleFolded": "ios engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "mobile"
+    },
+    {
+      "id": "golden-35",
+      "title": "Site Reliability Engineer",
+      "preFilter": "pass",
+      "titleFolded": "site reliability engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "devops_platform"
+    },
+    {
+      "id": "golden-36",
+      "title": "Data Analyst",
+      "preFilter": "not_software_role",
+      "titleFolded": "data analyst",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "data_ml"
+    },
+    {
+      "id": "golden-37",
+      "title": "Lead Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "lead frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 3,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "technical_lead"
+    },
+    {
+      "id": "golden-38",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": "employer_of_record",
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-39",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": "direct",
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-40",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": "direct",
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-41",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "excluded",
+      "skipReason": "violated_rule",
+      "skipDetail": "location",
+      "eligible": false,
+      "violatedRules": [
+        "location"
+      ],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "violated",
+          "quote": "Remote, US only"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-42",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "location",
+        "sponsorship",
+        "pay",
+        "hours"
+      ],
+      "arrangement": "onsite",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "unverified",
+          "quote": null
+        },
+        "sponsorship": {
+          "result": "unverified",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-43",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours",
+        "industry"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "unverified",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-44",
+      "title": "Fullstack Developer",
+      "preFilter": "pass",
+      "titleFolded": "fullstack developer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "fullstack"
+    },
+    {
+      "id": "golden-45",
+      "title": "Senior Product Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior product engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "product_engineering"
+    },
+    {
+      "id": "golden-46",
+      "title": "Senior Backend Developer",
+      "preFilter": "pass",
+      "titleFolded": "senior backend developer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "backend"
+    },
+    {
+      "id": "golden-47",
+      "title": "Android Engineer",
+      "preFilter": "pass",
+      "titleFolded": "android engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "mobile"
+    },
+    {
+      "id": "golden-48",
+      "title": "Platform Engineer",
+      "preFilter": "pass",
+      "titleFolded": "platform engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "platform_engineering"
+    },
+    {
+      "id": "golden-49",
+      "title": "Engineering Lead",
+      "preFilter": "pass",
+      "titleFolded": "engineering lead",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 1,
+        "totalCount": 1,
+        "unmetMandatory": []
+      },
+      "roleFamily": "people_management"
+    },
+    {
+      "id": "golden-50",
+      "title": "Machine Learning Engineer",
+      "preFilter": "pass",
+      "titleFolded": "machine learning engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "data_ml"
+    },
+    {
+      "id": "golden-51",
+      "title": "React Native Engineer",
+      "preFilter": "pass",
+      "titleFolded": "react native engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-52",
+      "title": "Sales Engineer",
+      "preFilter": "not_software_role",
+      "titleFolded": "sales engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "other"
+    },
+    {
+      "id": "golden-53",
+      "title": "Support Engineer",
+      "preFilter": "not_software_role",
+      "titleFolded": "support engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "other"
+    },
+    {
+      "id": "golden-54",
+      "title": "Customer Engineer",
+      "preFilter": "not_software_role",
+      "titleFolded": "customer engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "solutions_customer"
+    },
+    {
+      "id": "golden-55",
+      "title": "Solutions Engineer",
+      "preFilter": "not_software_role",
+      "titleFolded": "solutions engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "solutions_customer"
+    },
+    {
+      "id": "golden-56",
+      "title": "Field Engineer",
+      "preFilter": "not_software_role",
+      "titleFolded": "field engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "other"
+    },
+    {
+      "id": "golden-57",
+      "title": "HR Business Partner",
+      "preFilter": "not_software_role",
+      "titleFolded": "hr business partner",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "other"
+    },
+    {
+      "id": "golden-58",
+      "title": "HR Systems Engineer",
+      "preFilter": "pass",
+      "titleFolded": "hr systems engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "other"
+    },
+    {
+      "id": "golden-59",
+      "title": "Account Executive",
+      "preFilter": "not_software_role",
+      "titleFolded": "account executive",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "other"
+    },
+    {
+      "id": "golden-60",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": "contract",
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": null,
+          "normalizedMonthlyMaxUsd": null,
+          "source": "none",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    },
+    {
+      "id": "golden-61",
+      "title": "Senior Frontend Engineer",
+      "preFilter": "pass",
+      "titleFolded": "senior frontend engineer",
+      "status": "ranked",
+      "skipReason": null,
+      "skipDetail": null,
+      "eligible": true,
+      "violatedRules": [],
+      "unverifiedLabels": [
+        "pay",
+        "hours"
+      ],
+      "arrangement": "remote",
+      "relocationCountry": null,
+      "employmentType": null,
+      "rules": {
+        "location": {
+          "result": "met",
+          "quote": "Remote, open to Nigeria"
+        },
+        "sponsorship": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "pay": {
+          "result": "unverified",
+          "quote": "Salary NGN 900,000–1,200,000 per month",
+          "normalizedMonthlyMaxUsd": null,
+          "source": "posting",
+          "fxRateDate": null
+        },
+        "hours": {
+          "result": "unverified",
+          "quote": null
+        },
+        "industry": {
+          "result": "met",
+          "quote": null
+        },
+        "seniority": {
+          "result": "not_applicable",
+          "quote": null
+        },
+        "employment_type": {
+          "result": "not_applicable",
+          "quote": null
+        }
+      },
+      "match": {
+        "verdict": "strong",
+        "weakReason": null,
+        "coveredCount": 4,
+        "totalCount": 4,
+        "unmetMandatory": []
+      },
+      "roleFamily": "senior_frontend"
+    }
+  ],
+  "ranking": [
+    "golden-02",
+    "golden-38",
+    "golden-39",
+    "golden-10",
+    "golden-12",
+    "golden-16",
+    "golden-20",
+    "golden-42",
+    "golden-60",
+    "golden-01",
+    "golden-03",
+    "golden-40",
+    "golden-11",
+    "golden-13",
+    "golden-17",
+    "golden-19",
+    "golden-23",
+    "golden-27",
+    "golden-31",
+    "golden-43",
+    "golden-51",
+    "golden-61",
+    "golden-37",
+    "golden-44",
+    "golden-45",
+    "golden-05",
+    "golden-04",
+    "golden-32",
+    "golden-34",
+    "golden-36",
+    "golden-46",
+    "golden-48",
+    "golden-50",
+    "golden-52",
+    "golden-54",
+    "golden-56",
+    "golden-58",
+    "golden-33",
+    "golden-35",
+    "golden-47",
+    "golden-49",
+    "golden-53",
+    "golden-55",
+    "golden-57",
+    "golden-59"
+  ]
+}

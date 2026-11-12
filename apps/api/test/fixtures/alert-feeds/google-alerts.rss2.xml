@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RSS 2.0 variant (AC 4.4), synthetic. -->
+<rss version="2.0">
+  <channel>
+    <title>Google Alert - React</title>
+    <link>https://www.google.com/alerts</link>
+    <description>Google Alerts</description>
+    <item>
+      <title>Shipping with &lt;b&gt;React&lt;/b&gt;</title>
+      <link>https://www.google.com/url?rct=j&amp;sa=t&amp;url=https://www.linkedin.com/posts/ada-obi_rss-activity-1-abcd&amp;ct=ga</link>
+      <pubDate>Tue, 20 Oct 2026 09:15:00 GMT</pubDate>
+      <description>and &lt;b&gt;TypeScript&lt;/b&gt; at scale</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,89 @@
+# Slice 6 notifications compose test overlay (F-QA6-00). Use only with
+# docker/test/run-notifications-test.sh, which sets NOTIFY_TEST_IMAGE,
+# NOTIFY_TEST_VOLUME_PREFIX and NOTIFY_TEST_TLS_DIR (a throwaway CA and a
+# certificate for smtp.gmail.com).
+#
+# FAIL-CLOSED. GMAIL_SMTP hard-codes smtp.gmail.com:465, so the worker must never
+# have a route out while Gmail settings are set:
+#   - the worker sits ONLY on internal networks (`!override` drops `default` and
+#     `browser-net` from docker-compose.yml);
+#   - mailpit holds the DNS alias smtp.gmail.com on the internal notify-mail
+#     network. Never use extra_hosts: nodemailer resolves with DNS, not /etc/hosts;
+#   - the worker runs notification-failclosed.mjs before it starts and exits if
+#     the name is not the fake or 1.1.1.1:443 is reachable.
+# All credentials below are throwaway sentinels; nothing here is a real account.
+services:
+  provision-roles:
+    image: ${NOTIFY_TEST_IMAGE:?set by run-notifications-test.sh}
+  migrate:
+    image: ${NOTIFY_TEST_IMAGE:?set by run-notifications-test.sh}
+
+  postgres:
+    networks: [default, notify-db]
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    command:
+      - --smtp=0.0.0.0:465
+      - --smtp-require-tls
+      - --smtp-tls-cert=/tls/smtp.pem
+      - --smtp-tls-key=/tls/smtp.key
+      - --smtp-auth-file=/tls/smtp-auth
+      - --smtp-disable-rdns
+      - --listen=0.0.0.0:8025
+    volumes:
+      - ${NOTIFY_TEST_TLS_DIR:?set by run-notifications-test.sh}:/tls:ro
+    networks:
+      notify-mail:
+        aliases: [smtp.gmail.com]
+
+  worker:
+    image: ${NOTIFY_TEST_IMAGE:?set by run-notifications-test.sh}
+    # The guard runs inside the worker first; the worker (and its sender) only starts if it passes.
+    command: ["sh", "-c", "node /app/check/notification-failclosed.mjs && exec node dist/main.worker.js"]
+    environment:
+      SUBMISSION_BROWSER_ENABLED: "0"
+      SUBMISSION_FORM_AGENT_ENABLED: "0"
+      GMAIL_SMTP_USER: notify-test-sender@example.test
+      GMAIL_SMTP_APP_PASSWORD: ${NOTIFY_TEST_APP_PASSWORD:?set by run-notifications-test.sh}
+      NOTIFY_TO: notify-test-sender@example.test
+      PUBLIC_ORIGIN: https://dashboard.test
+      NOTIFY_DAILY_SUMMARY_ENABLED: "0"
+      NODE_EXTRA_CA_CERTS: /tls/ca.pem
+      FAKE_SMTP_SERVICE: mailpit
+    volumes:
+      - ./docker/test/notification-failclosed.mjs:/app/check/notification-failclosed.mjs:ro
+      - ${NOTIFY_TEST_TLS_DIR:?set by run-notifications-test.sh}/ca.pem:/tls/ca.pem:ro
+    networks: !override
+      notify-db: {}
+      notify-mail: {}
+    depends_on:
+      mailpit:
+        condition: service_started
+
+  notification-check:
+    image: ${NOTIFY_TEST_IMAGE:?set by run-notifications-test.sh}
+    command: ["node", "/app/check/notification-check.mjs"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set in env file}
+      NOTIFY_TEST_APP_PASSWORD: ${NOTIFY_TEST_APP_PASSWORD:?set by run-notifications-test.sh}
+    volumes:
+      - ./docker/test/notification-check.mjs:/app/check/notification-check.mjs:ro
+    networks: [notify-db, notify-mail]
+    restart: "no"
+
+networks:
+  notify-db:
+    internal: true
+  notify-mail:
+    internal: true
+
+# docker-compose.yml pins these to the live job-assistant_* volumes (eve rename).
+# Re-scope them to the test project so `down --volumes` can never delete live data.
+volumes:
+  postgres-data:
+    name: ${NOTIFY_TEST_VOLUME_PREFIX:?set by run-notifications-test.sh}_postgres-data
+  resume-data:
+    name: ${NOTIFY_TEST_VOLUME_PREFIX:?set by run-notifications-test.sh}_resume-data
+  document-data:
+    name: ${NOTIFY_TEST_VOLUME_PREFIX:?set by run-notifications-test.sh}_document-data

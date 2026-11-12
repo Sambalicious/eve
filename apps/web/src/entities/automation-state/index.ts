@@ -1,0 +1,7 @@
+export type { AutomationState, CostPause, MonthlySpend, RaiseCeilingResult, SpendCategory } from "./model/automation-state"
+export { isNearCeiling, SPEND_CATEGORIES } from "./model/automation-state"
+export { automationCopy } from "./model/copy"
+export { ceilingDifference, ceilingProblem, normalizeUsd } from "./model/ceiling-rules"
+export { firstOfNextMonth, monthLabel } from "./model/month"
+export { AUTOMATION_POLL_MS, automationStateQueryKey, automationStateQueryOptions } from "./model/automation-state-query"
+export { raiseCeiling, setGlobalPause } from "./api/automation-state-repository"

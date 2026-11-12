@@ -1,0 +1,1464 @@
+{
+  "note": "EPIC-0002 A0 item 4: Job Postings page golden. Regenerate only in its own commit with a reason. No cursor values are recorded.",
+  "capturedOn": "main b17e786 (pre-A1), proved on epic-0002/slice-a0-a1",
+  "limit": 5,
+  "entries": [
+    {
+      "tab": "ranked",
+      "families": "",
+      "keyword": "",
+      "totalCount": 37,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-02",
+              "rank": 1
+            },
+            {
+              "id": "golden-38",
+              "rank": 2
+            },
+            {
+              "id": "golden-39",
+              "rank": 3
+            },
+            {
+              "id": "golden-10",
+              "rank": 4
+            },
+            {
+              "id": "golden-12",
+              "rank": 5
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-16",
+              "rank": 6
+            },
+            {
+              "id": "golden-20",
+              "rank": 7
+            },
+            {
+              "id": "golden-42",
+              "rank": 8
+            },
+            {
+              "id": "golden-60",
+              "rank": 9
+            },
+            {
+              "id": "golden-01",
+              "rank": 10
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-95",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "",
+      "keyword": "",
+      "totalCount": 16,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-41",
+              "rank": null
+            },
+            {
+              "id": "golden-30",
+              "rank": null
+            },
+            {
+              "id": "golden-29",
+              "rank": null
+            },
+            {
+              "id": "golden-28",
+              "rank": null
+            },
+            {
+              "id": "golden-26",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-25",
+              "rank": null
+            },
+            {
+              "id": "golden-24",
+              "rank": null
+            },
+            {
+              "id": "golden-22",
+              "rank": null
+            },
+            {
+              "id": "golden-21",
+              "rank": null
+            },
+            {
+              "id": "golden-18",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "",
+      "keyword": "",
+      "totalCount": 57,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-61",
+              "rank": 22
+            },
+            {
+              "id": "golden-60",
+              "rank": 9
+            },
+            {
+              "id": "golden-58",
+              "rank": 33
+            },
+            {
+              "id": "golden-51",
+              "rank": 21
+            },
+            {
+              "id": "golden-50",
+              "rank": 32
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-49",
+              "rank": 37
+            },
+            {
+              "id": "golden-48",
+              "rank": 31
+            },
+            {
+              "id": "golden-47",
+              "rank": 36
+            },
+            {
+              "id": "golden-46",
+              "rank": 30
+            },
+            {
+              "id": "golden-45",
+              "rank": 25
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "senior_frontend",
+      "keyword": "",
+      "totalCount": 21,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-02",
+              "rank": 1
+            },
+            {
+              "id": "golden-38",
+              "rank": 2
+            },
+            {
+              "id": "golden-39",
+              "rank": 3
+            },
+            {
+              "id": "golden-10",
+              "rank": 4
+            },
+            {
+              "id": "golden-12",
+              "rank": 5
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-16",
+              "rank": 6
+            },
+            {
+              "id": "golden-20",
+              "rank": 7
+            },
+            {
+              "id": "golden-42",
+              "rank": 8
+            },
+            {
+              "id": "golden-60",
+              "rank": 9
+            },
+            {
+              "id": "golden-01",
+              "rank": 10
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "senior_frontend",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "senior_frontend",
+      "keyword": "",
+      "totalCount": 16,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-41",
+              "rank": null
+            },
+            {
+              "id": "golden-30",
+              "rank": null
+            },
+            {
+              "id": "golden-29",
+              "rank": null
+            },
+            {
+              "id": "golden-28",
+              "rank": null
+            },
+            {
+              "id": "golden-26",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-25",
+              "rank": null
+            },
+            {
+              "id": "golden-24",
+              "rank": null
+            },
+            {
+              "id": "golden-22",
+              "rank": null
+            },
+            {
+              "id": "golden-21",
+              "rank": null
+            },
+            {
+              "id": "golden-18",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "senior_frontend",
+      "keyword": "",
+      "totalCount": 39,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-61",
+              "rank": 22
+            },
+            {
+              "id": "golden-60",
+              "rank": 9
+            },
+            {
+              "id": "golden-51",
+              "rank": 21
+            },
+            {
+              "id": "golden-43",
+              "rank": 20
+            },
+            {
+              "id": "golden-42",
+              "rank": 8
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-41",
+              "rank": null
+            },
+            {
+              "id": "golden-31",
+              "rank": 19
+            },
+            {
+              "id": "golden-30",
+              "rank": null
+            },
+            {
+              "id": "golden-29",
+              "rank": null
+            },
+            {
+              "id": "golden-28",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "technical_lead",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-03",
+              "rank": 11
+            },
+            {
+              "id": "golden-37",
+              "rank": 23
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "technical_lead",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "technical_lead",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "technical_lead",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-37",
+              "rank": 23
+            },
+            {
+              "id": "golden-03",
+              "rank": 11
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "fullstack",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-44",
+              "rank": 24
+            },
+            {
+              "id": "golden-04",
+              "rank": 27
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "fullstack",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "fullstack",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "fullstack",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-44",
+              "rank": 24
+            },
+            {
+              "id": "golden-04",
+              "rank": 27
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "product_engineering",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-45",
+              "rank": 25
+            },
+            {
+              "id": "golden-05",
+              "rank": 26
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "product_engineering",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "product_engineering",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "product_engineering",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-45",
+              "rank": 25
+            },
+            {
+              "id": "golden-05",
+              "rank": 26
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "backend",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-46",
+              "rank": 30
+            },
+            {
+              "id": "golden-33",
+              "rank": 34
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "backend",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "backend",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "backend",
+      "keyword": "",
+      "totalCount": 3,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-46",
+              "rank": 30
+            },
+            {
+              "id": "golden-33",
+              "rank": 34
+            },
+            {
+              "id": "golden-92",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "mobile",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-34",
+              "rank": 29
+            },
+            {
+              "id": "golden-47",
+              "rank": 36
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "mobile",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-95",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "mobile",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "mobile",
+      "keyword": "",
+      "totalCount": 3,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-47",
+              "rank": 36
+            },
+            {
+              "id": "golden-34",
+              "rank": 29
+            },
+            {
+              "id": "golden-95",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "devops_platform",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-35",
+              "rank": 35
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "devops_platform",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "devops_platform",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "devops_platform",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-35",
+              "rank": 35
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "people_management",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-32",
+              "rank": 28
+            },
+            {
+              "id": "golden-49",
+              "rank": 37
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "people_management",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "people_management",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "people_management",
+      "keyword": "",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-49",
+              "rank": 37
+            },
+            {
+              "id": "golden-32",
+              "rank": 28
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "other",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-58",
+              "rank": 33
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "other",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "other",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "other",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-58",
+              "rank": 33
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "backend,mobile",
+      "keyword": "",
+      "totalCount": 4,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-34",
+              "rank": 29
+            },
+            {
+              "id": "golden-46",
+              "rank": 30
+            },
+            {
+              "id": "golden-33",
+              "rank": 34
+            },
+            {
+              "id": "golden-47",
+              "rank": 36
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "backend,mobile",
+      "keyword": "",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-95",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "backend,mobile",
+      "keyword": "",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "backend,mobile",
+      "keyword": "",
+      "totalCount": 6,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-47",
+              "rank": 36
+            },
+            {
+              "id": "golden-46",
+              "rank": 30
+            },
+            {
+              "id": "golden-34",
+              "rank": 29
+            },
+            {
+              "id": "golden-33",
+              "rank": 34
+            },
+            {
+              "id": "golden-95",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-92",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "",
+      "keyword": "react",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-51",
+              "rank": 21
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "",
+      "keyword": "react",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "",
+      "keyword": "react",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-08",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "",
+      "keyword": "react",
+      "totalCount": 3,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-51",
+              "rank": 21
+            },
+            {
+              "id": "golden-91",
+              "rank": null
+            },
+            {
+              "id": "golden-08",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "",
+      "keyword": "Réact",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-51",
+              "rank": 21
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "",
+      "keyword": "Réact",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "",
+      "keyword": "Réact",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-08",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "",
+      "keyword": "Réact",
+      "totalCount": 3,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-51",
+              "rank": 21
+            },
+            {
+              "id": "golden-91",
+              "rank": null
+            },
+            {
+              "id": "golden-08",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "",
+      "keyword": "engineer",
+      "totalCount": 33,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-02",
+              "rank": 1
+            },
+            {
+              "id": "golden-38",
+              "rank": 2
+            },
+            {
+              "id": "golden-39",
+              "rank": 3
+            },
+            {
+              "id": "golden-10",
+              "rank": 4
+            },
+            {
+              "id": "golden-16",
+              "rank": 6
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-20",
+              "rank": 7
+            },
+            {
+              "id": "golden-42",
+              "rank": 8
+            },
+            {
+              "id": "golden-60",
+              "rank": 9
+            },
+            {
+              "id": "golden-01",
+              "rank": 10
+            },
+            {
+              "id": "golden-40",
+              "rank": 12
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "",
+      "keyword": "engineer",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-95",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "",
+      "keyword": "engineer",
+      "totalCount": 16,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-41",
+              "rank": null
+            },
+            {
+              "id": "golden-30",
+              "rank": null
+            },
+            {
+              "id": "golden-29",
+              "rank": null
+            },
+            {
+              "id": "golden-28",
+              "rank": null
+            },
+            {
+              "id": "golden-26",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-25",
+              "rank": null
+            },
+            {
+              "id": "golden-24",
+              "rank": null
+            },
+            {
+              "id": "golden-22",
+              "rank": null
+            },
+            {
+              "id": "golden-21",
+              "rank": null
+            },
+            {
+              "id": "golden-18",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "",
+      "keyword": "engineer",
+      "totalCount": 53,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-61",
+              "rank": 22
+            },
+            {
+              "id": "golden-60",
+              "rank": 9
+            },
+            {
+              "id": "golden-58",
+              "rank": 33
+            },
+            {
+              "id": "golden-51",
+              "rank": 21
+            },
+            {
+              "id": "golden-50",
+              "rank": 32
+            }
+          ],
+          "nextCursorIsNull": false
+        },
+        {
+          "postings": [
+            {
+              "id": "golden-49",
+              "rank": 37
+            },
+            {
+              "id": "golden-48",
+              "rank": 31
+            },
+            {
+              "id": "golden-47",
+              "rank": 36
+            },
+            {
+              "id": "golden-45",
+              "rank": 25
+            },
+            {
+              "id": "golden-43",
+              "rank": 20
+            }
+          ],
+          "nextCursorIsNull": false
+        }
+      ]
+    },
+    {
+      "tab": "ranked",
+      "families": "backend",
+      "keyword": "engineer",
+      "totalCount": 1,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-33",
+              "rank": 34
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "manual",
+      "families": "backend",
+      "keyword": "engineer",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "skipped",
+      "families": "backend",
+      "keyword": "engineer",
+      "totalCount": 0,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [],
+          "nextCursorIsNull": true
+        }
+      ]
+    },
+    {
+      "tab": "all",
+      "families": "backend",
+      "keyword": "engineer",
+      "totalCount": 2,
+      "waitingToBeCheckedCount": 1,
+      "pages": [
+        {
+          "postings": [
+            {
+              "id": "golden-33",
+              "rank": 34
+            },
+            {
+              "id": "golden-92",
+              "rank": null
+            }
+          ],
+          "nextCursorIsNull": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "passThroughEnv": ["CI", "DOCKER_HOST", "TESTCONTAINERS_*"]
+    },
+    "e2e": {
+      "cache": false,
+      "passThroughEnv": ["CI", "DOCKER_HOST", "E2E_*", "PLAYWRIGHT_*"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

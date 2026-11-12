@@ -1,0 +1,89 @@
+{
+  "note": "EPIC-0002 A0 item 9 owner Stack posts golden (r5). Regenerate only in its own commit with a reason.",
+  "capturedOn": "main 86637ae (pre-A1), proved on epic-0002/a0-gap",
+  "fixture": "owner-alerts.atom.xml",
+  "criteria": {
+    "frameworks": [
+      "React"
+    ],
+    "technologies": [
+      "TypeScript"
+    ]
+  },
+  "now": "2026-10-21T07:00:00.000Z",
+  "posts": [
+    {
+      "canonicalUrl": "https://www.linkedin.com/posts/ada-obi_react-activity-7254-abcd",
+      "kind": "post",
+      "title": "Why we moved to React Server Components",
+      "snippet": "Ada Obi on React and TypeScript in production &hellip;",
+      "publishedAt": "2026-10-21T06:12:00.000Z",
+      "matchedTechnologies": [
+        "React",
+        "TypeScript"
+      ]
+    },
+    {
+      "canonicalUrl": "https://www.linkedin.com/pulse/ts-at-scale-chidi-eze",
+      "kind": "article",
+      "title": "TS at scale",
+      "snippet": "Notes from a large ReactJS and TypeScript codebase.",
+      "publishedAt": "2026-10-20T09:15:00.000Z",
+      "matchedTechnologies": [
+        "React",
+        "TypeScript"
+      ]
+    },
+    {
+      "canonicalUrl": "https://www.linkedin.com/posts/kofi-mensah_vue-activity-7255-efgh",
+      "kind": "post",
+      "title": "",
+      "snippet": "Our Vue 3 migration, and why Reactive state helped.",
+      "publishedAt": "2026-10-19T12:00:00.000Z",
+      "matchedTechnologies": []
+    },
+    {
+      "canonicalUrl": "https://www.linkedin.com/pulse/typed-react-hooks-wanjiru-k",
+      "kind": "article",
+      "title": "Typed React hooks",
+      "snippet": "Generic hooks with TypeScript.",
+      "publishedAt": null,
+      "matchedTechnologies": [
+        "React",
+        "TypeScript"
+      ]
+    }
+  ],
+  "searchGroups": [
+    {
+      "label": "React, TypeScript",
+      "terms": [
+        "React",
+        "TypeScript"
+      ],
+      "expression": "(\"React\" OR \"TypeScript\")",
+      "linkedin": "https://www.linkedin.com/search/results/content/?keywords=(%22React%22%20OR%20%22TypeScript%22)%20NOT%20hiring&sortBy=%22date_posted%22&datePosted=%22past-week%22",
+      "googlePosts": "https://www.google.com/search?q=site%3Alinkedin.com%2Fposts%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&tbs=qdr%3Aw",
+      "googleArticles": "https://www.google.com/search?q=site%3Alinkedin.com%2Fpulse%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&tbs=qdr%3Aw",
+      "alertsPostsQuery": "site:linkedin.com/posts (\"React\" OR \"TypeScript\") -hiring -job",
+      "alertsArticlesQuery": "site:linkedin.com/pulse (\"React\" OR \"TypeScript\") -hiring -job"
+    }
+  ],
+  "dailySummary": {
+    "verified": {
+      "text": "Stack posts\n\nPast-week searches from your job criteria. Some results will still be hiring posts or job ads.\n\nReact, TypeScript\nLinkedIn posts: https://www.linkedin.com/search/results/content/?keywords=(%22React%22%20OR%20%22TypeScript%22)%20NOT%20hiring&sortBy=%22date_posted%22&datePosted=%22past-week%22\nGoogle posts: https://www.google.com/search?q=site%3Alinkedin.com%2Fposts%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&tbs=qdr%3Aw\nGoogle articles: https://www.google.com/search?q=site%3Alinkedin.com%2Fpulse%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&tbs=qdr%3Aw\n\nNew Stack posts: 4\n\nTyped React hooks: https://www.linkedin.com/pulse/typed-react-hooks-wanjiru-k\nFound 21 Oct 2026 · React, TypeScript\n\nWhy we moved to React Server Components: https://www.linkedin.com/posts/ada-obi_react-activity-7254-abcd\nPosted 21 Oct 2026 · React, TypeScript\n\nTS at scale: https://www.linkedin.com/pulse/ts-at-scale-chidi-eze\nPosted 20 Oct 2026 · React, TypeScript\n\nUntitled LinkedIn post: https://www.linkedin.com/posts/kofi-mensah_vue-activity-7255-efgh\nPosted 19 Oct 2026\n\nFailing Alert feeds\n\nAlert feed (…222333): Timed out",
+      "html": "<h2 style=\"margin:24px 0 8px;font-size:16px;line-height:24px;color:#0a0a0a\">Stack posts</h2>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Past-week searches from your job criteria. Some results will still be hiring posts or job ads.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">React, TypeScript<br><a href=\"https://www.linkedin.com/search/results/content/?keywords=(%22React%22%20OR%20%22TypeScript%22)%20NOT%20hiring&amp;sortBy=%22date_posted%22&amp;datePosted=%22past-week%22\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">LinkedIn posts</a> · <a href=\"https://www.google.com/search?q=site%3Alinkedin.com%2Fposts%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&amp;tbs=qdr%3Aw\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Google posts</a> · <a href=\"https://www.google.com/search?q=site%3Alinkedin.com%2Fpulse%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&amp;tbs=qdr%3Aw\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Google articles</a></p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">New Stack posts: 4</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/pulse/typed-react-hooks-wanjiru-k\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Typed React hooks</a><br>Found 21 Oct 2026 · React, TypeScript</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/posts/ada-obi_react-activity-7254-abcd\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Why we moved to React Server Components</a><br>Posted 21 Oct 2026 · React, TypeScript</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/pulse/ts-at-scale-chidi-eze\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">TS at scale</a><br>Posted 20 Oct 2026 · React, TypeScript</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/posts/kofi-mensah_vue-activity-7255-efgh\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Untitled LinkedIn post</a><br>Posted 19 Oct 2026</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Failing Alert feeds</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Alert feed (…222333): Timed out</p>\n",
+      "preheader": "0 not a match, 0 failed, 0 unsure, 4 new Stack posts."
+    },
+    "unverified": {
+      "text": "Stack posts\n\nPast-week searches from your job criteria. Some results will still be hiring posts or job ads.\n\nReact, TypeScript\nLinkedIn posts: https://www.linkedin.com/search/results/content/?keywords=(%22React%22%20OR%20%22TypeScript%22)%20NOT%20hiring&sortBy=%22date_posted%22&datePosted=%22past-week%22\nGoogle posts: https://www.google.com/search?q=site%3Alinkedin.com%2Fposts%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&tbs=qdr%3Aw\nGoogle articles: https://www.google.com/search?q=site%3Alinkedin.com%2Fpulse%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&tbs=qdr%3Aw",
+      "html": "<h2 style=\"margin:24px 0 8px;font-size:16px;line-height:24px;color:#0a0a0a\">Stack posts</h2>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Past-week searches from your job criteria. Some results will still be hiring posts or job ads.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">React, TypeScript<br><a href=\"https://www.linkedin.com/search/results/content/?keywords=(%22React%22%20OR%20%22TypeScript%22)%20NOT%20hiring&amp;sortBy=%22date_posted%22&amp;datePosted=%22past-week%22\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">LinkedIn posts</a> · <a href=\"https://www.google.com/search?q=site%3Alinkedin.com%2Fposts%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&amp;tbs=qdr%3Aw\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Google posts</a> · <a href=\"https://www.google.com/search?q=site%3Alinkedin.com%2Fpulse%20(%22React%22%20OR%20%22TypeScript%22)%20-hiring%20-job&amp;tbs=qdr%3Aw\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Google articles</a></p>\n",
+      "preheader": "0 not a match, 0 failed, 0 unsure."
+    },
+    "noCriteria": {
+      "text": "Stack posts\n\nSearch links need Frameworks or Technologies in your job criteria. Both lists are empty.\n\nAdd job criteria: https://dashboard.test/settings#job-criteria\n\nNew Stack posts: 4\n\nTyped React hooks: https://www.linkedin.com/pulse/typed-react-hooks-wanjiru-k\nFound 21 Oct 2026 · React, TypeScript\n\nWhy we moved to React Server Components: https://www.linkedin.com/posts/ada-obi_react-activity-7254-abcd\nPosted 21 Oct 2026 · React, TypeScript\n\nTS at scale: https://www.linkedin.com/pulse/ts-at-scale-chidi-eze\nPosted 20 Oct 2026 · React, TypeScript\n\nUntitled LinkedIn post: https://www.linkedin.com/posts/kofi-mensah_vue-activity-7255-efgh\nPosted 19 Oct 2026\n\nFailing Alert feeds\n\nAlert feed (…222333): Timed out",
+      "html": "<h2 style=\"margin:24px 0 8px;font-size:16px;line-height:24px;color:#0a0a0a\">Stack posts</h2>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Search links need Frameworks or Technologies in your job criteria. Both lists are empty.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://dashboard.test/settings#job-criteria\" style=\"color:#0a0a0a;text-decoration:underline\">Add job criteria</a></p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">New Stack posts: 4</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/pulse/typed-react-hooks-wanjiru-k\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Typed React hooks</a><br>Found 21 Oct 2026 · React, TypeScript</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/posts/ada-obi_react-activity-7254-abcd\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Why we moved to React Server Components</a><br>Posted 21 Oct 2026 · React, TypeScript</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/pulse/ts-at-scale-chidi-eze\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">TS at scale</a><br>Posted 20 Oct 2026 · React, TypeScript</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://www.linkedin.com/posts/kofi-mensah_vue-activity-7255-efgh\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#0a0a0a;text-decoration:underline\">Untitled LinkedIn post</a><br>Posted 19 Oct 2026</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Failing Alert feeds</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Alert feed (…222333): Timed out</p>\n",
+      "preheader": "0 not a match, 0 failed, 0 unsure, 4 new Stack posts."
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "note": "EPIC-0002 A0 item 5: Operator controls and E4 golden. Regenerate only in its own commit with a reason.",
+  "capturedOn": "main db690a2 (PR #32), proved on epic-0002/slice-a0-a1",
+  "month": "2026-10-01",
+  "controls": {
+    "globalPaused": false,
+    "globalPausedAt": null,
+    "costPause": {
+      "pausedAt": "2026-10-25T10:30:00.000Z",
+      "month": "2026-10-01",
+      "resumesAt": "2026-10-31T23:00:00.000Z",
+      "nextAction": "form filling",
+      "nextActionEstimate": "20.00"
+    },
+    "spend": {
+      "month": "2026-10-01",
+      "spent": "41.57",
+      "ceiling": "60.00",
+      "defaultCeiling": "50.00",
+      "raised": true,
+      "maxCeiling": "100.00",
+      "canRaise": true,
+      "percentUsed": 69,
+      "byCategory": {
+        "hosting": "24.00",
+        "ai": "13.79",
+        "browser": "3.21",
+        "discovery": "0.55",
+        "email": "0.02"
+      }
+    }
+  },
+  "e4": {
+    "payload": {
+      "month": "2026-10-01",
+      "action": "form filling",
+      "pausedAt": "2026-10-25T10:30:00.000Z",
+      "spentMicros": 41570000,
+      "ceilingMicros": 60000000,
+      "estimateMicros": 20000000
+    },
+    "render": {
+      "subject": "Paid automation paused: monthly cost ceiling",
+      "preheader": "Nothing paid runs until 1 Nov 2026, unless you raise this month's ceiling.",
+      "text": "Paid automation is paused. The next paid action would have taken this month's spend over USD 60.00, so the assistant stopped before running it.\n\nSpent this month: USD 41.57\nThis month's ceiling: USD 60.00\nNext paid action: form filling, estimated USD 20.00\nPaused at: 25 Oct 2026, 11:30 WAT\n\nWhat's stopped: every paid action, including discovery, document generation, Eligibility and Match checks, and the browser that fills and submits forms. Nothing is sent to employers while this pause is on.\n\nWhat still works: your dashboard. You can still paste job links. They're saved now, then checked for Eligibility and Match once the pause ends, because checking is a paid AI call.\n\nApplications that were mid-way stay where they are. If the pause hit before the submit click, the Application wasn't submitted and goes ahead after the pause ends.\n\nWhen it resumes:\n- On its own at 00:00 WAT on 1 Nov 2026, when a new month starts and the ceiling returns to USD 50.00.\n- Sooner, if you raise this month's ceiling to an amount that leaves room for the next paid action. You can raise it to at most USD 100.00, and the raise lasts until the end of October 2026.\n\nYour global pause is off. You don't need to do anything else.\n\nRaise this month's ceiling: https://eve.example/settings#cost\n\nSee this month's spend: https://eve.example/settings#cost\n\nYou'll get one email for this pause. The daily summary repeats the status until it ends.\n\nLinks open your Eve dashboard and ask you to sign in.\n",
+      "html": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><title>Paid automation paused: monthly cost ceiling</title></head>\n<body style=\"margin:0;padding:24px;background:#ffffff;font-family:Inter,-apple-system,'Segoe UI',Roboto,Arial,sans-serif\">\n<div style=\"display:none;max-height:0;overflow:hidden\">Nothing paid runs until 1 Nov 2026, unless you raise this month&#39;s ceiling.</div>\n<div style=\"max-width:600px;margin:0 auto\">\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Paid automation is paused. The next paid action would have taken this month&#39;s spend over USD 60.00, so the assistant stopped before running it.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Spent this month: USD 41.57<br>This month&#39;s ceiling: USD 60.00<br>Next paid action: form filling, estimated USD 20.00<br>Paused at: 25 Oct 2026, 11:30 WAT</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">What&#39;s stopped: every paid action, including discovery, document generation, Eligibility and Match checks, and the browser that fills and submits forms. Nothing is sent to employers while this pause is on.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">What still works: your dashboard. You can still paste job links. They&#39;re saved now, then checked for Eligibility and Match once the pause ends, because checking is a paid AI call.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Applications that were mid-way stay where they are. If the pause hit before the submit click, the Application wasn&#39;t submitted and goes ahead after the pause ends.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">When it resumes:<br>- On its own at 00:00 WAT on 1 Nov 2026, when a new month starts and the ceiling returns to USD 50.00.<br>- Sooner, if you raise this month&#39;s ceiling to an amount that leaves room for the next paid action. You can raise it to at most USD 100.00, and the raise lasts until the end of October 2026.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Your global pause is off. You don&#39;t need to do anything else.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://eve.example/settings#cost\" style=\"color:#0a0a0a;text-decoration:underline\">Raise this month&#39;s ceiling</a></p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\"><a href=\"https://eve.example/settings#cost\" style=\"color:#0a0a0a;text-decoration:underline\">See this month&#39;s spend</a></p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">You&#39;ll get one email for this pause. The daily summary repeats the status until it ends.</p>\n<p style=\"margin:0 0 16px;font-size:14px;line-height:20px;color:#0a0a0a\">Links open your Eve dashboard and ask you to sign in.</p>\n</div></body></html>"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+# Throwaway restore target for restore-drill.sh (docs/ops/backups.md).
+# Always run with its own project name, never eve or job-assistant:
+#   docker compose -p ja-ops-backup-drill -f scripts/backup/drill.compose.yml up -d --wait
+# No published ports and no network route out. restore-drill.sh creates the
+# file volumes <project>_documents, <project>_resumes and <project>_candidates itself and removes
+# them with the project (`down --volumes` only removes pgdata).
+# Every volume and network declared here carries eve.backup.drill=1: restore-drill.sh
+# reads both sections and refuses to start (or remove anything) if one already exists
+# without that label (F-SEC-18).
+services:
+  postgres:
+    # restore-drill.sh only tears down a project whose containers carry this label.
+    labels:
+      eve.backup.drill: "1"
+    image: ${BACKUP_HELPER_IMAGE:-postgres:17-alpine}
+    environment:
+      POSTGRES_USER: postgres
+      # Throwaway: reachable only through `docker exec` (no ports, internal network).
+      POSTGRES_PASSWORD: drill-only-not-a-secret
+      POSTGRES_DB: ${DRILL_DB:-job_assistant}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [drill]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+
+networks:
+  drill:
+    internal: true
+    labels:
+      eve.backup.drill: "1"
+
+volumes:
+  pgdata:
+    labels:
+      eve.backup.drill: "1"

@@ -1,0 +1,1524 @@
+{
+  "note": "EPIC-0002 A0 owner Job criteria golden (r5). Regenerate only in its own commit with a reason.",
+  "capturedOn": "main 86637ae (pre-A1), proved on epic-0002/a0-gap",
+  "owner": {
+    "matchThreshold": 0.7,
+    "hours": {
+      "hoursCutoff": "23:00",
+      "hoursTimeZone": "Africa/Lagos"
+    },
+    "evaluatedOn": "2026-10-20T09:00:00.000Z"
+  },
+  "criteriaSet2": {
+    "minCoreMatchPercent": 80,
+    "frameworks": [
+      "React"
+    ],
+    "technologies": [
+      "TypeScript"
+    ]
+  },
+  "underCriteriaSet2": {
+    "postings": [
+      {
+        "id": "golden-01",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-02",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-03",
+        "title": "Tech Lead, Web",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "technical_lead"
+      },
+      {
+        "id": "golden-04",
+        "title": "Full Stack Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 4
+        },
+        "roleFamily": "fullstack"
+      },
+      {
+        "id": "golden-05",
+        "title": "Product Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 5
+        },
+        "roleFamily": "product_engineering"
+      },
+      {
+        "id": "golden-06",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-07",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-08",
+        "title": "React Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-09",
+        "title": "UI Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-10",
+        "title": "Web Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-11",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-12",
+        "title": "Frontend Developer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-13",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-14",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-15",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "sponsorship",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-16",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-17",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-18",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "pay",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-19",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-20",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-21",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "pay",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-22",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "hours",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-23",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-24",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "hours",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-25",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "industry",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-26",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "industry",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-27",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-28",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 5
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-29",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "uncovered_mandatory_prerequisite",
+        "skipDetail": "Professional Kotlin Android experience",
+        "match": {
+          "verdict": "weak",
+          "weakReason": "unmet_mandatory",
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-30",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "no_core_responsibilities",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "no_core_responsibilities",
+          "coveredCount": 0,
+          "totalCount": 0
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-31",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-32",
+        "title": "Engineering Manager",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 1,
+          "totalCount": 1
+        },
+        "roleFamily": "people_management"
+      },
+      {
+        "id": "golden-33",
+        "title": "Backend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "backend"
+      },
+      {
+        "id": "golden-34",
+        "title": "iOS Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "mobile"
+      },
+      {
+        "id": "golden-35",
+        "title": "Site Reliability Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "devops_platform"
+      },
+      {
+        "id": "golden-36",
+        "title": "Data Analyst",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "data_ml"
+      },
+      {
+        "id": "golden-37",
+        "title": "Lead Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 4
+        },
+        "roleFamily": "technical_lead"
+      },
+      {
+        "id": "golden-38",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-39",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-40",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-41",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-42",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-43",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-44",
+        "title": "Fullstack Developer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "fullstack"
+      },
+      {
+        "id": "golden-45",
+        "title": "Senior Product Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "product_engineering"
+      },
+      {
+        "id": "golden-46",
+        "title": "Senior Backend Developer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "backend"
+      },
+      {
+        "id": "golden-47",
+        "title": "Android Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "mobile"
+      },
+      {
+        "id": "golden-48",
+        "title": "Platform Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "platform_engineering"
+      },
+      {
+        "id": "golden-49",
+        "title": "Engineering Lead",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 1,
+          "totalCount": 1
+        },
+        "roleFamily": "people_management"
+      },
+      {
+        "id": "golden-50",
+        "title": "Machine Learning Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "data_ml"
+      },
+      {
+        "id": "golden-51",
+        "title": "React Native Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-52",
+        "title": "Sales Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "other"
+      },
+      {
+        "id": "golden-53",
+        "title": "Support Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "other"
+      },
+      {
+        "id": "golden-54",
+        "title": "Customer Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "solutions_customer"
+      },
+      {
+        "id": "golden-55",
+        "title": "Solutions Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "solutions_customer"
+      },
+      {
+        "id": "golden-56",
+        "title": "Field Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "other"
+      },
+      {
+        "id": "golden-57",
+        "title": "HR Business Partner",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "other"
+      },
+      {
+        "id": "golden-58",
+        "title": "HR Systems Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "other"
+      },
+      {
+        "id": "golden-59",
+        "title": "Account Executive",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "other"
+      },
+      {
+        "id": "golden-60",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-61",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-62",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-63",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-64",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "none_found",
+        "technologies": [],
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "technology_mismatch",
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-65",
+        "title": "Frontend Engineer",
+        "technologyState": "none_found",
+        "technologies": [],
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-66",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "React",
+            "quote": "Build React interfaces"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-67",
+        "title": "Product Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "TS",
+            "quote": "We write TS daily"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 5
+        },
+        "roleFamily": "product_engineering"
+      },
+      {
+        "id": "golden-68",
+        "title": "Frontend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "Vue",
+            "quote": "Our stack is Vue 3"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "technology_mismatch",
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-69",
+        "title": "Backend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "Python",
+            "quote": "run on Python"
+          }
+        ],
+        "droppedTechnologyCount": 1,
+        "status": "skipped",
+        "skipReason": "technology_mismatch",
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "backend"
+      },
+      {
+        "id": "golden-70",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "React",
+            "quote": "Build React interfaces"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-71",
+        "title": "Full Stack Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "TypeScript",
+            "quote": "Own the TypeScript design system"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 5
+        },
+        "roleFamily": "fullstack"
+      }
+    ],
+    "ranking": [
+      "golden-02",
+      "golden-38",
+      "golden-39",
+      "golden-10",
+      "golden-12",
+      "golden-16",
+      "golden-20",
+      "golden-42",
+      "golden-60",
+      "golden-62",
+      "golden-66",
+      "golden-01",
+      "golden-03",
+      "golden-40",
+      "golden-11",
+      "golden-13",
+      "golden-17",
+      "golden-19",
+      "golden-23",
+      "golden-27",
+      "golden-31",
+      "golden-43",
+      "golden-51",
+      "golden-61",
+      "golden-44",
+      "golden-45",
+      "golden-05",
+      "golden-67",
+      "golden-32",
+      "golden-34",
+      "golden-36",
+      "golden-46",
+      "golden-48",
+      "golden-50",
+      "golden-52",
+      "golden-54",
+      "golden-56",
+      "golden-58",
+      "golden-33",
+      "golden-35",
+      "golden-47",
+      "golden-49",
+      "golden-53",
+      "golden-55",
+      "golden-57",
+      "golden-59"
+    ]
+  },
+  "technologyPostingsUnderOwnerCriteria": {
+    "postings": [
+      {
+        "id": "golden-62",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-63",
+        "title": "Frontend Engineer",
+        "technologyState": "not_checked",
+        "technologies": null,
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 3,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-64",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "none_found",
+        "technologies": [],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-65",
+        "title": "Frontend Engineer",
+        "technologyState": "none_found",
+        "technologies": [],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 3,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-66",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "React",
+            "quote": "Build React interfaces"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-67",
+        "title": "Product Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "TS",
+            "quote": "We write TS daily"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 5
+        },
+        "roleFamily": "product_engineering"
+      },
+      {
+        "id": "golden-68",
+        "title": "Frontend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "Vue",
+            "quote": "Our stack is Vue 3"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-69",
+        "title": "Backend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "Python",
+            "quote": "run on Python"
+          }
+        ],
+        "droppedTechnologyCount": 1,
+        "status": "ranked",
+        "skipReason": null,
+        "skipDetail": null,
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "backend"
+      },
+      {
+        "id": "golden-70",
+        "title": "Senior Frontend Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "React",
+            "quote": "Build React interfaces"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "excluded",
+        "skipReason": "violated_rule",
+        "skipDetail": "location",
+        "match": {
+          "verdict": "strong",
+          "weakReason": null,
+          "coveredCount": 4,
+          "totalCount": 4
+        },
+        "roleFamily": "senior_frontend"
+      },
+      {
+        "id": "golden-71",
+        "title": "Full Stack Engineer",
+        "technologyState": "listed",
+        "technologies": [
+          {
+            "name": "TypeScript",
+            "quote": "Own the TypeScript design system"
+          }
+        ],
+        "droppedTechnologyCount": 0,
+        "status": "skipped",
+        "skipReason": "weak_core_match",
+        "skipDetail": null,
+        "match": {
+          "verdict": "weak",
+          "weakReason": "coverage_below_threshold",
+          "coveredCount": 3,
+          "totalCount": 5
+        },
+        "roleFamily": "fullstack"
+      }
+    ],
+    "ranking": [
+      "golden-62",
+      "golden-64",
+      "golden-66",
+      "golden-68",
+      "golden-63",
+      "golden-65",
+      "golden-67",
+      "golden-69"
+    ]
+  }
+}

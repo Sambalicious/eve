@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TO CONFIRM against a saved, sanitised real feed before release (PRD open question 2). Synthetic: no real alert, person or post. -->
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:idx="urn:atom-extension:indexing">
+  <id>tag:google.com,2005:reader/user/01234567890123456789/state/com.google/alerts/9876543210987654321</id>
+  <title>Google Alert - site:linkedin.com/posts ("React" OR "NestJS") -hiring -job</title>
+  <link href="https://www.google.com/alerts/feeds/01234567890123456789/9876543210987654321" rel="self"/>
+  <updated>2026-10-21T07:00:00Z</updated>
+  <entry>
+    <id>tag:google.com,2013:googlealerts/feed:1111111111111111111</id>
+    <title type="html">Why we moved to &lt;b&gt;React&lt;/b&gt; Server Components</title>
+    <link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https://www.linkedin.com/posts/ada-obi_react-activity-7254-abcd&amp;ct=ga&amp;cd=CAIyGg&amp;usg=AOvVaw0"/>
+    <published>2026-10-21T06:12:00Z</published>
+    <updated>2026-10-21T06:12:00Z</updated>
+    <content type="html">Ada Obi on &lt;b&gt;React&lt;/b&gt; and &lt;b&gt;NestJS&lt;/b&gt; in production …</content>
+    <author><name/></author>
+  </entry>
+  <entry>
+    <id>tag:google.com,2013:googlealerts/feed:2222222222222222222</id>
+    <title type="html">&lt;b&gt;TypeScript&lt;/b&gt; at scale</title>
+    <link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fuk.linkedin.com%2Fpulse%2Ftypescript-at-scale-chidi-eze&amp;ct=ga"/>
+    <published>2026-10-20T09:15:00Z</published>
+    <updated>2026-10-20T10:00:00Z</updated>
+    <content type="html">Notes from a large &lt;b&gt;TypeScript&lt;/b&gt; codebase.</content>
+    <author><name/></author>
+  </entry>
+  <entry>
+    <id>tag:google.com,2013:googlealerts/feed:3333333333333333333</id>
+    <title type="html">Hiring: senior &lt;b&gt;React&lt;/b&gt; engineer</title>
+    <link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https://www.linkedin.com/jobs/view/3900000000&amp;ct=ga"/>
+    <published>2026-10-20T08:00:00Z</published>
+    <content type="html">Apply now.</content>
+  </entry>
+</feed>

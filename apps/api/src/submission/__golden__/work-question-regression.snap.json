@@ -1,0 +1,4123 @@
+{
+  "note": "EPIC-0002 A0 work-question golden. Regenerate only in its own commit with a reason.",
+  "capturedOn": "main b17e786 (pre-A1), proved on epic-0002/slice-a0-a1",
+  "settings": [
+    "",
+    "none outside Nigeria",
+    "Nigeria",
+    "Nigeria only",
+    "only Nigeria"
+  ],
+  "rows": [
+    {
+      "label": "Are you authorized to work in the United Kingdom?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the United Kingdom?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the United Kingdom?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you now or in the future require visa sponsorship?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you now or in the future require visa sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you now or in the future require visa sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you require sponsorship to work in Germany?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you require sponsorship to work in Germany?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you require sponsorship to work in Germany?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in the United States without sponsorship?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in the United States without sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in the United States without sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the US without visa sponsorship?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the US without visa sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the US without visa sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Can you work in the UK without requiring sponsorship?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Can you work in the UK without requiring sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Can you work in the UK without requiring sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in the country in which this job is located without the need for visa sponsorship? (United States)",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in the country in which this job is located without the need for visa sponsorship? (United States)\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in the country in which this job is located without the need for visa sponsorship? (United States)",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you currently eligible to work in Canada without employer sponsorship?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you currently eligible to work in Canada without employer sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you currently eligible to work in Canada without employer sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you able to work in Germany without a visa or sponsorship?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you able to work in Germany without a visa or sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you able to work in Germany without a visa or sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria without sponsorship?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria without sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria without sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are You Legally Authorized To Work In The United States Without Sponsorship?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are You Legally Authorized To Work In The United States Without Sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are You Legally Authorized To Work In The United States Without Sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in the United States?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in the United States?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in the United States?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work lawfully in the United Kingdom?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work lawfully in the United Kingdom?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work lawfully in the United Kingdom?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have the right to work in the UK?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to work in the UK?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you have the right to work in the UK?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have the legal right to work in the EU?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the legal right to work in the EU?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you have the legal right to work in the EU?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you currently have the right to work in the European Union?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you currently have the right to work in the European Union?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you currently have the right to work in the European Union?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally eligible to work in Australia?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally eligible to work in Australia?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally eligible to work in Australia?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you hold a valid work permit for Switzerland?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you hold a valid work permit for Switzerland?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you hold a valid work permit for Switzerland?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in any country other than Nigeria?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in any country other than Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in any country other than Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work outside of Nigeria?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work outside of Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work outside of Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally permitted to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally permitted to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally permitted to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you eligible to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you eligible to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you eligible to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Will you now or in the future require sponsorship for employment visa status (e.g. H-1B visa status)?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you now or in the future require sponsorship for employment visa status (e.g. H-1B visa status)?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you now or in the future require sponsorship for employment visa status (e.g. H-1B visa status)?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you now, or in the future, require sponsorship to work in the United States?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you now, or in the future, require sponsorship to work in the United States?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you now, or in the future, require sponsorship to work in the United States?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you require visa sponsorship?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you require visa sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you require visa sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require Lyft to sponsor a visa for you to work in the US?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require Lyft to sponsor a visa for you to work in the US?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require Lyft to sponsor a visa for you to work in the US?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Would you need visa sponsorship to work in Ireland?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Would you need visa sponsorship to work in Ireland?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Would you need visa sponsorship to work in Ireland?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Visa sponsorship required?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Visa sponsorship required?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Visa sponsorship required?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require a work permit to work in Spain?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require a work permit to work in Spain?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require a work permit to work in Spain?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the US, or will you require sponsorship?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the US, or will you require sponsorship?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in the US, or will you require sponsorship?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the US, or will you require sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the US, or will you require sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the United States? Will you require sponsorship now or in the future?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the United States? Will you require sponsorship now or in the future?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in the United States? Will you require sponsorship now or in the future?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the United States? Will you require sponsorship now or in the future?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the United States? Will you require sponsorship now or in the future?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you not require sponsorship to work in the US?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you not require sponsorship to work in the US?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you not require sponsorship to work in the US?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you not require sponsorship to work in the US?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you not require sponsorship to work in the US?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Please confirm you don't need visa sponsorship",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Please confirm you don't need visa sponsorship\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Please confirm you don't need visa sponsorship"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Please confirm you don't need visa sponsorship\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Please confirm you don't need visa sponsorship",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you not authorized to work in the UK?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you not authorized to work in the UK?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you not authorized to work in the UK?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you not authorized to work in the UK?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you not authorized to work in the UK?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in the country where this role is based?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in the country where this role is based?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you legally authorized to work in the country where this role is based?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in the country where this role is based?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in the country where this role is based?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work without sponsorship?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work without sponsorship?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work without sponsorship?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work without sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work without sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and the United Kingdom?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the United Kingdom?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and the United Kingdom?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the United Kingdom?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and the United Kingdom?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you require sponsorship to work in Nigeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you require sponsorship to work in Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you require sponsorship to work in Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you require sponsorship to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you require sponsorship to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and Togo?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and Togo?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and Togo?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and Togo?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and Togo?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria or Cameroon?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria or Cameroon?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria or Cameroon?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria or Cameroon?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria or Cameroon?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and Benin?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and Benin?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and Benin?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and Benin?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and Benin?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and Dubai?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and Dubai?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and Dubai?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and Dubai?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and Dubai?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and America?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and America?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and America?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and America?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and America?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and NYC?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and NYC?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and NYC?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and NYC?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and NYC?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and EMEA?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and EMEA?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and EMEA?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and EMEA?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and EMEA?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and London?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and London?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and London?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and London?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and London?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and the U.S.?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the U.S.?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and the U.S.?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the U.S.?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and the U.S.?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria/UK?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria/UK?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria/UK?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria/UK?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria/UK?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "As a Nigerian, are you authorized to work in Togo?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"As a Nigerian, are you authorized to work in Togo?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "As a Nigerian, are you authorized to work in Togo?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"As a Nigerian, are you authorized to work in Togo?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "As a Nigerian, are you authorized to work in Togo?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Africa, including Nigeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Africa, including Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Africa, including Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Africa, including Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Africa, including Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in West Africa (e.g. Nigeria)?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in West Africa (e.g. Nigeria)?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in West Africa (e.g. Nigeria)?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in West Africa (e.g. Nigeria)?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in West Africa (e.g. Nigeria)?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria, and in the country where this role is based?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria, and in the country where this role is based?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria, and in the country where this role is based?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria, and in the country where this role is based?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria, and in the country where this role is based?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and the location of this role?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the location of this role?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and the location of this role?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the location of this role?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and the location of this role?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you eligible to work in Nigeria and Togo without sponsorship?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you eligible to work in Nigeria and Togo without sponsorship?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you eligible to work in Nigeria and Togo without sponsorship?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you eligible to work in Nigeria and Togo without sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you eligible to work in Nigeria and Togo without sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria, Ghana and Togo?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria, Ghana and Togo?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria, Ghana and Togo?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria, Ghana and Togo?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria, Ghana and Togo?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and the US?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the US?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and the US?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the US?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and the US?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria & the UK?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria & the UK?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria & the UK?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria & the UK?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria & the UK?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and the Netherlands?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the Netherlands?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and the Netherlands?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and the Netherlands?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and the Netherlands?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in America?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in America?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in America?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in America?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in America?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in London?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in London?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in London?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in London?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in London?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the UK or Lagos?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the UK or Lagos?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in the UK or Lagos?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the UK or Lagos?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the UK or Lagos?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the US or anywhere in Africa?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the US or anywhere in Africa?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in the US or anywhere in Africa?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the US or anywhere in Africa?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the US or anywhere in Africa?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria or any country other than Nigeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria or any country other than Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria or any country other than Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria or any country other than Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria or any country other than Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria and other countries?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and other countries?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria and other countries?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria and other countries?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria and other countries?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria (and the EU)?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria (and the EU)?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria (and the EU)?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria (and the EU)?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria (and the EU)?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria-Togo?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria-Togo?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria-Togo?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria-Togo?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria-Togo?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria for a US employer?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria for a US employer?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria for a US employer?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria for a US employer?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria for a US employer?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you, a Nigerian citizen, authorized to work in the role's country?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you, a Nigerian citizen, authorized to work in the role's country?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you, a Nigerian citizen, authorized to work in the role's country?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you, a Nigerian citizen, authorized to work in the role's country?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you, a Nigerian citizen, authorized to work in the role's country?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria in Accra?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria in Accra?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria in Accra?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria in Accra?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria in Accra?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria without sponsorship in Ghana?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria without sponsorship in Ghana?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria without sponsorship in Ghana?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria without sponsorship in Ghana?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria without sponsorship in Ghana?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the Federal Republic of Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the Federal Republic of Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the Federal Republic of Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria without visa sponsorship?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria without visa sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria without visa sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Do you have the right to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you have the right to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria? *",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria? *\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria? *",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you authorized to work in Canada?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Canada?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Canada?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require visa sponsorship?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require visa sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you authorized to work in the UK?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the UK?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the UK?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you able to work from our London office location?",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you able to work from our London office location?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you able to work from our London office location?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you able to work from our London office location?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you able to work from our London office location?"
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Nigeria? *",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria? *\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Nigeria? *",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Will you now or in the future require sponsorship for employment visa status?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you now or in the future require sponsorship for employment visa status?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you now or in the future require sponsorship for employment visa status?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Nigeria and Togo?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria and Togo?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you legally authorized to work in Nigeria and Togo?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria and Togo?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Nigeria and Togo?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Nigeria? Please select Yes No",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria? Please select Yes No\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you legally authorized to work in Nigeria? Please select Yes No"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria? Please select Yes No\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Nigeria? Please select Yes No",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": true,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Will you require visa sponsorship to work in Port Harcourt?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship to work in Port Harcourt?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Will you require visa sponsorship to work in Port Harcourt?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship to work in Port Harcourt?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require visa sponsorship to work in Port Harcourt?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you need sponsorship to work in Ibadan or Kano?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you need sponsorship to work in Ibadan or Kano?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you need sponsorship to work in Ibadan or Kano?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you need sponsorship to work in Ibadan or Kano?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you need sponsorship to work in Ibadan or Kano?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require sponsorship as a Nigerian citizen?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require sponsorship as a Nigerian citizen?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Will you require sponsorship as a Nigerian citizen?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require sponsorship as a Nigerian citizen?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require sponsorship as a Nigerian citizen?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require visa sponsorship to work in Nіgeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship to work in Nіgeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Will you require visa sponsorship to work in Nіgeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship to work in Nіgeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require visa sponsorship to work in Nіgeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require visa spоnsorship?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa spоnsorship?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Will you require visa spоnsorship?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa spоnsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require visa spоnsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in the UK or Nіgeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the UK or Nіgeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in the UK or Nіgeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the UK or Nіgeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the UK or Nіgeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Togo?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Togo?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you legally authorized to work in Togo?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Togo?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Togo?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Nigeria? and Togo",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria? and Togo\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you legally authorized to work in Nigeria? and Togo"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria? and Togo\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Nigeria? and Togo",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have the right to live and work in Nigeria?",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to live and work in Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have the right to live and work in Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to live and work in Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have the right to live and work in Nigeria?"
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you hold a valid work permit?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you hold a valid work permit?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you hold a valid work permit?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you hold a valid work permit?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you hold a valid work permit?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you auth​orized to work in the US?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you auth​orized to work in the US?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you auth​orized to work in the US?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you auth​orized to work in the US?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you auth​orized to work in the US?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require visa spon­sorship?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa spon­sorship?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Will you require visa spon­sorship?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa spon­sorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require visa spon­sorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized⁠ to work in Canada?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized⁠ to work in Canada?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized⁠ to work in Canada?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized⁠ to work in Canada?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized⁠ to work in Canada?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have the right to live and work here?",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to live and work here?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have the right to live and work here?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to live and work here?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have the right to live and work here?"
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you legally authorized to work in Nigeria",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally authorized to work in Nigeria\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally authorized to work in Nigeria",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you currently eligible to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you currently eligible to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you currently eligible to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Do you have the legal right to work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the legal right to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you have the legal right to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Can you legally work in Nigeria?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Can you legally work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Can you legally work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you legally able to work in Nigeria without visa sponsorship?",
+      "classify": {
+        "": "authorized",
+        "none outside Nigeria": "authorized",
+        "Nigeria": "authorized",
+        "Nigeria only": "authorized",
+        "only Nigeria": "authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you legally able to work in Nigeria without visa sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you legally able to work in Nigeria without visa sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": true
+      }
+    },
+    {
+      "label": "Are you authorized to work in the United States?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in the United States?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in the United States?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have the right to work in the United Kingdom?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have the right to work in the United Kingdom?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you have the right to work in the United Kingdom?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you eligible to work in the European Union?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you eligible to work in the European Union?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you eligible to work in the European Union?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work outside Nigeria?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work outside Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work outside Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in any other country?",
+      "classify": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "classifyRaw": {
+        "": "not_authorized",
+        "none outside Nigeria": "not_authorized",
+        "Nigeria": "not_authorized",
+        "Nigeria only": "not_authorized",
+        "only Nigeria": "not_authorized"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "No",
+        "source": "settings_work_authorization",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in any other country?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in any other country?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you need sponsorship to work in Canada?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you need sponsorship to work in Canada?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you need sponsorship to work in Canada?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Would you require sponsorship for a work visa?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Would you require sponsorship for a work visa?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Would you require sponsorship for a work visa?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you require employer sponsorship?",
+      "classify": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Yes",
+        "source": "rule_sponsorship",
+        "work": true
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you require employer sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you require employer sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you not authorized to work in Nigeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you not authorized to work in Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you not authorized to work in Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you not authorized to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you not authorized to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nigeria? Will you require sponsorship?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria? Will you require sponsorship?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nigeria? Will you require sponsorship?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nigeria? Will you require sponsorship?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nigeria? Will you require sponsorship?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in Nіgeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nіgeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in Nіgeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in Nіgeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in Nіgeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you author​ized to work in Nigeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you author​ized to work in Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you author​ized to work in Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you author​ized to work in Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you author​ized to work in Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Will you require visa sponsorship to work in Lagos?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "sponsorship",
+        "none outside Nigeria": "sponsorship",
+        "Nigeria": "sponsorship",
+        "Nigeria only": "sponsorship",
+        "only Nigeria": "sponsorship"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship to work in Lagos?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Will you require visa sponsorship to work in Lagos?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Will you require visa sponsorship to work in Lagos?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Will you require visa sponsorship to work in Lagos?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you authorized to work in ECOWAS except Nigeria?",
+      "classify": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "classifyRaw": {
+        "": "unclear",
+        "none outside Nigeria": "unclear",
+        "Nigeria": "unclear",
+        "Nigeria only": "unclear",
+        "only Nigeria": "unclear"
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in ECOWAS except Nigeria?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you authorized to work in ECOWAS except Nigeria?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you authorized to work in ECOWAS except Nigeria?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Are you authorized to work in ECOWAS except Nigeria?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": true,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Expected salary (USD per year)",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "USD 48,000 per year",
+        "source": "salary_gross_policy",
+        "work": false
+      },
+      "pageRead": {
+        "kind": "value",
+        "value": "USD 48,000 per year",
+        "source": "salary_gross_policy",
+        "work": false
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Full name",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "Ada Okafor",
+        "source": "settings_contact",
+        "work": false
+      },
+      "pageRead": {
+        "kind": "value",
+        "value": "Ada Okafor",
+        "source": "settings_contact",
+        "work": false
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Are you willing to relocate?",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you willing to relocate?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you willing to relocate?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Are you willing to relocate?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Are you willing to relocate?"
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have a visa card?",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have a visa card?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have a visa card?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have a visa card?\" (as shown on the page). Work-authorization answers are used only on questions read from the employer's Greenhouse API, so complete this one manually. Nothing was entered.",
+        "field": "Do you have a visa card?",
+        "manualOnly": true
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Do you have experience with work queues?",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have experience with work queues?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have experience with work queues?"
+      },
+      "pageRead": {
+        "reason": "missing_approved_answer",
+        "detail": "The form asks \"Do you have experience with work queues?\" and you have no Approved Answer for it. Nothing was guessed.",
+        "field": "Do you have experience with work queues?"
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    },
+    {
+      "label": "Notice period",
+      "classify": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "classifyRaw": {
+        "": null,
+        "none outside Nigeria": null,
+        "Nigeria": null,
+        "Nigeria only": null,
+        "only Nigeria": null
+      },
+      "schemaMatched": {
+        "kind": "value",
+        "value": "4 weeks",
+        "source": "approved_answer_standard",
+        "work": false
+      },
+      "pageRead": {
+        "kind": "value",
+        "value": "4 weeks",
+        "source": "approved_answer_standard",
+        "work": false
+      },
+      "labelTampered": {
+        "agreeing": false,
+        "hidden_node": false,
+        "second_country": false
+      }
+    }
+  ]
+}

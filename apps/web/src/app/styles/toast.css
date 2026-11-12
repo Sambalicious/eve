@@ -1,0 +1,190 @@
+/* Toasts (shared/ui/toast.tsx, design-spec.r3 Interaction patterns > Toasts).
+   Sonner positions and stacks; EveToast is headless, so these rules own the
+   look. A popover surface with a tone edge and tone icon, never filled. */
+
+.eve-toaster {
+  --width: 356px;
+  font-family: var(--font-sans);
+}
+/* The app toaster sits under any modal scrim (z-50), never over it. The
+   class plus attribute outranks Sonner's injected [data-sonner-toaster]. */
+.eve-app-toaster[data-sonner-toaster] {
+  z-index: 60;
+}
+body:has([role="dialog"][data-open], [role="alertdialog"][data-open]) .eve-app-toaster[data-sonner-toaster] {
+  z-index: 40;
+}
+/* EPIC-F2: from 600px each app toast is the toaster's width (384px at 768px
+   and up, top right under the sticky header; centred between 16px gutters
+   below 768px). Sonner sizes only styled toasts; EveToast is headless. */
+@media (min-width: 601px) {
+  .eve-app-toaster[data-sonner-toaster] [data-sonner-toast] {
+    width: var(--width);
+  }
+}
+/* Sonner's narrow layout starts at max-width 600px; at exactly 600px the
+   app toaster stays top right. */
+@media (width: 600px) {
+  .eve-app-toaster[data-sonner-toaster][data-x-position="right"] {
+    left: auto;
+    right: var(--offset-right);
+    top: var(--offset-top);
+    width: var(--width);
+  }
+  .eve-app-toaster[data-sonner-toaster] [data-sonner-toast] {
+    left: auto;
+    right: 0;
+    width: var(--width);
+  }
+}
+
+.eve-toast {
+  --tone: var(--destructive);
+  --tone-text: var(--destructive-text);
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  column-gap: 10px;
+  align-items: start;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 8px 10px 14px;
+  border-radius: 12px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow:
+    inset 3px 0 0 var(--tone),
+    0 0 0 1px var(--border),
+    var(--shadow-overlay);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.eve-toast[data-tone="success"] {
+  --tone: var(--success);
+  --tone-text: var(--success-text);
+}
+.eve-toast[data-tone="warning"] {
+  --tone: var(--warning);
+  --tone-text: var(--warning-text);
+}
+.eve-toast[data-tone="info"] {
+  --tone: var(--info);
+  --tone-text: var(--info-text);
+}
+[dir="rtl"] .eve-toast {
+  box-shadow:
+    inset -3px 0 0 var(--tone),
+    0 0 0 1px var(--border),
+    var(--shadow-overlay);
+}
+.eve-toast-icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 6px;
+  color: var(--tone-text);
+}
+.eve-toast-text {
+  margin: 4px 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.eve-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+/* The action drops under the text when the row can't hold it (narrow
+   toasts with both an action and a close control). */
+@media (max-width: 399px) {
+  .eve-toast:has(.eve-toast-actions > :nth-child(2)) .eve-toast-actions {
+    grid-column: 2 / -1;
+    justify-content: flex-end;
+  }
+}
+
+/* Swipe to dismiss. Sonner ignores every pointer move while the page has a
+   text selection, and a mouse or pen drag across the toast selects its text
+   on the first move, so the drag never travels. Sonner only turns selection
+   off once a move has registered (data-swiped). Turn it off from the press
+   (data-swiping is set on pointerdown) so the drag can travel; outside a drag
+   the message stays selectable. */
+.eve-toaster [data-sonner-toast][data-swiping="true"],
+.eve-toaster [data-sonner-toast][data-swiping="true"] * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (forced-colors: active) {
+  .eve-toast {
+    border: 1px solid CanvasText;
+    border-inline-start: 3px solid Highlight;
+    box-shadow: none;
+  }
+}
+
+/* Motion (EPIC-F2 design-spec.r2, matched on Sonner per the Candidate
+   decision of 2026-10-22 21:28). One curve everywhere, DESIGN.md's ease-out
+   (--ease-standard). Enter and stack reflow: transform and opacity 200ms
+   (--duration-toast-in), height 150ms (--duration-fast), content fade 200ms.
+   Every exit (timeout, close, supersede, submit press, swipe dismiss, orphan)
+   takes 150ms (--duration-toast-out). Same values on mobile and desktop and in
+   dialog toasters. Literal values, not var(), so the unit tests can read them
+   from jsdom, which does not resolve var(); tokens.test.ts owns the tokens.
+   These selectors outrank Sonner's injected defaults (400ms layers, a 500ms
+   behind-stack exit, a 200ms ease-out swipe-out). */
+.eve-toaster [data-sonner-toast] {
+  transition:
+    transform 200ms cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 200ms cubic-bezier(0.25, 1, 0.5, 1),
+    height 150ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.eve-toaster [data-sonner-toast] > * {
+  transition: opacity 200ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* While dragging, the toast follows the finger with no transition. */
+.eve-toaster [data-sonner-toast][data-swiping="true"] {
+  transition: none;
+}
+/* Every exit: 150ms on each layer. !important beats Sonner's behind-stack
+   exit rule (five attribute selectors) and the drag rule above, which Sonner
+   leaves on through a swipe dismiss. */
+.eve-toaster [data-sonner-toast][data-removed="true"] {
+  transition-property: transform, opacity, height !important;
+  transition-duration: 150ms !important;
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+/* Swipe dismiss: Sonner slides the toast on past the finger with a keyframe
+   animation; 150ms on the same curve. */
+.eve-toaster [data-sonner-toast][data-swipe-out="true"][data-y-position] {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Reduced motion: no slide, opacity only, exactly 150ms on the same curve,
+   on enter, exit, swipe dismiss and orphan. Stack positions snap. A drag
+   still follows the finger (F2 r1); a swipe dismiss then fades where it was
+   released (Sonner already drops its swipe-out animation). */
+@media (prefers-reduced-motion: reduce) {
+  .eve-toaster [data-sonner-toast]:not([data-swiping="true"]) {
+    transform: none !important;
+  }
+  /* Sonner keeps data-swiping on through a swipe dismiss: stay at the finger. */
+  .eve-toaster [data-sonner-toast][data-swiping="true"][data-removed="true"] {
+    transform: translateY(var(--swipe-amount-y, 0px)) translateX(var(--swipe-amount-x, 0px)) !important;
+  }
+  .eve-toaster [data-sonner-toast],
+  .eve-toaster [data-sonner-toast] > *,
+  .eve-toaster [data-sonner-toast][data-removed="true"] {
+    transition: opacity 150ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+  }
+}
+
+/* EPIC-F2 r2 CR-03: a toast still exiting on the other half when the next
+   toast lands fades in place (150ms) instead of sliding. Last, so it beats
+   the exit and reduced-motion rules above, with or without reduced motion. */
+.eve-app-toaster [data-sonner-toast][data-orphaned] {
+  transform: none !important;
+  opacity: 0 !important;
+  transition: opacity 150ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+}

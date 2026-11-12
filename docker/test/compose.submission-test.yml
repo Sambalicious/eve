@@ -1,0 +1,90 @@
+# Slice 5 browser test overlay. Use only with docker/test/run-submission-browser-test.sh,
+# which sets SUBMISSION_TEST_IMAGE (default ja-s05-backend-api:test) so
+# eve-api:local is untouched. Adds the fake ATS fixture server and two
+# one-shot check runners; makes egress-out internal so nothing leaves the host;
+# turns the worker's browser on (fixture hosts only).
+services:
+  provision-roles:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+  migrate:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+  api:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+  worker:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+    environment:
+      # F-QA5-01: the worker submits approved samples through the browser (fixture hosts only).
+      SUBMISSION_BROWSER_ENABLED: "1"
+  submission-volumes:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+
+  fake-ats:
+    image: node:22-bookworm-slim
+    command: ["node", "/srv/server.mjs"]
+    user: "1000:1000"
+    environment:
+      PORT: "80"
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
+    volumes:
+      - ./docker/fake-ats/server.mjs:/srv/server.mjs:ro
+    networks:
+      egress-out:
+        aliases:
+          - boards.greenhouse.fixture.test
+          - jobs.lever.fixture.test
+          - jobs.ashbyhq.fixture.test
+          - collect.fixture.test
+
+  egress:
+    depends_on:
+      fake-ats:
+        condition: service_started
+
+  submission-check:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+    command: ["node", "/app/check/submission-check.mjs"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set in env file}
+    volumes:
+      - ./docker/test/submission-check.mjs:/app/check/submission-check.mjs:ro
+      - submission-uploads:/data/uploads
+      - egress-allowlist:/data/egress
+    tmpfs:
+      - /tmp/documents:uid=1000,gid=1000,mode=0700
+    networks: [default, browser-net]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      browser:
+        condition: service_started
+      egress:
+        condition: service_started
+    restart: "no"
+
+  gate-check:
+    image: ${SUBMISSION_TEST_IMAGE:-ja-s05-backend-api:test}
+    command: ["node", "/app/check/gate-check.mjs"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set in env file}
+      CANDIDATE_GOOGLE_SUB: ${CANDIDATE_GOOGLE_SUB:?set in env file}
+    volumes:
+      - ./docker/test/gate-check.mjs:/app/check/gate-check.mjs:ro
+      - document-data:/data/documents
+      - egress-allowlist:/data/egress
+    networks: [default, browser-net]
+    restart: "no"
+
+networks:
+  egress-out:
+    internal: true
+
+# docker-compose.yml pins these to the live job-assistant_* volumes (eve rename).
+# Re-scope them to the test project so `down --volumes` can never delete live data.
+volumes:
+  postgres-data:
+    name: ${SUBMISSION_TEST_VOLUME_PREFIX:?set by run-submission-browser-test.sh}_postgres-data
+  resume-data:
+    name: ${SUBMISSION_TEST_VOLUME_PREFIX:?set by run-submission-browser-test.sh}_resume-data
+  document-data:
+    name: ${SUBMISSION_TEST_VOLUME_PREFIX:?set by run-submission-browser-test.sh}_document-data

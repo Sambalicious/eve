@@ -1,0 +1,25 @@
+{
+  "name": "eve",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=24.15"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "check:changed": "node scripts/check-changed.mjs",
+    "test:file": "node scripts/test-file.mjs"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.8"
+  },
+  "files": [
+    ".agents/",
+    "factory/",
+    "AGENTS.md"
+  ]
+}
