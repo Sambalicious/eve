@@ -1,17 +1,17 @@
 # Backups and restore
 
-Eve keeps everything in one Postgres database and its file volumes: two flat volumes before the EPIC-0002 A2 deploy, plus the per-Candidate volume after it. This page covers the nightly encrypted backup of all of them, the on-demand backup before a deploy, checking that last night's run worked, restoring, the monthly restore drill, and getting the files off the machine.
+Eve keeps everything in one Postgres database and its file volumes: two flat volumes before the FEAT-0002 A2 deploy, plus the per-Candidate volume after it. This page covers the nightly encrypted backup of all of them, the on-demand backup before a deploy, checking that last night's run worked, restoring, the monthly restore drill, and getting the files off the machine.
 
 Brief: [backups-brief.md](backups-brief.md) (B.1 to B.14). Decisions: ADR 0004 (nightly backups, kept at most 30 days) and ADR 0008 (evidence snapshots fall under the same 30-day rule).
 
 ## What a backup is
 
-Each run writes one set of three files, or four after the EPIC-0002 A2 deploy, into `BACKUP_DIR` (default `~/eve-backups`). The names carry the UTC time of the run:
+Each run writes one set of three files, or four after the FEAT-0002 A2 deploy, into `BACKUP_DIR` (default `~/eve-backups`). The names carry the UTC time of the run:
 
 | File | Contents |
 |---|---|
 | `eve-db-20261023T010000Z.dump.age` | `pg_dump -Fc` of `POSTGRES_DB`, as the read-only backup role `DB_BACKUP_ROLE` (not the bootstrap superuser, not the owner). Includes the `pgboss` schema and every row of the row-level-security tables. Unlogged tables keep their definition but not their rows (`--no-unlogged-table-data`), and the row counts leave them out: the only one, `tenant_binding.candidate_binding`, binds running transactions, so a restore starts it empty. |
-| `eve-candidates-20261023T010000Z.tar.age` | From EPIC-0002 A2: tar of the `job-assistant_candidate-data` volume (`<candidate_id>/{resumes,documents,exports}` and the `.storage-migrated` marker), mounted read-only. Written only when that volume exists; before the A2 deploy the run logs `step=candidates status=skipped reason=no-volume`. |
+| `eve-candidates-20261023T010000Z.tar.age` | From FEAT-0002 A2: tar of the `job-assistant_candidate-data` volume (`<candidate_id>/{resumes,documents,exports}` and the `.storage-migrated` marker), mounted read-only. Written only when that volume exists; before the A2 deploy the run logs `step=candidates status=skipped reason=no-volume`. |
 | `eve-documents-20261023T010000Z.tar.age` | Tar of the `job-assistant_document-data` volume (tailored documents), mounted read-only. |
 | `eve-resumes-20261023T010000Z.tar.age` | Tar of the `job-assistant_resume-data` volume (uploaded résumés), mounted read-only. |
 
@@ -38,8 +38,8 @@ The backups therefore run as a separate role, `DB_BACKUP_ROLE` (for example `ja_
 
 - It has `BYPASSRLS`, so it reads every row of every Candidate and of the installation.
 - It is `NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION`, and is a member of no role.
-- It has `CONNECT` on the database, `USAGE` on `public` and `pgboss`, and `SELECT` on every table and sequence. Default privileges give it `SELECT` on every table and sequence the owner creates later. From EPIC-0002 A2 (`0022-candidate-binding`) it also has `USAGE` on the owner-only `tenant_binding` schema and `SELECT` on its table, which `pg_dump` must lock. The runtime role has no access there.
-- It has no `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `TEMPORARY` or sequence `USAGE`. It cannot change data or policies. From EPIC-0002 A2 (`0023-runtime-no-temporary`), `PUBLIC` has no `TEMPORARY` either, and every `migrate` revokes a direct `TEMPORARY` grant from the backup role.
+- It has `CONNECT` on the database, `USAGE` on `public` and `pgboss`, and `SELECT` on every table and sequence. Default privileges give it `SELECT` on every table and sequence the owner creates later. From FEAT-0002 A2 (`0022-candidate-binding`) it also has `USAGE` on the owner-only `tenant_binding` schema and `SELECT` on its table, which `pg_dump` must lock. The runtime role has no access there.
+- It has no `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `TEMPORARY` or sequence `USAGE`. It cannot change data or policies. From FEAT-0002 A2 (`0023-runtime-no-temporary`), `PUBLIC` has no `TEMPORARY` either, and every `migrate` revokes a direct `TEMPORARY` grant from the backup role.
 - Its sessions start read-only (`default_transaction_read_only = on`), so it cannot write even where every role can by default, such as large objects. `pg_dump` and the row counts only read.
 - No other role bypasses row-level security. The owner and runtime roles are unchanged.
 
@@ -172,9 +172,9 @@ Notes:
 scripts/backup/backup.sh --on-demand
 ```
 
-It uses the same encryption, names, modes, log and retention as the nightly run, and logs `mode=on-demand`. The EPIC-0002 deploy steps that need this backup first are in [deploy.md](deploy.md).
+It uses the same encryption, names, modes, log and retention as the nightly run, and logs `mode=on-demand`. The FEAT-0002 deploy steps that need this backup first are in [deploy.md](deploy.md).
 
-After the EPIC-0002 A2 deploy, stored files live in `job-assistant_candidate-data`, and the run archives that volume too (`eve-candidates-<UTC>.tar.age`; see [deploy.md](deploy.md), "Backups after A2"). If the nightly run is busy, the command exits 3. Wait and run it again.
+After the FEAT-0002 A2 deploy, stored files live in `job-assistant_candidate-data`, and the run archives that volume too (`eve-candidates-<UTC>.tar.age`; see [deploy.md](deploy.md), "Backups after A2"). If the nightly run is busy, the command exits 3. Wait and run it again.
 
 Exit codes: `0` ok, `1` a step failed, `2` configuration refused, `3` another run holds the lock.
 
@@ -223,7 +223,7 @@ The log holds only times, the run mode, step names, durations, encrypted byte si
 `scripts/backup/restore.sh` decrypts a set with your identity file and restores it:
 
 1. It runs `pg_restore --no-owner --no-acl --exit-on-error` into the postgres of a target compose project.
-2. It unpacks the documents and résumés archives, and the candidates archive when the set has one (after the EPIC-0002 A2 deploy), into target volumes or into empty host folders.
+2. It unpacks the documents and résumés archives, and the candidates archive when the set has one (after the FEAT-0002 A2 deploy), into target volumes or into empty host folders.
 3. It checks the result:
    - the table count, the total rows and the per-table count digest match the set's `status=ok` line in `backup.log`. Both sides count logged tables only, so the empty restored `tenant_binding.candidate_binding` is not compared;
    - the document and résumé file counts match that line, and so does the candidates file count (`candidates_files`) for a set with a candidates archive;
@@ -233,7 +233,7 @@ The target database must exist and contain no tables. Target volumes and folders
 
 By default, `restore.sh` refuses the live project (`eve`, `job-assistant`) and the live volumes (`job-assistant_*`, `eve_*`) before it contacts Docker. Restoring over live data is covered only in the disaster runbook below.
 
-`--no-owner --no-acl` means the restored objects belong to `--target-db-user`. The drill uses the drill database's own superuser, so nothing needs to exist first. For the real disaster restore, restore as the bootstrap superuser (`POSTGRES_USER`), then run `provision-roles` and `migrate`: `provision-roles` hands every restored object in `public`, `pgboss` and, from EPIC-0002 A2, `tenant_binding` to `DB_OWNER_ROLE` (tables, partitioned tables and their partitions, sequences, views, types such as `pgboss.job_state`, routines, and the `pgboss` and `tenant_binding` schemas), and `migrate` re-applies the runtime and backup roles' grants (see the runbook). Both are safe to run again.
+`--no-owner --no-acl` means the restored objects belong to `--target-db-user`. The drill uses the drill database's own superuser, so nothing needs to exist first. For the real disaster restore, restore as the bootstrap superuser (`POSTGRES_USER`), then run `provision-roles` and `migrate`: `provision-roles` hands every restored object in `public`, `pgboss` and, from FEAT-0002 A2, `tenant_binding` to `DB_OWNER_ROLE` (tables, partitioned tables and their partitions, sequences, views, types such as `pgboss.job_state`, routines, and the `pgboss` and `tenant_binding` schemas), and `migrate` re-applies the runtime and backup roles' grants (see the runbook). Both are safe to run again.
 
 Why not restore as `DB_OWNER_ROLE`: the dump keeps `FORCE ROW LEVEL SECURITY` and the policies, so once they are restored the owner sees no Candidate rows, and the count and file-reference checks would run on nothing. The count check runs with `row_security=off`, so a target user bound by the policies fails with `reason=rls-hides-rows` instead of passing on missing rows.
 

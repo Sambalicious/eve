@@ -121,6 +121,8 @@ test.describe("Lead line in every links state (AC-9)", () => {
     await resetPhase3()
     const help = await openHiring(page)
     await expect(help.line("hiring")).toBeVisible()
+    // The empty state is on the Hiring posts tab (EPIC-0015).
+    await help.hiring().showTab(COPY.hiringPostsTitle)
     await expect(page.getByText(P3.postsEmptyHiring, { exact: true })).toBeVisible()
   })
 
@@ -244,6 +246,8 @@ test.describe("Go to links (AC-11)", () => {
       await expect(help.heading(P3.feedsTitle)).toBeFocused()
       const url = new URL(page.url())
       expect(`${url.pathname}${url.search}`).toBe(`/find-jobs?family=${family}`)
+      // The select lives on the Search tab; the value it kept is what proves ?family= survived the jump.
+      await help.hiring().showTab(COPY.searchTab)
       await expect(help.hiring().familySelect()).toHaveValue("senior_frontend")
       await expect(help.hiring().familySelect().locator("option:checked")).toHaveText("Frontend")
     })
@@ -263,14 +267,17 @@ test.describe("Go to links (AC-11)", () => {
 })
 
 test.describe("Find jobs keeps the Hiring lead line and (i) in one place (AC-12 after EPIC-0011 R5)", () => {
-  test("HH9-18 (HVH:119) /find-jobs shows the Hiring lead line once and one (i), with the Search links and Posts from your field sections beside it; the legacy /stack-posts lands there", async ({ page }) => {
+  test("HH9-18 (HVH:119) /find-jobs shows the Hiring lead line once and one (i) above the tabs, with the Search links and Posts from your field sections a tab away; the legacy /stack-posts lands on the Posts tab", async ({ page }) => {
     const help = await signedIn(page)
     await page.goto("/stack-posts")
     await expect(page).toHaveURL(/\/find-jobs/)
-    await expect(page.getByRole("region", { name: COPY.stackLinksTitle, exact: true })).toBeVisible()
+    // EPIC-0015: the old link's hash selects Posts from your field.
+    await expect(help.hiring().tab(COPY.stackSectionTitle)).toHaveAttribute("aria-selected", "true")
     await expect(page.getByRole("region", { name: COPY.stackSectionTitle, exact: true })).toBeVisible()
     await expect(page.getByText(EH.hiringLine, { exact: true })).toHaveCount(1)
     await expect(help.trigger("hiring")).toHaveCount(1)
+    await help.hiring().showTab(COPY.searchTab)
+    await expect(page.getByRole("region", { name: COPY.stackLinksTitle, exact: true })).toBeVisible()
   })
 
   test("HH9-19 (HVH:126) leaving Find jobs with the popover open closes it and the line is gone on the next page", async ({ page }) => {

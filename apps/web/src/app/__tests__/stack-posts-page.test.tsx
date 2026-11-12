@@ -6,7 +6,7 @@ import { ALERT_FEEDS_PATH, JOB_CRITERIA_PATH, STACK_POSTS_PATH } from "@eve/cont
 import { routeSkeleton } from "@/components/page-skeletons"
 import { apiErrorResponse, expiredSession, noSession, server, storedFeed, storedPost, verifiedOn20Oct } from "@/shared/testing"
 import { renderApp } from "./test-app"
-import { loadedFeeds, loadedPosts, openStackPosts, region } from "./stack-posts-helpers"
+import { loadedFeeds, loadedPosts, openStackPosts, region, showTab } from "./stack-posts-helpers"
 
 const decoded = (href: string, name: string) => new URL(href).searchParams.get(name)
 const rawParam = (href: string, name: string) =>
@@ -51,15 +51,18 @@ describe("Stack posts page frame (stack-posts-page.feature)", () => {
   })
 
   it("@ac-1.1 shows Search links, Posts from your field and Set up alerts (with Alert feeds) in order, even on a new installation; title is Find jobs · Eve", async () => {
-    openStackPosts()
+    const { user } = openStackPosts()
+    const tabs = within(await screen.findByRole("tablist", { name: "Find jobs" })).getAllByRole("tab")
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Search", "Hiring posts", "Posts from your field", "Set up alerts"])
+    const headings = () => screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent ?? "")
+    // Each tab holds its own sections, in the design note's order.
+    await user.click(screen.getByRole("tab", { name: "Search" }))
+    expect(headings()).toEqual(expect.arrayContaining(["Hiring search links", "Check this job", "Search links"]))
+    await user.click(screen.getByRole("tab", { name: "Posts from your field" }))
+    expect(await screen.findByRole("heading", { level: 2, name: "Posts from your field" })).toBeVisible()
+    await user.click(screen.getByRole("tab", { name: "Set up alerts" }))
     await loadedFeeds()
-    const titles = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent ?? "")
-    expect(titles.filter((t) => ["Search links", "Posts from your field", "Set up alerts", "Alert feeds"].includes(t))).toEqual([
-      "Search links",
-      "Posts from your field",
-      "Set up alerts",
-      "Alert feeds",
-    ])
+    expect(headings().filter((t) => ["Set up alerts", "Alert feeds"].includes(t))).toEqual(["Set up alerts", "Alert feeds"])
     expect(document.title).toBe("Find jobs · Eve")
   })
 
@@ -292,6 +295,8 @@ describe("Search links (search-links.feature)", () => {
     expect(within(await loadedFeeds()).getByRole("listitem", { name: /^React posts/ })).toBeVisible()
     expect(await region("Posts")).toBeVisible()
 
+    // Back to the Search tab for its empty-state link.
+    await showTab("Search links")
     await user.click(within(links).getByRole("link", { name: "Add job criteria" }))
     expect(currentPath()).toBe("/settings#job-criteria")
   })
@@ -361,10 +366,13 @@ describe("External links and names (stack-posts-page.feature @ac-1.3 @ac-1.4)", 
     })
     const [row] = await groupRows()
     await user.click(within(row).getByRole("button", { name: /Google Alerts queries/ }))
-    await loadedPosts()
-    const external = screen.getAllByRole("link").filter((a) => /linkedin\.com|google\.com/.test(a.getAttribute("href") ?? ""))
-    expect(external).toHaveLength(5)
-    for (const link of external) {
+    const external = (links: HTMLElement[]) => links.filter((a) => /linkedin\.com|google\.com/.test(a.getAttribute("href") ?? ""))
+    // The Search tab's links, then Posts from your field's post title: five in all, as before the tabs.
+    const searchLinks = external(within(await region("Search links")).getAllByRole("link"))
+    const posts = await loadedPosts()
+    const externalLinks = [...searchLinks, ...external(within(posts).getAllByRole("link"))]
+    expect(externalLinks).toHaveLength(5)
+    for (const link of externalLinks) {
       expect(link).toHaveAttribute("target", "_blank")
       expect(link).toHaveAttribute("rel", "noopener noreferrer")
       expect(link).toHaveAccessibleName(/\(opens in a new tab\)$/)
@@ -378,13 +386,20 @@ describe("External links and names (stack-posts-page.feature @ac-1.3 @ac-1.4)", 
     })
     const [row] = await groupRows()
     await user.click(within(row).getByRole("button", { name: /Google Alerts queries/ }))
-    const feeds = await loadedFeeds()
-    await loadedPosts()
-    const main = screen.getByRole("main")
-    for (const control of [...within(main).getAllByRole("link"), ...within(main).getAllByRole("button"), ...within(main).getAllByRole("textbox")]) {
-      expect(control).toHaveAccessibleName()
+    const named = () => {
+      const main = screen.getByRole("main")
+      for (const control of [...within(main).queryAllByRole("link"), ...within(main).queryAllByRole("button"), ...within(main).queryAllByRole("textbox")]) {
+        expect(control).toHaveAccessibleName()
+      }
     }
+    // Each tab's own controls carry a name.
+    await showTab("Search links")
+    named()
     expect(within(row).getByRole("button", { name: "Copy posts query for React, TypeScript" })).toBeVisible()
+    await loadedPosts()
+    named()
+    const feeds = await loadedFeeds()
+    named()
     expect(within(feeds).getByRole("button", { name: "Remove React posts, feed ending 6 5 4 3 2 1" })).toBeVisible()
   })
 
@@ -400,21 +415,34 @@ describe("External links and names (stack-posts-page.feature @ac-1.3 @ac-1.4)", 
     await groupRows()
     await loadedFeeds()
     await within(await region("Posts")).findByRole("link", { name: /Next/ })
-    within(await region("Search links")).getByRole("link", { name: "Change job criteria" }).focus()
-    const order: string[] = []
-    for (let i = 0; i < 90; i++) {
-      await user.tab()
-      const el = document.activeElement as HTMLElement
-      order.push(el.getAttribute("aria-label") ?? el.textContent ?? "")
+
+    /** Focus starts on the selected tab; Tab then enters that panel's first control, in reading order. */
+    const order = async (tab: "Search links" | "Posts" | "Alert feeds", stops: number) => {
+      await showTab(tab)
+      await user.click(screen.getByRole("tab", { name: tab === "Search links" ? "Search" : tab === "Posts" ? "Posts from your field" : "Set up alerts" }))
+      const names: string[] = []
+      for (let i = 0; i < stops; i++) {
+        await user.tab()
+        const el = document.activeElement as HTMLElement
+        names.push(el.getAttribute("aria-label") ?? el.textContent ?? "")
+      }
+      return names
     }
-    const at = (pattern: RegExp) => order.findIndex((name) => pattern.test(name))
-    expect(at(/^LinkedIn posts for/)).toBeLessThan(at(/^Google Alerts queries for/))
-    // R5: the posts come before Set up alerts, so the feeds' controls follow the posts' paging.
-    expect(at(/^Google Alerts queries for/)).toBeLessThan(at(/^Post 50/))
-    expect(at(/^Post 50/)).toBeLessThan(at(/^Update your confirmation for Alert feeds/))
-    expect(at(/^Update your confirmation for Alert feeds/)).toBeLessThan(at(/^Remove React posts/))
-    expect(at(/^Remove React posts/)).toBeLessThan(at(/^Add feed/))
-    expect(at(/Next/)).toBeGreaterThan(at(/^Post 1\b/))
-    // F-QA-E5-06: 90 tab presses over a full page and the hiring sections before it.
+    const pos = (names: string[], pattern: RegExp) => names.findIndex((name) => pattern.test(name))
+
+    // Search: the section's own links, then its Google Alerts disclosure.
+    const search = await order("Search links", 20)
+    expect(pos(search, /^LinkedIn posts for/)).toBeLessThan(pos(search, /^Google Alerts queries for/))
+
+    // Posts from your field: every row, then the paging.
+    const posts = await order("Posts", 80)
+    expect(pos(posts, /^Post 50/)).toBe(0)
+    expect(pos(posts, /^Post 1\b/)).toBeGreaterThan(pos(posts, /^Post 50/))
+    expect(pos(posts, /Next/)).toBeGreaterThan(pos(posts, /^Post 1\b/))
+
+    // Set up alerts: its one confirm step, then the feeds' rows and form.
+    const alerts = await order("Alert feeds", 20)
+    expect(pos(alerts, /^Update your confirmation for Alert feeds/)).toBeLessThan(pos(alerts, /^Remove React posts/))
+    expect(pos(alerts, /^Remove React posts/)).toBeLessThan(pos(alerts, /^Add feed/))
   }, 30000)
 })

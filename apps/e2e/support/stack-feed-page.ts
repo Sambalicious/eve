@@ -14,13 +14,15 @@ export class StackFeedPage {
     this.page = page
   }
 
-  /** Opens Find jobs, opens Set up alerts, and waits for the Alert feeds section to leave its loading state. */
+  /** Opens Find jobs, selects the Set up alerts tab, and waits for the Alert feeds section to leave its loading state. */
   async openAndWait(): Promise<void> {
     const loaded = this.page.waitForResponse((r) => new URL(r.url()).pathname === ALERT_FEEDS_PATH && r.request().method() === "GET")
     await this.page.goto("/find-jobs")
     await loaded
-    const toggle = this.page.getByRole("button", { name: /^Set up alerts/ })
-    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click()
+    // Set up alerts is the fourth tab; the tab is the only disclosure (EPIC-0015 design note section 2).
+    const tab = this.page.getByRole("tab", { name: "Set up alerts", exact: true })
+    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click()
+    await expect(tab).toHaveAttribute("aria-selected", "true")
     await expect(this.confirmButton().or(this.updateButton()).first()).toBeVisible()
   }
 

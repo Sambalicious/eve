@@ -2,13 +2,15 @@
 export const findJobsCopy = {
   title: "Find jobs",
   description: "Search for jobs and read hiring posts. Set up alerts if you want new ones delivered.",
+  /** find.tabs.search (PROPOSAL): the first tab's label; the other three reuse their section headings. */
+  searchTab: "Search",
   stack: {
     heading: "Posts from your field",
     helper: "Posts by people who work with the tools you use. They are not job listings.",
   },
   hiring: {
     /** find.hiring.empty (PROPOSAL). */
-    empty: "Hiring posts appear here once you set up job alerts. You can also use the search links above.",
+    empty: "Hiring posts appear here once you set up job alerts. You can also use the Search tab.",
   },
   stackEmpty: "Posts from your field appear here once you set up job alerts.",
   alerts: {

@@ -66,7 +66,8 @@ export class HelpPage {
 
   /**
    * EPIC-0011 R5: Job Sources is "Job boards" inside Find jobs > Set up alerts, for the Operator only. The
-   * `#job-sources` hash opens the collapsed Set up alerts; `/sources` still redirects there (find-upgrade spec).
+   * `#job-sources` hash selects the Set up alerts tab (EPIC-0015); `/sources` still redirects there
+   * (find-upgrade spec).
    */
   async openSources(): Promise<void> {
     await this.page.goto("/find-jobs#job-sources")

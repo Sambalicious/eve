@@ -17,11 +17,16 @@ test.describe("Hiring view frame (Phase 2), now Find jobs (EPIC-0011 R5)", () =>
     await signIn(context, ADA.email)
   })
 
-  test("HV-01 the two views are gone: Find jobs is one page with no tablist, holding the Hiring and Stack sections", async ({ page }) => {
+  test("HV-01 the two views are gone: Find jobs is one page with one tablist, its own four tabs, holding the Hiring and Stack sections", async ({ page }) => {
     const hiring = new HiringPage(page)
     await hiring.open(null)
-    await expect(page.getByRole("tablist")).toHaveCount(0)
+    // EPIC-0015: the only tablist is Find jobs' own; there is no Hiring/Stack view switch.
+    await expect(page.getByRole("tablist")).toHaveCount(1)
+    await expect(page.getByRole("tablist", { name: COPY.findTitle })).toBeVisible()
+    await expect(page.getByRole("tab")).toHaveCount(4)
+    await hiring.showTab(COPY.hiringPostsTitle)
     await expect(hiring.heading(COPY.hiringPostsTitle)).toBeVisible()
+    await hiring.showTab(COPY.stackSectionTitle)
     await expect(hiring.heading(COPY.stackSectionTitle)).toBeVisible()
   })
 
@@ -66,17 +71,23 @@ test.describe("Hiring view frame (Phase 2), now Find jobs (EPIC-0011 R5)", () =>
     await expect(nav.getByRole("link", { name: "Hiring", exact: true })).toHaveCount(0)
   })
 
-  test("HV-07 Find jobs order: Hiring search links, Search links, Check this job, Hiring posts, Posts from your field, Set up alerts", async ({ page }) => {
+  test("HV-07 Find jobs order: the tabs in order, with Hiring search links, Check this job and Search links on Search, Hiring posts, Posts from your field, then Set up alerts' feeds", async ({ page }) => {
     await setJobCriteriaTerms(ADA.email, ["React"], ["TypeScript"])
     const hiring = new HiringPage(page)
     await hiring.open(null)
-    const titles = [COPY.hiringLinksTitle, COPY.stackLinksTitle, COPY.checkTitle, COPY.hiringPostsTitle, COPY.stackSectionTitle, COPY.setUpAlerts]
+    await expect(page.getByRole("tablist", { name: COPY.findTitle }).getByRole("tab")).toHaveText([
+      COPY.searchTab,
+      COPY.hiringPostsTitle,
+      COPY.stackSectionTitle,
+      COPY.setUpAlerts,
+    ])
+    // Search, the start, holds the page's three sections in reading order.
     const headings = await page.getByRole("heading", { level: 2 }).allInnerTexts()
-    const at = titles.map((t) => headings.findIndex((h) => h.trim() === t))
+    const at = [COPY.hiringLinksTitle, COPY.checkTitle, COPY.stackLinksTitle].map((t) => headings.findIndex((h) => h.trim() === t))
     expect(at.every((i) => i >= 0), `headings: ${headings.join(" | ")}`).toBe(true)
     expect([...at].sort((a, b) => a - b)).toEqual(at)
     await expect(page.getByRole("link", { name: /LinkedIn posts/ }).first()).toBeVisible()
-    // The two Alert feeds lists live inside the collapsed Set up alerts.
+    // The two Alert feeds lists live on the Set up alerts tab, out of reach until it is selected.
     await expect(hiring.heading(COPY.stackFeedsTitle)).toHaveCount(0)
     await hiring.openAlerts()
     await expect(hiring.heading(COPY.stackFeedsTitle)).toBeVisible()
@@ -88,6 +99,9 @@ test.describe("Hiring view frame (Phase 2), now Find jobs (EPIC-0011 R5)", () =>
       const hiring = new HiringPage(page)
       await page.goto(`/stack-posts?view=${encodeURIComponent(value)}`)
       await expect(page).toHaveURL(/\/find-jobs/)
+      // The legacy link lands on Posts from your field (EPIC-0015); the view value is ignored, with no error.
+      await expect(hiring.heading(COPY.stackSectionTitle)).toBeVisible()
+      await hiring.showTab(COPY.searchTab)
       await expect(hiring.heading(COPY.stackLinksTitle)).toBeVisible()
       await expect(page.getByRole("alert")).toHaveCount(0)
     })

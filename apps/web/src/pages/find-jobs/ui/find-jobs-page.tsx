@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ChevronDown, Clock, Rss, ShieldQuestionMark } from "lucide-react"
+import { Clock, Rss, ShieldQuestionMark } from "lucide-react"
 import { useLocation, useSearchParams } from "react-router-dom"
 import { buildStackSearchGroups, type RoleFamilyValue } from "@eve/contracts"
 
@@ -27,7 +27,6 @@ import { useViewer } from "@/entities/viewer"
 import { EmployerListCard } from "@/features/approve-employer-list"
 import { RemoteBoardsTable } from "@/features/manage-job-source"
 import { findJobsCopy } from "@/entities/stack-post"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/collapsible"
 import {
   alertFeedsQueryOptions,
   hiringAlertFeedsQueryOptions,
@@ -58,10 +57,10 @@ import {
   ROLE_FAMILY_HIRING_PHRASES,
 } from "@/shared/lib/hiring-contracts"
 import { useDocumentTitle } from "@/shared/lib/use-document-title"
-import { useScrollToHash } from "@/shared/lib/use-scroll-to-hash"
 import { HelpPopover, HelpPopoverLead } from "@/shared/ui/help-popover"
 import { LoadErrorAlert } from "@/shared/ui/load-error-alert"
 import { QuietEmpty, Section, SectionNote, SectionStack } from "@/shared/ui/section"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 
 /** Section ids. The old ids keep resolving: `#posts` is mapped to `#practitioner-posts` by the `/stack-posts` redirect. */
 const FIND_JOBS_IDS = {
@@ -72,14 +71,46 @@ const FIND_JOBS_IDS = {
   jobSources: "job-sources",
 } as const
 
-/** The hash targets that live inside the collapsed Set up alerts: opening one of them opens the section. */
-const ALERT_HASHES: readonly string[] = [FIND_JOBS_IDS.setUpAlerts, FIND_JOBS_IDS.jobSources, ALERT_FEEDS_SECTION_ID, HIRING_ALERT_FEEDS_SECTION_ID, "employer-list"]
+/** The four tabs, grouped by what the Candidate is doing (EPIC-0015 design note section 1); Search is the start. */
+const FIND_JOBS_TABS = {
+  search: "search",
+  hiringPosts: "hiring-posts",
+  practitionerPosts: "practitioner-posts",
+  setUpAlerts: "set-up-alerts",
+} as const
+type FindJobsTab = (typeof FIND_JOBS_TABS)[keyof typeof FIND_JOBS_TABS]
+
+/** Tab labels: one new, three the section headings already in the deck (design note section 7). */
+const FIND_JOBS_TAB_LABELS: readonly { value: FindJobsTab; label: string }[] = [
+  { value: FIND_JOBS_TABS.search, label: findJobsCopy.searchTab },
+  { value: FIND_JOBS_TABS.hiringPosts, label: h.postsTitle },
+  { value: FIND_JOBS_TABS.practitionerPosts, label: findJobsCopy.stack.heading },
+  { value: FIND_JOBS_TABS.setUpAlerts, label: findJobsCopy.alerts.heading },
+]
+
+/** Posts from your field pages in `?spage`; Hiring posts use `?page` (design-spec F6 step 4). */
+const STACK_PAGE_PARAM = "spage"
+
+/** Every in-page target and the tab it lives in (design note section 3). */
+const TAB_FOR_TARGET: Readonly<Record<string, FindJobsTab | undefined>> = {
+  [HIRING_SEARCH_LINKS_SECTION_ID]: FIND_JOBS_TABS.search,
+  [CHECK_THIS_JOB_SECTION_ID]: FIND_JOBS_TABS.search,
+  [FIND_JOBS_IDS.searchLinks]: FIND_JOBS_TABS.search,
+  [FIND_JOBS_IDS.hiringPosts]: FIND_JOBS_TABS.hiringPosts,
+  [FIND_JOBS_IDS.practitionerPosts]: FIND_JOBS_TABS.practitionerPosts,
+  [FIND_JOBS_IDS.setUpAlerts]: FIND_JOBS_TABS.setUpAlerts,
+  "confirm-feeds": FIND_JOBS_TABS.setUpAlerts,
+  [ALERT_FEEDS_SECTION_ID]: FIND_JOBS_TABS.setUpAlerts,
+  [HIRING_ALERT_FEEDS_SECTION_ID]: FIND_JOBS_TABS.setUpAlerts,
+  [FIND_JOBS_IDS.jobSources]: FIND_JOBS_TABS.setUpAlerts,
+  "employer-list": FIND_JOBS_TABS.setUpAlerts,
+}
 
 /**
- * Find jobs (`/find-jobs`, R5): search links, Hiring posts, posts from your field, then Set up alerts,
- * collapsed. Every section has its own query, skeleton and load error, so one failing never hides the rest.
- * Hiring posts use `?page`; posts from your field use `?spage`. The Operator also sees the former
- * Job Sources content, last, as "Job boards" (AC-5.2a).
+ * Find jobs (`/find-jobs`, R5, EPIC-0015): four tabs. Search holds the Hiring search links, Check this job and
+ * the Search links; Hiring posts and Posts from your field hold one list each; Set up alerts holds the whole
+ * delivery set-up. Every section keeps its own query, skeleton and load error, and every panel stays mounted,
+ * so one failure never hides another and no typed draft is lost on a switch.
  */
 export function FindJobsPage() {
   useDocumentTitle(findJobsCopy.title)
@@ -101,59 +132,169 @@ function FindJobsSections() {
     () => criteria.data && buildStackSearchGroups(criteria.data.frameworks, criteria.data.technologies),
     [criteria.data]
   )
-  const { hash } = useLocation()
-  const opensAlerts = ALERT_HASHES.includes(decodeURIComponent(hash.slice(1)))
-  // A link to something inside Set up alerts opens it. After that the user's own toggle rules, and a later
-  // navigation without that hash (paging a list, say) leaves it as it is.
-  const [alertsOpen, setAlertsOpen] = useState(opensAlerts)
-  const [seenHash, setSeenHash] = useState(opensAlerts ? hash : null)
-  if (opensAlerts && seenHash !== hash) {
-    setSeenHash(hash)
-    setAlertsOpen(true)
-  }
-  useScrollToHash(hiringFeeds.data !== undefined && stackFeeds.data !== undefined && (!opensAlerts || alertsOpen))
+  const tabs = useFindJobsTabs({
+    searchSettled: links.state.kind !== "loading",
+    alertsSettled:
+      (stackFeeds.data !== undefined || stackFeeds.isError) && (hiringFeeds.data !== undefined || hiringFeeds.isError),
+  })
   return (
-    <OpenAlertsContext value={() => setAlertsOpen(true)}>
-    <SectionStack>
-      <HiringHelp />
-      <HiringSearchLinksSection
-        state={links.state}
-        onFamilyChange={links.changeFamily}
-        onHintLink={() => focusSection(CHECK_THIS_JOB_SECTION_ID)}
-        onFeedsLink={() => {
-          setAlertsOpen(true)
-          requestAnimationFrame(() => focusSection(HIRING_ALERT_FEEDS_SECTION_ID))
-        }}
-        loadingBody={<SearchLinksBodySkeleton />}
-        errorBody={<LoadErrorAlert onRetry={links.retry} />}
-      />
-      <SearchLinksSection
-        groups={groups}
-        content={
-          criteria.isError ? <LoadErrorAlert onRetry={() => void criteria.refetch()} /> : <SearchLinksBodySkeleton />
-        }
-      />
-      <CheckThisJobSection hintShown={links.state.kind === "ready"} />
-      <HiringPostsSection feeds={hiringFeeds.data} />
-      <StackPostsSection feeds={stackFeeds.data} />
-      <SetUpAlerts open={alertsOpen} onOpenChange={setAlertsOpen} hiringFeeds={hiringFeeds} stackFeeds={stackFeeds} />
-    </SectionStack>
-    </OpenAlertsContext>
+    <GoToSectionContext value={tabs.goTo}>
+      <SectionStack>
+        <HiringHelp />
+        <Tabs value={tabs.tab} onValueChange={(value) => tabs.select(value as FindJobsTab)}>
+          {/*
+            Four equal cells below 640px (a column cannot grow past its share, so no label is clipped and all
+            four stay on screen at 375px); from 640px each tab sizes to its label, on one line, left-aligned.
+          */}
+          <TabsList
+            variant="line"
+            aria-label={findJobsCopy.title}
+            activateOnFocus
+            className="grid w-full grid-cols-4 items-stretch gap-2 sm:flex sm:w-fit sm:items-center"
+          >
+            {FIND_JOBS_TAB_LABELS.map(({ value, label }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="flex min-w-0 flex-wrap items-center justify-center px-1 text-center whitespace-normal sm:justify-start"
+              >
+                <span className="min-w-0 text-balance">{label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value={FIND_JOBS_TABS.search} keepMounted tabIndex={-1} className="pt-4">
+            <SectionStack>
+              <HiringSearchLinksSection
+                state={links.state}
+                onFamilyChange={links.changeFamily}
+                onHintLink={() => tabs.goTo(CHECK_THIS_JOB_SECTION_ID)}
+                onFeedsLink={() => tabs.goTo(HIRING_ALERT_FEEDS_SECTION_ID)}
+                loadingBody={<SearchLinksBodySkeleton />}
+                errorBody={<LoadErrorAlert onRetry={links.retry} />}
+              />
+              <CheckThisJobSection hintShown={links.state.kind === "ready"} />
+              <SearchLinksSection
+                groups={groups}
+                content={
+                  criteria.isError ? <LoadErrorAlert onRetry={() => void criteria.refetch()} /> : <SearchLinksBodySkeleton />
+                }
+              />
+            </SectionStack>
+          </TabsContent>
+          <TabsContent value={FIND_JOBS_TABS.hiringPosts} keepMounted tabIndex={-1} className="pt-4">
+            <HiringPostsSection feeds={hiringFeeds.data} />
+          </TabsContent>
+          <TabsContent value={FIND_JOBS_TABS.practitionerPosts} keepMounted tabIndex={-1} className="pt-4">
+            <StackPostsSection feeds={stackFeeds.data} />
+          </TabsContent>
+          <TabsContent value={FIND_JOBS_TABS.setUpAlerts} keepMounted tabIndex={-1} className="pt-4">
+            <SetUpAlerts hiringFeeds={hiringFeeds} stackFeeds={stackFeeds} />
+          </TabsContent>
+        </Tabs>
+      </SectionStack>
+    </GoToSectionContext>
   )
 }
 
+interface HashTarget {
+  tab: FindJobsTab
+  target: string
+}
+
+/** The selected tab and the deep-link target still waiting for its panel (the hash it arrived with). */
+interface Navigation {
+  hash: string
+  tab: FindJobsTab
+  pending: HashTarget | null
+}
+
+/** The tab and scroll target a recognised hash names; null for no hash, an unknown target or one that decodes to nothing. */
+function tabForHash(hash: string): HashTarget | null {
+  const target = decodeTarget(hash)
+  const tab = TAB_FOR_TARGET[target]
+  return tab === undefined ? null : { tab, target }
+}
+
+/** `#a%20b` decoded; a malformed escape counts as no hash rather than throwing. */
+function decodeTarget(hash: string): string {
+  try {
+    return decodeURIComponent(hash.slice(1))
+  } catch {
+    return ""
+  }
+}
+
+/** The first render's tab: a recognised hash, else `?spage` then `?page` on first load only, else Search. */
+function firstTab(initial: HashTarget | null, search: string): FindJobsTab {
+  if (initial) return initial.tab
+  const params = new URLSearchParams(search)
+  if (params.get(STACK_PAGE_PARAM) !== null) return FIND_JOBS_TABS.practitionerPosts
+  if (params.get("page") !== null) return FIND_JOBS_TABS.hiringPosts
+  return FIND_JOBS_TABS.search
+}
+
 /**
- * Set up alerts (`#set-up-alerts`): collapsed by default. Inside: the Alert feeds and Hiring Alert
- * feeds with their permitted-use step, then, for the Operator only, "Job boards".
+ * The selected tab, seeded in the first render so a deep-linked panel is visible before any scroll. A later
+ * navigation with a recognised hash selects its tab; one without (paging, `family`, Back to page 1) leaves it
+ * alone. Neither a tab click nor an in-page link writes the URL, so neither adds a history entry.
+ */
+function useFindJobsTabs({ searchSettled, alertsSettled }: { searchSettled: boolean; alertsSettled: boolean }) {
+  const { hash, search } = useLocation()
+  const initial = tabForHash(hash)
+  const [nav, setNav] = useState<Navigation>(() => ({ hash, tab: firstTab(initial, search), pending: initial }))
+
+  // A recognised hash wins, on arrival and on every later navigation that carries one. Deriving it here,
+  // during the render of that navigation, keeps the target panel in the same paint. One without a recognised
+  // hash (paging, `family`, Back to page 1) leaves the tab alone.
+  if (nav.hash !== hash) {
+    const next = tabForHash(hash)
+    setNav({ hash, tab: next?.tab ?? nav.tab, pending: next })
+  }
+
+  const settled =
+    nav.tab === FIND_JOBS_TABS.search ? searchSettled : nav.tab === FIND_JOBS_TABS.setUpAlerts ? alertsSettled : true
+  const focused = useRef<HashTarget | null>(null)
+
+  // Scroll to the target and focus its heading once its tab is visible (it is, in this commit) and its queries
+  // have settled (data or error), so a deep link lands where it says and a failed panel still gets focus.
+  useEffect(() => {
+    const target = nav.pending
+    if (!target || target.tab !== nav.tab || !settled || focused.current === target) return
+    focused.current = target
+    focusSection(target.target)
+  }, [nav, settled])
+
+  const select = useCallback((value: FindJobsTab) => setNav((current) => ({ ...current, tab: value })), [])
+
+  // One helper for every in-page link: select the target's tab, then focus its heading. The URL is untouched.
+  // A target already on screen is focused now, as the in-page links always did; a target on another tab is
+  // focused once that panel is visible, in the next commit.
+  const goTo = useCallback(
+    (target: string) => {
+      const destination = TAB_FOR_TARGET[target]
+      if (destination === undefined || destination === nav.tab) {
+        focusSection(target)
+        return
+      }
+      setNav((current) => ({ ...current, tab: destination }))
+      // The panel is visible in the next commit; the frame after that, so a closing help popover that restores
+      // the page scroll first has finished (HH9-13).
+      requestAnimationFrame(() => requestAnimationFrame(() => focusSection(target)))
+    },
+    [nav.tab]
+  )
+
+  return { tab: nav.tab, select, goTo }
+}
+
+/**
+ * Set up alerts (`#set-up-alerts`): the tab's head, then the Alert feeds and Hiring Alert feeds with their
+ * permitted-use step, then, for the Operator only, "Job boards". The tab is the only disclosure.
  */
 function SetUpAlerts({
-  open,
-  onOpenChange,
   hiringFeeds,
   stackFeeds,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
   hiringFeeds: ReturnType<typeof useQuery<AlertFeeds>>
   stackFeeds: ReturnType<typeof useQuery<AlertFeeds>>
 }) {
@@ -162,43 +303,30 @@ function SetUpAlerts({
     ...(stackFeeds.data && stackFeeds.data.verification === null ? (["stack"] as const) : []),
     ...(hiringFeeds.data && hiringFeeds.data.verification === null ? (["hiring"] as const) : []),
   ]
-  const panelId = useId()
-  const headingId = useId()
   return (
-    <section id={FIND_JOBS_IDS.setUpAlerts} aria-labelledby={headingId} className="scroll-mt-20 border-t border-border pt-7">
-      <Collapsible open={open} onOpenChange={onOpenChange}>
-        <CollapsibleTrigger
-          aria-controls={panelId}
-          className="group flex w-full cursor-pointer items-start justify-between gap-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:min-h-11"
-        >
-          <span className="flex min-w-0 flex-col gap-1">
-            <h2 id={headingId} tabIndex={-1} className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] outline-none">
-              {findJobsCopy.alerts.heading}
-            </h2>
-            <span className="max-w-[60ch] text-[0.8125rem] leading-relaxed font-normal text-muted-foreground">{findJobsCopy.alerts.description}</span>
-          </span>
-          <ChevronDown aria-hidden="true" className="mt-1 size-4 shrink-0 transition-transform duration-200 group-data-[panel-open]:rotate-180 motion-reduce:transition-none" />
-        </CollapsibleTrigger>
-        <CollapsibleContent id={panelId} className="pt-5">
-          <SectionStack>
-            <ConfirmFeedsStep
-              id="confirm-feeds"
-              pending={pendingLists}
-              onConfirmed={() => focusWhenReady(() => document.getElementById(ALERT_FEEDS_SECTION_ID)?.querySelector<HTMLInputElement>('input[type="url"], input'))}
-            />
-            <AlertFeedsSection
-              data={stackFeeds.data}
-              content={stackFeeds.isError ? <LoadErrorAlert onRetry={() => void stackFeeds.refetch()} /> : <AlertFeedsBodySkeleton />}
-            />
-            <HiringAlertFeedsSection
-              data={hiringFeeds.data}
-              content={hiringFeeds.isError ? <LoadErrorAlert onRetry={() => void hiringFeeds.refetch()} /> : <AlertFeedsBodySkeleton />}
-            />
-            {isOperator && <JobBoards />}
-          </SectionStack>
-        </CollapsibleContent>
-      </Collapsible>
-    </section>
+    <Section
+      id={FIND_JOBS_IDS.setUpAlerts}
+      title={findJobsCopy.alerts.heading}
+      description={findJobsCopy.alerts.description}
+      headingProps={{ tabIndex: -1 }}
+    >
+      <SectionStack>
+        <ConfirmFeedsStep
+          id="confirm-feeds"
+          pending={pendingLists}
+          onConfirmed={() => focusWhenReady(() => document.getElementById(ALERT_FEEDS_SECTION_ID)?.querySelector<HTMLInputElement>('input[type="url"], input'))}
+        />
+        <AlertFeedsSection
+          data={stackFeeds.data}
+          content={stackFeeds.isError ? <LoadErrorAlert onRetry={() => void stackFeeds.refetch()} /> : <AlertFeedsBodySkeleton />}
+        />
+        <HiringAlertFeedsSection
+          data={hiringFeeds.data}
+          content={hiringFeeds.isError ? <LoadErrorAlert onRetry={() => void hiringFeeds.refetch()} /> : <AlertFeedsBodySkeleton />}
+        />
+        {isOperator && <JobBoards />}
+      </SectionStack>
+    </Section>
   )
 }
 
@@ -273,11 +401,7 @@ function HiringPostsEmptyState({ feeds }: { feeds: AlertFeeds }) {
         icon={<Rss />}
         titleAs="h3"
         title={findJobsCopy.hiring.empty}
-        action={
-          <SectionLink target={FIND_JOBS_IDS.setUpAlerts} inAlerts>
-            {findJobsCopy.alerts.action}
-          </SectionLink>
-        }
+        action={<SectionLink target={FIND_JOBS_IDS.setUpAlerts}>{findJobsCopy.alerts.action}</SectionLink>}
       />
     )
   }
@@ -291,22 +415,17 @@ function HiringPostsEmptyState({ feeds }: { feeds: AlertFeeds }) {
   )
 }
 
-/** An in-page link that scrolls to a section and focuses its heading, without touching the URL (`?view=hiring` stays). */
-/** Opens Set up alerts, for links whose target is inside it. */
-const OpenAlertsContext = createContext<() => void>(() => undefined)
+/** The in-page link helper: select the target's tab and focus its heading, without touching the URL. */
+const GoToSectionContext = createContext<(target: string) => void>(() => undefined)
 
-function SectionLink({ target, children, inAlerts = false }: { target: string; children: ReactNode; inAlerts?: boolean }) {
-  const openAlerts = useContext(OpenAlertsContext)
-  const before = inAlerts ? openAlerts : undefined
+function SectionLink({ target, children }: { target: string; children: ReactNode }) {
+  const goTo = useContext(GoToSectionContext)
   return (
     <a
       href={`#${target}`}
       onClick={(event) => {
         event.preventDefault()
-        before?.()
-        // A closed Set up alerts mounts its content on the next frame.
-        if (before) requestAnimationFrame(() => focusSection(target))
-        else focusSection(target)
+        goTo(target)
       }}
       className="text-sm font-medium underline underline-offset-4"
     >
@@ -318,14 +437,14 @@ function SectionLink({ target, children, inAlerts = false }: { target: string; c
 /**
  * The Hiring view lead (EPIC-0009 design-spec S3): C-EH-HIRING-LINE and one (i)
  * that explains why Eve can't read LinkedIn and the three ways in. Each "Go to"
- * link closes the popover without returning focus to the trigger, then moves
- * focus to the section heading. The URL is untouched, so `view` and `family`
- * stay. It reads no data and sends nothing.
+ * link closes the popover without returning focus to the trigger, then selects
+ * the section's tab and moves focus to its heading. The URL is untouched, so
+ * `view` and `family` stay. It reads no data and sends nothing.
  */
 function HiringHelp() {
   const [open, setOpen] = useState(false)
   const [returnFocus, setReturnFocus] = useState(true)
-  const openAlerts = useContext(OpenAlertsContext)
+  const goToSection = useContext(GoToSectionContext)
   const why = h.helpWhy
 
   const changeOpen = (next: boolean) => {
@@ -335,10 +454,7 @@ function HiringHelp() {
   const goTo = (sectionId: string) => {
     setReturnFocus(false)
     setOpen(false)
-    // The Hiring Alert feeds live in Set up alerts, closed until asked for; its content mounts on the next frame.
-    const inAlerts = sectionId === HIRING_ALERT_FEEDS_SECTION_ID
-    if (inAlerts) openAlerts()
-    requestAnimationFrame(() => (inAlerts ? requestAnimationFrame(() => focusSection(sectionId)) : focusSection(sectionId)))
+    goToSection(sectionId)
   }
   const ways = [
     { text: why.links, go: why.linksGo, target: HIRING_SEARCH_LINKS_SECTION_ID },
@@ -502,8 +618,6 @@ function useCorrectedPage(
   }, [page, rawPage, totalPages, setParams, key])
 }
 
-const STACK_PAGE_PARAM = "spage"
-
 function withPage(
   current: URLSearchParams,
   page: number | null,
@@ -601,7 +715,7 @@ function PostsUnverifiedNote() {
         <ShieldQuestionMark aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         {c.postsUnverifiedNote}
       </p>
-      <SectionLink target={FIND_JOBS_IDS.setUpAlerts} inAlerts>{findJobsCopy.alerts.action}</SectionLink>
+      <SectionLink target={FIND_JOBS_IDS.setUpAlerts}>{findJobsCopy.alerts.action}</SectionLink>
     </SectionNote>
   )
 }
@@ -615,11 +729,7 @@ function PostsEmptyState({ feeds }: { feeds: AlertFeeds }) {
         icon={<Rss />}
         titleAs="h3"
         title={findJobsCopy.stackEmpty}
-        action={
-          <SectionLink target={FIND_JOBS_IDS.setUpAlerts} inAlerts>
-            {findJobsCopy.alerts.action}
-          </SectionLink>
-        }
+        action={<SectionLink target={FIND_JOBS_IDS.setUpAlerts}>{findJobsCopy.alerts.action}</SectionLink>}
       />
     )
   }

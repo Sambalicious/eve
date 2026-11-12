@@ -40,7 +40,7 @@ scripts/ops/deploy.sh ubuntu@<instance-ip>
 ```
 
 It refuses a `.env` with placeholder or empty required values, rsyncs the checkout without `.git`
-or `epics/`, copies `.env` with mode 600, installs Docker and the firewall rules, starts the stack,
+or `features/`, copies `.env` with mode 600, installs Docker and the firewall rules, starts the stack,
 waits for `/v1/health`, and installs the backup and health timers. The manual steps below are the
 same work done by hand.
 

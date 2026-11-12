@@ -5,7 +5,7 @@ import { ALERT_FEED_VERIFICATION_PATH, ALERT_FEEDS_PATH, CSRF_HEADER, type ApiEr
 
 import { apiErrorResponse, FEED_A, FEED_B, server, storedFeed, storedPost, TEST_CSRF_TOKEN, verifiedOn20Oct } from "@/shared/testing"
 import { findToast } from "./career-setup-helpers"
-import { loadedFeeds, loadedPosts, openStackPosts } from "./stack-posts-helpers"
+import { loadedFeeds, loadedPosts, openStackPosts, showTab } from "./stack-posts-helpers"
 
 const FORMAT_ERR = "This isn't a Google Alerts feed URL. Those start with https://www.google.com/alerts/feeds/"
 const BASIS_CHARS = "The basis has hidden characters Eve can't save. Type it again or paste it as plain text."
@@ -764,6 +764,8 @@ describe("Alert feeds (alert-feeds.feature)", () => {
     const feeds = await loadedFeeds()
     const posts = await loadedPosts()
     expect(within(posts).getByText("from React posts")).toBeVisible()
+    // The feed row lives on the Set up alerts tab; the posts stay mounted while it is hidden.
+    await showTab("Alert feeds")
     await user.click(within(feeds).getByRole("button", { name: "Remove React posts, feed ending 6 5 4 3 2 1" }))
     const dialog = await screen.findByRole("alertdialog", { name: "Remove this Alert feed?" })
     expect(dialog).toHaveTextContent(
@@ -775,9 +777,11 @@ describe("Alert feeds (alert-feeds.feature)", () => {
     expect(await findToast("Alert feed removed.")).toBeInTheDocument()
     await waitFor(() => expect(within(feeds).queryByRole("listitem", { name: /^React posts/ })).not.toBeInTheDocument())
     await waitFor(() => expect(within(feeds).getByRole("button", { name: /^Remove TS posts/ })).toHaveFocus())
-    expect(await within(posts).findByText("Removed feed")).toBeVisible()
     expect(stack.requestsTo("DELETE", ALERT_FEEDS_PATH)).toEqual([{ method: "DELETE", path: `${ALERT_FEEDS_PATH}/${a.id}`, body: null }])
     expect(within(feeds).getByText("1 of 10")).toBeVisible()
+    // Its posts stay, on the Posts from your field tab, marked with the removed feed.
+    await showTab("Posts")
+    expect(await within(posts).findByText("Removed feed")).toBeVisible()
   })
 
   it("@ac-1.3 N-1 a newly registered row fades in over 150ms; rows present at load do not animate", async () => {

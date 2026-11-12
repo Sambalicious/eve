@@ -4,7 +4,7 @@ import type { RoleFamilyValue } from "@eve/contracts"
 
 import { ownRecord21Oct, rankedPosting, storedPost } from "@/shared/testing"
 import { openDocuments } from "./documents-helpers"
-import { checkRegion, openHiringFeeds as openHiring } from "./hiring-view-helpers"
+import { checkRegion, openHiringFeeds as openHiring, showTab } from "./hiring-view-helpers"
 
 /**
  * EPIC-0007 Phase 3 QA gate: component tests for @phase3 scenarios in Gherkin r6 that
@@ -20,6 +20,7 @@ const HELP_SOLO =
 const LINK_ACCEPTED_START = /^Checking the link\./
 
 async function postsRegion() {
+  await showTab("Hiring posts")
   const region = await screen.findByRole("region", { name: "Hiring posts" })
   await waitFor(() =>
     expect(region.querySelector("ol:not([aria-hidden]), h3")).not.toBeNull()
@@ -112,10 +113,12 @@ describe("HV:291 (r5) Check this job shows C-HP-CHECK-HELP-SOLO exactly when the
         criteria: { targetRoleFamilies, frameworks: ["React"] },
         stack: { hiringVerification: ownRecord21Oct },
       })
-      // Phase 3 is shipped in this build: its two sections are present.
+      // Phase 3 is shipped in this build: its section is present on its own tab.
+      await showTab("Set up alerts")
       expect(
         await screen.findByRole("region", { name: "Hiring alert feeds" })
       ).toBeInTheDocument()
+      await showTab("Search")
       const links = await screen.findByRole("region", {
         name: "Hiring search links",
       })

@@ -19,7 +19,7 @@ import {
 } from "@/shared/testing"
 import { findToast } from "./career-setup-helpers"
 import { openHiringFeeds as openHiring } from "./hiring-view-helpers"
-import { loadedFeeds, loadedPosts, openStackPosts, region, toggleHeaderPause } from "./stack-posts-helpers"
+import { loadedFeeds, loadedPosts, openStackPosts, region, showTab, toggleHeaderPause } from "./stack-posts-helpers"
 
 /**
  * EPIC-0008 web: Stack posts Alert feeds per Candidate (design-spec S1 to S3,
@@ -535,7 +535,8 @@ describe("Registration gate on the page (SFRG:27, SFRG:76)", () => {
     const url = within(feeds).getByRole("textbox", { name: "Feed URL" }) as HTMLInputElement
     await user.type(url, FEED_A)
     await user.click(within(feeds).getByRole("button", { name: "Add feed" }))
-    expect(await within(feeds).findByText(NOT_VERIFIED_MSG)).toBeVisible()
+    // Re-query on each try: the section swaps to its unconfirmed panel once the 409's refetch lands.
+    await waitFor(() => expect(within(feeds).getByText(NOT_VERIFIED_MSG)).toBeVisible())
     expect(url).toHaveValue(FEED_A)
     expect(await screen.findByRole("heading", { name: MISSING_TITLE })).toBeVisible()
     expect(within(feeds).queryByRole("textbox", { name: "Feed URL" })).not.toBeInTheDocument()
@@ -547,11 +548,12 @@ describe("Wording and empty states (SFCU)", () => {
   it("SFCU:91 Posts empty before her own record: title, body without 'then add a feed', link to Set up alerts, one confirm control", async () => {
     const { user } = openStackPosts()
     await loadedFeeds()
+    // One confirm control for the whole tab, not one per list.
+    expect(screen.getAllByRole("button", { name: SAVE })).toHaveLength(1)
     const posts = await loadedPosts()
     expect(within(posts).getByRole("heading", { level: 3, name: POSTS_EMPTY_TITLE })).toBeVisible()
     expect(posts).not.toHaveTextContent("then add a feed")
     expect(within(posts).queryByText(POSTS_NOTE)).not.toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: SAVE })).toHaveLength(1)
     await user.click(within(posts).getByRole("link", { name: POSTS_EMPTY_BODY }))
     await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "Set up alerts" })).toHaveFocus())
   })
@@ -711,6 +713,7 @@ describe("OWN-1: the pause notes read globalPaused from the feeds responses", ()
       return HttpResponse.json(body, { status: 409 })
     })
   const hiringRegion = async () => {
+    await showTab("Alert feeds")
     const region = await screen.findByRole("region", { name: "Hiring alert feeds" })
     await waitFor(() => expect(within(region).queryByText(/^Confirmed on/) ?? within(region).queryByText(/Confirm above to add feeds\./)).not.toBeNull())
     return region
@@ -777,6 +780,7 @@ describe("SFCU:110 r2 the pause notes follow the header pause control without a 
   const HIRING_PAUSED =
     "Scheduled reads are paused. You can still add feeds. Reads restart at the next scheduled time after automation resumes."
   const hiringRegion = async () => {
+    await showTab("Alert feeds")
     const region = await screen.findByRole("region", { name: "Hiring alert feeds" })
     await waitFor(() => expect(within(region).queryByText(/^Confirmed on/)).not.toBeNull())
     return region

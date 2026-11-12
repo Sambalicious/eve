@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { expect } from "vitest"
 import type { JobCriteriaResponse } from "@eve/contracts"
@@ -45,8 +45,24 @@ export function openStackPosts(
 }
 
 /** "Posts" is the Stack posts section, titled "Posts from your field" on Find jobs. */
-export const region = (name: "Search links" | "Alert feeds" | "Posts") =>
-  screen.findByRole("region", { name: name === "Posts" ? "Posts from your field" : name })
+const TAB_FOR_REGION = {
+  "Search links": "Search",
+  Posts: "Posts from your field",
+  "Alert feeds": "Set up alerts",
+} as const
+
+/** Selects the Find jobs tab that holds a region, so a test can read a panel other than the one it opened on. */
+export async function showTab(name: "Search links" | "Alert feeds" | "Posts") {
+  const tab =
+    screen.queryByRole("tab", { name: TAB_FOR_REGION[name] }) ??
+    (await screen.findByRole("tab", { name: TAB_FOR_REGION[name] }))
+  if (tab.getAttribute("aria-selected") !== "true") fireEvent.click(tab)
+}
+
+export const region = async (name: "Search links" | "Alert feeds" | "Posts") => {
+  await showTab(name)
+  return screen.findByRole("region", { name: name === "Posts" ? "Posts from your field" : name })
+}
 
 export async function feedsRegion() {
   return region("Alert feeds")

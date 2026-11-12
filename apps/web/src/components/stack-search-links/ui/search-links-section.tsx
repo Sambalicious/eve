@@ -28,6 +28,7 @@ export function SearchLinksSection({ groups, content }: { groups: readonly Stack
       id="search-links"
       title={c.linksTitle}
       description={hasGroups ? c.linksDesc : undefined}
+      headingProps={{ tabIndex: -1 }}
       actions={
         hasGroups && (
           <ButtonLink variant="ghost" size="sm" to={JOB_CRITERIA_LINK}>
@@ -74,7 +75,7 @@ function GroupRow({ group, position, onCopied }: { group: StackSearchGroup; posi
     <li className="flex flex-col gap-2 py-3">
       {position && <span className="text-[0.78125rem] font-medium text-muted-foreground uppercase">{position}</span>}
       <Collapsible open={open} onOpenChange={setOpen}>
-        <div className="flex flex-col gap-2 md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] md:gap-x-6">
+        <div className="flex flex-col gap-2 md:grid md:grid-cols-[minmax(0,20rem)_minmax(min-content,1fr)] md:gap-x-6">
           <span className="text-sm font-medium [overflow-wrap:anywhere]">{group.label}</span>
           <div className="flex flex-col items-start gap-2">
             <div className="flex flex-wrap gap-2">

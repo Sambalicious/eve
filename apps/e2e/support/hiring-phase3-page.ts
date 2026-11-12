@@ -16,7 +16,7 @@ export const ALERT_FEEDS_PATH = "/v1/stack-posts/alert-feeds"
  */
 export class HiringPhase3Page extends HiringPage {
   /**
-   * Opens Find jobs with Set up alerts open and waits for the Hiring Alert feeds section to leave its
+   * Opens Find jobs on the Set up alerts tab and waits for the Hiring Alert feeds section to leave its
    * loading state. `query` is a raw query string such as "&page=2" or "?page=2".
    */
   async openAndWait(query = ""): Promise<void> {

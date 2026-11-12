@@ -57,8 +57,8 @@ A first job, `what changed` (`scripts/ci/changes.mjs`), decides which other jobs
 
 | Change                                                                                                  | Runs                                                                                                                                         |
 | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Docs, epics or agent files only                                                                         | `agent rules`                                                                                                                                |
-| A package (`apps/*`, `packages/*`), or a file its code quotes such as an `epics/` copy deck or contract | typecheck, lint and tests for that package and its dependents, plus e2e; the api integration and image jobs only when `@eve/api` is affected |
+| Docs, features or agent files only                                                                         | `agent rules`                                                                                                                                |
+| A package (`apps/*`, `packages/*`), or a file its code quotes such as an `features/` copy deck or contract | typecheck, lint and tests for that package and its dependents, plus e2e; the api integration and image jobs only when `@eve/api` is affected |
 | Lockfile, root build config, `.github/` or `scripts/ci/`                                                | everything                                                                                                                                   |
 | Nightly                                                                                                 | everything, when `main` changed in the last day                                                                                              |
 

@@ -69,7 +69,7 @@ export const P3 = {
   sourceRemoved: "Removed feed", // C-SP-SOURCE-REMOVED
   source: (name: string) => `from ${name}`, // C-SP-SOURCE
   // EPIC-0011 repair wave 1 (find.hiring.empty): "not confirmed" and "no feeds" read the same, with one action that opens Set up alerts.
-  postsEmptyHiring: "Hiring posts appear here once you set up job alerts. You can also use the search links above.", // find.hiring.empty
+  postsEmptyHiring: "Hiring posts appear here once you set up job alerts. You can also use the Search tab.", // find.hiring.empty
   setUpAlertsAction: "Set up alerts", // find.alerts.action
   stackPostsEmpty: "Posts from your field appear here once you set up job alerts.", // find.stack.empty
   postsEmptyUnverifiedTitle: "Hiring posts start after you record permitted use", // C-HP-POSTS-EMPTY-UNVERIFIED-TITLE

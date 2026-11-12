@@ -1,12 +1,12 @@
-# Deploying EPIC-0002 slices A1 and A2
+# Deploying FEAT-0002 slices A1 and A2
 
 First install, no domain: [deploy-oracle-free.md](deploy-oracle-free.md). It covers the Oracle Always Free shape, the SSH tunnel, and the backup timer.
 
-This page lists the steps for the two EPIC-0002 deploys that move live data: A1 (the multi-candidate migration) and A2 (per-Candidate files). Run them in order. Run each deploy from the repository folder on the server, as the backup user. Backups: [backups.md](backups.md).
+This page lists the steps for the two FEAT-0002 deploys that move live data: A1 (the multi-candidate migration) and A2 (per-Candidate files). Run them in order. Run each deploy from the repository folder on the server, as the backup user. Backups: [backups.md](backups.md).
 
 There is no deploy script. Each step below is one command. Do not continue after a command fails.
 
-## Before any EPIC-0002 deploy
+## Before any FEAT-0002 deploy
 
 A1 cannot be undone without a restore. Before A1 deploys, you must have a verified Postgres backup and a file snapshot. The backup role must be set up first (see "Backup role and A2" below):
 
@@ -67,11 +67,11 @@ Order: backup, then `migrate`, then `storage-migrate`, then the api and worker.
 
    `migrate` must exit 0. It applies every pending migration in name order, all in one transaction (Kysely `migrateToLatest`, `apps/api/src/db/migrator.ts`), then installs the pg-boss schema and re-applies the runtime and backup roles' grants. The pending set depends on where the database is:
 
-   - Before A1 (at 0015): `0016-multi-candidate` through `0023-runtime-no-temporary`, including EPIC-0006's `0020-role-relevance` and EPIC-0007's `0021-hiring-posts`.
-   - A1 deployed, EPIC-0006 not (at 0019): `0020-role-relevance`, `0021-hiring-posts`, `0022-candidate-binding`, `0023-runtime-no-temporary`, in that order. Success prints `Applied migrations: 0020-role-relevance, 0021-hiring-posts, 0022-candidate-binding, 0023-runtime-no-temporary`.
-   - EPIC-0006 deployed, EPIC-0007 not (at 0020): `0021-hiring-posts`, `0022-candidate-binding`, `0023-runtime-no-temporary`. Success prints `Applied migrations: 0021-hiring-posts, 0022-candidate-binding, 0023-runtime-no-temporary`.
-   - EPIC-0007 already deployed (at 0021): `0022-candidate-binding`, `0023-runtime-no-temporary`. Success prints `Applied migrations: 0022-candidate-binding, 0023-runtime-no-temporary`.
-   - From EPIC-0008 (merged after A2), every set above ends with `0024-alert-feed-candidate-verification`, and the success line names it last. If A2 is already deployed (at 0023), the set is `0024-alert-feed-candidate-verification` alone. Its rollback is in `epics/active/EPIC-0008-stack-feeds-per-user/architecture.md` ("Rollback (AR-8)").
+   - Before A1 (at 0015): `0016-multi-candidate` through `0023-runtime-no-temporary`, including FEAT-0006's `0020-role-relevance` and FEAT-0007's `0021-hiring-posts`.
+   - A1 deployed, FEAT-0006 not (at 0019): `0020-role-relevance`, `0021-hiring-posts`, `0022-candidate-binding`, `0023-runtime-no-temporary`, in that order. Success prints `Applied migrations: 0020-role-relevance, 0021-hiring-posts, 0022-candidate-binding, 0023-runtime-no-temporary`.
+   - FEAT-0006 deployed, FEAT-0007 not (at 0020): `0021-hiring-posts`, `0022-candidate-binding`, `0023-runtime-no-temporary`. Success prints `Applied migrations: 0021-hiring-posts, 0022-candidate-binding, 0023-runtime-no-temporary`.
+   - FEAT-0007 already deployed (at 0021): `0022-candidate-binding`, `0023-runtime-no-temporary`. Success prints `Applied migrations: 0022-candidate-binding, 0023-runtime-no-temporary`.
+   - From FEAT-0008 (merged after A2), every set above ends with `0024-alert-feed-candidate-verification`, and the success line names it last. If A2 is already deployed (at 0023), the set is `0024-alert-feed-candidate-verification` alone. Its rollback is in `features/active/FEAT-0008-stack-feeds-per-user/architecture.md` ("Rollback (AR-8)").
 
    A rerun prints `No pending migrations`.
 
@@ -168,7 +168,7 @@ commit;
 
 ### Backup role and A2
 
-Since `0017-row-level-security` the owner and runtime roles obey forced row security, so a dump as the owner fails. `backup.sh` therefore dumps as the read-only backup role `DB_BACKUP_ROLE` (for example `ja_backup`): `BYPASSRLS`, `SELECT` only, sessions read-only by default. `provision-roles` creates it and `migrate` grants it on every run. The role, its two `.env` keys and the one-time step for an installation deployed before it are in [backups.md](backups.md), "Backup role". Do both before the "Before any EPIC-0002 deploy" backup: `backup.sh` refuses to run without them (`reason=no-backup-role`, `reason=no-backup-password`), and a role that is bound by row security fails with `step=db reason=rls-hides-rows`.
+Since `0017-row-level-security` the owner and runtime roles obey forced row security, so a dump as the owner fails. `backup.sh` therefore dumps as the read-only backup role `DB_BACKUP_ROLE` (for example `ja_backup`): `BYPASSRLS`, `SELECT` only, sessions read-only by default. `provision-roles` creates it and `migrate` grants it on every run. The role, its two `.env` keys and the one-time step for an installation deployed before it are in [backups.md](backups.md), "Backup role". Do both before the "Before any FEAT-0002 deploy" backup: `backup.sh` refuses to run without them (`reason=no-backup-role`, `reason=no-backup-password`), and a role that is bound by row security fails with `step=db reason=rls-hides-rows`.
 
 A2 changes three things for the backup role and the restore:
 

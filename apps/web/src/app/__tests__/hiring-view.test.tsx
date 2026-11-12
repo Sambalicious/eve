@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { describe, expect, it, vi } from "vitest"
 import {
@@ -28,6 +29,21 @@ import {
 } from "./hiring-view-helpers"
 import { renderApp } from "./test-app"
 
+/** Focus moves from the selected tab through that panel's controls; the targets never reached are returned. */
+async function unreachedAfterTabbing(
+  user: ReturnType<typeof userEvent.setup>,
+  targets: readonly HTMLElement[],
+  stops: number
+): Promise<HTMLElement[]> {
+  const reached = new Set<Element>()
+  for (let stop = 0; stop < stops && reached.size < targets.length; stop++) {
+    await user.tab()
+    const active = document.activeElement
+    if (active && targets.includes(active as HTMLElement)) reached.add(active)
+  }
+  return targets.filter((target) => !reached.has(target))
+}
+
 /** Deck strings (copy-deck.r1.md), quoted so a copy change fails here. */
 const HELP_SOLO =
   "Eve can't check pay, hours or sponsorship in a LinkedIn post. Paste the employer's application link from the post, not the post link. No link? Add the job description. Eve checks that job with your usual rules."
@@ -42,26 +58,33 @@ const GREENHOUSE = "https://boards.greenhouse.io/acme/jobs/4012345"
 
 describe("Hiring view frame (hiring-view.feature, Phase 2)", () => {
   it.each(["", "stack", "jobs", "HIRING", "hiring%20", "%3Cscript%3Ex%3C%2Fscript%3E"])(
-    "HV:71 R5: view=%j is an old query value: Find jobs opens with every section, no error and no tabs",
+    "HV:71 R5: view=%j is an old query value: Find jobs opens on Search with its own four tabs, no error",
     async (value) => {
       openHiring({ path: `/find-jobs?view=${value}` })
       expect(await screen.findByRole("region", { name: "Search links" })).toBeVisible()
       expect(screen.getByRole("region", { name: "Check this job" })).toBeVisible()
-      expect(screen.queryByRole("tab", { name: "Stack posts" })).not.toBeInTheDocument()
+      // No view tabs of the old Hiring view; the tablist on screen is Find jobs' own four.
+      expect(screen.getByRole("tab", { name: "Search" })).toHaveAttribute("aria-selected", "true")
+      expect(screen.getAllByRole("tab")).toHaveLength(4)
       expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     }
   )
 
-  it("HV:104 @ac-1.2 R5: Find jobs shows Hiring search links, Search links, Check this job, Hiring posts, Posts from your field, Set up alerts and, inside it, Hiring alert feeds", async () => {
-    openHiringFeeds({ criteria: { frameworks: ["React"] } })
-    await screen.findByRole("link", { name: /^LinkedIn posts for/ })
+  it("HV:104 @ac-1.2 R5: the tabs in order, each holding its sections: Search (Hiring search links, Check this job, Search links), Hiring posts, Posts from your field, Set up alerts (inside it, Hiring alert feeds)", async () => {
+    const { user } = openHiringFeeds({ criteria: { frameworks: ["React"] } })
     await screen.findByRole("heading", { name: "Hiring alert feeds" })
-    const titles = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent ?? "")
-    expect(
-      titles.filter((t) =>
-        ["Hiring search links", "Search links", "Check this job", "Hiring posts", "Posts from your field", "Set up alerts", "Hiring alert feeds"].includes(t)
-      )
-    ).toEqual(["Hiring search links", "Search links", "Check this job", "Hiring posts", "Posts from your field", "Set up alerts", "Hiring alert feeds"])
+    const tabs = within(screen.getByRole("tablist", { name: "Find jobs" })).getAllByRole("tab")
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Search", "Hiring posts", "Posts from your field", "Set up alerts"])
+    const headings = () => screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent ?? "")
+    // The hash selects Set up alerts; each tab then shows its own sections in order.
+    expect(headings()).toEqual(["Set up alerts", "Alert feeds", "Hiring alert feeds"])
+    await user.click(screen.getByRole("tab", { name: "Search" }))
+    await screen.findByRole("link", { name: /^LinkedIn posts for/ })
+    expect(headings()).toEqual(["Hiring search links", "Check this job", "Search links"])
+    await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
+    expect(headings()).toEqual(["Hiring posts"])
+    await user.click(screen.getByRole("tab", { name: "Posts from your field" }))
+    expect(headings()).toEqual(["Posts from your field"])
     expect(document.body).not.toHaveTextContent(/coming soon/i)
   })
 
@@ -578,41 +601,48 @@ describe("Hiring view with Phase 3 (hiring-view.feature r5, outbound-and-separat
   }
   const many = (n: number) => Array.from({ length: n }, (_, i) => ({ ...post, id: `b0000000-0000-4000-8000-${String(i).padStart(12, "0")}`, canonicalUrl: `${post.canonicalUrl}-${i}` }))
 
-  it("HV:194 every Phase 3 control is reachable by keyboard: Update, Feed URL, Add feed, Remove, row Check this job, paging", async () => {
+  it("HV:194 every Phase 3 control is reachable by keyboard, within its tab: Update, Feed URL, Add feed, Remove, row Check this job, paging", async () => {
     // Page 2 of 2 holds one row, so tabbing to every control stays short.
     const { user } = openHiringFeeds({
       path: "/find-jobs?view=hiring&page=2#set-up-alerts",
       criteria: { frameworks: ["React"] },
       stack: { hiringVerification: record, hiringFeeds: [feed], hiringPosts: many(51) },
     })
-    const posts = await screen.findByRole("region", { name: "Hiring posts" })
-    await within(posts).findByText("Page 2 of 2")
-    const targets = [
+    // Set up alerts holds the feeds controls (the hash opened it).
+    await user.click(await screen.findByRole("tab", { name: "Set up alerts" }))
+    await screen.findByRole("region", { name: "Hiring alert feeds" })
+    const alertTargets = [
       screen.getByRole("button", { name: "Update your confirmation for hiring alert feeds" }),
       screen.getByRole("textbox", { name: "Feed URL" }),
       screen.getByRole("button", { name: "Add feed" }),
       screen.getByRole("button", { name: /^Remove Frontend hiring/ }),
+    ]
+    // Focus starts on the selected tab; Tab then enters that panel's first control.
+    expect(await unreachedAfterTabbing(user, alertTargets, 40)).toEqual([])
+    // Hiring posts holds the row's Check this job and the paging.
+    await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
+    const posts = await screen.findByRole("region", { name: "Hiring posts" })
+    await within(posts).findByText("Page 2 of 2")
+    const postTargets = [
       within(posts).getAllByRole("button", { name: /^Check this job from / })[0],
       within(posts).getByRole("link", { name: "Previous" }),
     ]
-    ;(await screen.findAllByRole("link", { name: /^LinkedIn posts for/ }))[0].focus()
-    const reached = new Set<Element>()
-    for (let stop = 0; stop < 80 && reached.size < targets.length; stop++) {
-      await user.tab()
-      if (document.activeElement && targets.includes(document.activeElement as HTMLElement)) reached.add(document.activeElement)
-    }
-    expect(targets.filter((t) => !reached.has(t))).toEqual([])
+    expect(await unreachedAfterTabbing(user, postTargets, 40)).toEqual([])
   }, 20_000)
 
   it("HV:201 every Phase 3 control has an accessible name", async () => {
-    openHiringFeeds({ stack: { hiringVerification: record, hiringFeeds: [feed], hiringPosts: [post] } })
-    const posts = await screen.findByRole("region", { name: "Hiring posts" })
-    await within(posts).findByRole("button", { name: /^Check this job from / })
-    for (const name of ["Hiring alert feeds", "Hiring posts"]) {
-      const region = screen.getByRole("region", { name })
+    const { user } = openHiringFeeds({ stack: { hiringVerification: record, hiringFeeds: [feed], hiringPosts: [post] } })
+    const named = (region: HTMLElement) => {
       for (const control of [...within(region).getAllByRole("button"), ...within(region).queryAllByRole("link"), ...within(region).queryAllByRole("textbox")])
         expect(control).toHaveAccessibleName()
     }
+    const alerts = await screen.findByRole("region", { name: "Hiring alert feeds" })
+    await within(alerts).findByRole("button", { name: /^Remove Frontend hiring/ })
+    named(alerts)
+    await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
+    const posts = await screen.findByRole("region", { name: "Hiring posts" })
+    await within(posts).findByRole("button", { name: /^Check this job from / })
+    named(posts)
   })
 
   it("HV:135 Phase 3 writes carry the session's CSRF token (register, remove, permitted-use save)", async () => {
@@ -646,11 +676,20 @@ describe("Hiring view with Phase 3 (hiring-view.feature r5, outbound-and-separat
     const links = await screen.findByRole("region", { name: "Hiring search links" })
     await within(links).findByRole("link", { name: /^LinkedIn posts for/ })
     await user.click(within(links).getByRole("button", { name: /Google Alerts query/ }))
-    const posts = await screen.findByRole("region", { name: "Hiring posts" })
-    await within(posts).findByRole("link", { name: /^We're hiring/ })
-    const external = screen
+    await within(links).findByRole("link", { name: /^Open Google Alerts/ })
+    const searchExternal = within(links)
       .getAllByRole("link")
       .filter((a) => /linkedin\.com|google\.com/.test(a.getAttribute("href") ?? ""))
+    expect(searchExternal.length).toBeGreaterThanOrEqual(3)
+    // The post title lives on the Hiring posts tab.
+    await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
+    const posts = await screen.findByRole("region", { name: "Hiring posts" })
+    await within(posts).findByRole("link", { name: /^We're hiring/ })
+    const postExternal = within(posts)
+      .getAllByRole("link")
+      .filter((a) => /linkedin\.com|google\.com/.test(a.getAttribute("href") ?? ""))
+    expect(postExternal.length).toBeGreaterThanOrEqual(1)
+    const external = [...searchExternal, ...postExternal]
     expect(external.length).toBeGreaterThanOrEqual(4)
     for (const a of external) {
       expect(a).toHaveAttribute("target", "_blank")
@@ -662,6 +701,7 @@ describe("Hiring view with Phase 3 (hiring-view.feature r5, outbound-and-separat
     const hosts = new Set<string>()
     server.events.on("request:start", ({ request }) => hosts.add(new URL(request.url).host))
     const { user } = openHiring({ stack: { hiringVerification: record, hiringFeeds: [feed], hiringPosts: [post] } })
+    await user.click(await screen.findByRole("tab", { name: "Hiring posts" }))
     const posts = await screen.findByRole("region", { name: "Hiring posts" })
     await user.click(await within(posts).findByRole("button", { name: /^Check this job from / }))
     server.events.removeAllListeners()
@@ -669,8 +709,9 @@ describe("Hiring view with Phase 3 (hiring-view.feature r5, outbound-and-separat
   })
 
   it("H1 step 6 / OUT:115 R5: the page reads the Hiring feeds and Hiring posts, and never LinkedIn or Google", async () => {
-    const { stack } = openHiringFeeds({ stack: { hiringVerification: record } })
-    await screen.findByRole("heading", { name: "Hiring posts appear here once you set up job alerts. You can also use the search links above." })
+    const { stack, user } = openHiringFeeds({ stack: { hiringVerification: record } })
+    await user.click(await screen.findByRole("tab", { name: "Hiring posts" }))
+    await screen.findByRole("heading", { name: "Hiring posts appear here once you set up job alerts. You can also use the Search tab." })
     const paths = stack.requests.map((r) => r.path.split("?")[0])
     expect(paths).toEqual(expect.arrayContaining(["/v1/stack-posts/hiring-feeds", "/v1/stack-posts/hiring-posts"]))
     expect(paths.every((p) => p.startsWith("/v1/"))).toBe(true)
@@ -808,9 +849,10 @@ describe("EPIC-0009 S3: Hiring view help (hiring-view-help.feature)", () => {
   })
 
   it("@ac-9 the unconfirmed Hiring posts empty state (find.hiring.empty) sits next to the lead line", async () => {
-    openHiring({ stack: { hiringVerification: null } })
+    const { user } = openHiring({ stack: { hiringVerification: null } })
     expect(await screen.findByText(EH_LINE)).toBeVisible()
-    expect(await screen.findByText("Hiring posts appear here once you set up job alerts. You can also use the search links above.")).toBeVisible()
+    await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
+    expect(await screen.findByText("Hiring posts appear here once you set up job alerts. You can also use the Search tab.")).toBeVisible()
   })
 
   it("@ac-10 @ac-13 exactly one collapsed (i) after the line; it opens the reason and three ways, in order", async () => {
@@ -906,7 +948,10 @@ describe("EPIC-0009 S3: Hiring view help (hiring-view-help.feature)", () => {
     const { user } = openHiringFeeds({ criteria: { targetRoleFamilies: ["senior_frontend"], frameworks: ["React"] } })
     await screen.findByText(HINT_TEXT, { exact: false })
     await screen.findByRole("region", { name: "Hiring alert feeds" })
+    // The Hiring posts panel stays mounted; visit it so its requests have all fired before recording.
+    await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
     await screen.findByRole("region", { name: "Hiring posts" })
+    await user.click(screen.getByRole("tab", { name: "Search" }))
     await new Promise((resolve) => setTimeout(resolve, 200))
     const urls: string[] = []
     const record = ({ request }: { request: Request }) => void urls.push(request.url)

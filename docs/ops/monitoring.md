@@ -4,7 +4,7 @@ Eve has no metrics service. The worker and api write log lines to stdout, which 
 
 ## Scheduled feed reads with failed Candidates (SEC-E8-05)
 
-The Stack posts and Hiring feed reads run at 02:00, 08:00, 14:00 and 20:00 WAT, once for each active Candidate (EPIC-0008). If one Candidate's read fails, the worker logs it and goes on to the next Candidate. The pg-boss job still completes, so the job state does not show the failure. A failing feed (a timeout, or Google answering with an error) is not a failed read: the feed is marked failing on the Candidate's page and in her daily summary. A failed read is an error inside Eve, for example a database error.
+The Stack posts and Hiring feed reads run at 02:00, 08:00, 14:00 and 20:00 WAT, once for each active Candidate (FEAT-0008). If one Candidate's read fails, the worker logs it and goes on to the next Candidate. The pg-boss job still completes, so the job state does not show the failure. A failing feed (a timeout, or Google answering with an error) is not a failed read: the feed is marked failing on the Candidate's page and in her daily summary. A failed read is an error inside Eve, for example a database error.
 
 Eve logs an internal error in two places, and an operator should alert on both:
 

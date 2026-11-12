@@ -79,6 +79,12 @@ export function openHiring(
   }
 }
 
+/** Selects a Find jobs tab by its label, for a test that reads more than one panel. */
+export async function showTab(name: "Search" | "Hiring posts" | "Posts from your field" | "Set up alerts") {
+  const tab = await screen.findByRole("tab", { name })
+  if (tab.getAttribute("aria-selected") !== "true") fireEvent.click(tab)
+}
+
 /** The section, or its open dialog: results render inside the dialog, so result assertions use the same helper. */
 export const checkRegion = async () =>
   screen.queryByRole("dialog", { name: "Check this job" }) ??
@@ -104,6 +110,10 @@ export const pastes = (discovery: ReturnType<typeof createDiscoveryApi>) =>
   discovery.requests.filter((r) => r.path === "/v1/job-postings/links")
 
 
-/** `openHiring` with Set up alerts open: for tests of the Hiring alert feeds, which now sit inside that section. */
+/** `openHiring` with Set up alerts selected: for tests of the Hiring alert feeds, which now sit in that tab. */
 export const openHiringFeeds = (options: Parameters<typeof openHiring>[0] = {}) =>
-  openHiring({ path: "/find-jobs?view=hiring#set-up-alerts", ...options })
+  openHiring({ ...options, path: options.path ?? "/find-jobs?view=hiring#set-up-alerts" })
+
+/** `openHiring` with Hiring posts selected: for tests of the Hiring posts list and its rows. */
+export const openHiringPosts = (options: Parameters<typeof openHiring>[0] = {}) =>
+  openHiring({ ...options, path: options.path ?? "/find-jobs?view=hiring#hiring-posts" })

@@ -45,7 +45,7 @@ not run. Reviews are for correctness, scope and security, not for style preferen
 
 ## Releases
 
-This repository is generated. The maintainer works in a private tree that also holds the epics,
+This repository is generated. The maintainer works in a private tree that also holds the features,
 agent configuration and run artifacts, and publishes an allowlisted slice on each release tag.
 
 Practically: your pull request is welcome and will be merged into the private tree, then appears in

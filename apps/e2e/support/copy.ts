@@ -9,7 +9,8 @@ export const COPY = {
   // EPIC-0011 R5: the Stack posts / Hiring view frame (tablist, two tabs) is gone. Both lists are sections of Find jobs.
   findTitle: "Find jobs", // find.title (EXACT); also the document title
   findPath: "/find-jobs", // architecture route table
-  setUpAlerts: "Set up alerts", // find.alerts.heading (EXACT); a collapsed section holding both Alert feeds lists
+  searchTab: "Search", // find.tabs.search (PROPOSAL, EPIC-0015): the first Find jobs tab
+  setUpAlerts: "Set up alerts", // find.alerts.heading (EXACT); the fourth tab, holding both Alert feeds lists
   stackSectionTitle: "Posts from your field", // find.stack.heading (PROPOSAL), the former Stack posts "Posts"
   stackLinksSectionTitle: "Search links", // find.search.heading (PROPOSAL)
 

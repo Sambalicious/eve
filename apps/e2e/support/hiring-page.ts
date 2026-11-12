@@ -4,9 +4,10 @@ import { COPY } from "./copy.ts"
 import { JOB_POSTING_LINKS_PATH } from "./db.ts"
 
 /**
- * Locators for Find jobs (`/find-jobs`, EPIC-0011 R5), by role and deck text only. It replaces the
- * Stack posts page and its Hiring view: there is no tablist any more, every list is a section of one
- * page, and both Alert feeds lists sit inside the collapsed "Set up alerts" section.
+ * Locators for Find jobs (`/find-jobs`, EPIC-0011 R5, EPIC-0015 tabs), by role and deck text only. Four
+ * tabs, in order: Search (the Hiring search links, Check this job, the Search links), Hiring posts, Posts
+ * from your field, Set up alerts (both Alert feeds lists). A tab is not navigation: selecting one never
+ * changes the URL.
  */
 export class HiringPage {
   readonly page: Page
@@ -26,17 +27,22 @@ export class HiringPage {
     await expect(this.page.getByRole("heading", { level: 1, name: COPY.findTitle })).toBeVisible()
   }
 
-  /** The "Set up alerts" disclosure button (aria-expanded), whose name starts with the heading. */
-  alertsToggle(): Locator {
-    return this.page.getByRole("button", { name: new RegExp(`^${COPY.setUpAlerts}`) })
+  /** A Find jobs tab, by its label (EPIC-0015 design note section 1). */
+  tab(name: string): Locator {
+    return this.page.getByRole("tab", { name, exact: true })
   }
 
-  /** Opens Set up alerts if it is closed, so the Alert feeds and Hiring Alert feeds sections are mounted. */
+  /** Selects a tab. The tab is the only disclosure: no click opens it twice, and the URL is untouched. */
+  async showTab(name: string): Promise<void> {
+    const tab = this.tab(name)
+    await expect(tab).toBeVisible()
+    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click()
+    await expect(tab).toHaveAttribute("aria-selected", "true")
+  }
+
+  /** Selects Set up alerts, so the Alert feeds and Hiring Alert feeds sections are shown. */
   async openAlerts(): Promise<void> {
-    const toggle = this.alertsToggle()
-    await expect(toggle).toBeVisible()
-    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click()
-    await expect(toggle).toHaveAttribute("aria-expanded", "true")
+    await this.showTab(COPY.setUpAlerts)
   }
 
   /** The "Check this job" section: a region named by its h2. */

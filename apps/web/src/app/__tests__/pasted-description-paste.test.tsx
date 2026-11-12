@@ -6,7 +6,7 @@ import { JOB_POSTING_LINKS_PATH } from "@eve/contracts"
 import { ownRecord21Oct, pastedPosting, rankedPosting, server, storedPost } from "@/shared/testing"
 import { findToast } from "./career-setup-helpers"
 import { openDiscovery } from "./discovery-helpers"
-import { openHiring, pastes } from "./hiring-view-helpers"
+import { openHiring, pastes, showTab } from "./hiring-view-helpers"
 
 /** The Check this job form lives in a dialog now: open the section's button and return the dialog. */
 async function checkDialog(user: { click: (el: HTMLElement) => Promise<void> }): Promise<HTMLElement> {
@@ -134,6 +134,7 @@ describe("PD-1.1 the description panel in each paste form (PD:44)", () => {
 describe("Hiring post row panel label (design review P2)", () => {
   it("open, the visible link label is 'Application link (Optional)'; the accessible name keeps the post title", async () => {
     const { user } = openHiring({ stack: { hiringVerification: ownRecord21Oct, hiringPosts: [storedPost({ title: "A Frontend Engineer (React)" })] } })
+    await showTab("Hiring posts")
     const posts = await screen.findByRole("region", { name: "Hiring posts" })
     const row = await within(posts).findByRole("listitem", { name: "A Frontend Engineer (React)" })
     await user.click(within(row).getByRole("button", { name: "Check this job from A Frontend Engineer (React)" }))

@@ -2,7 +2,7 @@
 
 Eve is a personal job-application assistant. One Candidate uses it, mostly on a laptop, to check what needs them and to keep their facts, answers and sources correct. The surface is an Operate tool: the Candidate should find everything without noticing the design, and the design should feel calm, exact and trustworthy.
 
-This file owns durable visual decisions. It supersedes the "Style decisions" section of `epics/active/EPIC-0001-job-application-assistant/design-spec.r4.md` for typography, colour, spacing, elevation and page composition. Flows, copy, states and accessibility in the spec stay authoritative.
+This file owns durable visual decisions. It supersedes the "Style decisions" section of `features/active/FEAT-0001-job-application-assistant/design-spec.r4.md` for typography, colour, spacing, elevation and page composition. Flows, copy, states and accessibility in the spec stay authoritative.
 
 ## World
 
@@ -50,7 +50,7 @@ Tokens live in `apps/web/src/app/styles/index.css` (OKLCH). Neutrals carry a fai
 
 The landing page and future public marketing pages may use a Persuade layer on top of the Operate system. The app shell, every signed-in page, dialogs and the Privacy page stay Operate. Persuade adds only what is listed here: display type, tinted section grounds, a second accent from the cobalt family, and cobalt-duotone spot illustrations. It never changes components, controls, focus or status colours, and it keeps one filled button per view.
 
-Tokens are defined on `.landing-root`, not `:root`, so nothing leaks into the app: `--persuade-accent` (azure, graphics only, never text or a control), `--persuade-ink` (line 2 of the h1 only), `--persuade-tint` and `--persuade-tint-strong` (section grounds and the Stops icon discs), and the illustration paints `--illo-fill`, `--illo-fill-2`, `--illo-stroke`, `--illo-accent`, `--illo-paper`. On Persuade surfaces cobalt may also appear in illustration strokes, the Stops icon discs and the h1's second line. Display type: h1 Bricolage Grotesque `clamp(40px, 5.2vw + 12px, 76px)`, 650, -0.035em; section h2 `clamp(28px, 2.2vw + 14px, 44px)`, 600, -0.025em. Values: EPIC-0003 design-spec.r3, Style decisions P6.
+Tokens are defined on `.landing-root`, not `:root`, so nothing leaks into the app: `--persuade-accent` (azure, graphics only, never text or a control), `--persuade-ink` (line 2 of the h1 only), `--persuade-tint` and `--persuade-tint-strong` (section grounds and the Stops icon discs), and the illustration paints `--illo-fill`, `--illo-fill-2`, `--illo-stroke`, `--illo-accent`, `--illo-paper`. On Persuade surfaces cobalt may also appear in illustration strokes, the Stops icon discs and the h1's second line. Display type: h1 Bricolage Grotesque `clamp(40px, 5.2vw + 12px, 76px)`, 650, -0.035em; section h2 `clamp(28px, 2.2vw + 14px, 44px)`, 600, -0.025em. Values: FEAT-0003 design-spec.r3, Style decisions P6.
 
 ## Motion
 

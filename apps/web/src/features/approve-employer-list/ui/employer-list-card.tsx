@@ -33,7 +33,7 @@ export function EmployerListCard({ list }: { list: EmployerList }) {
     <Section
       id="employer-list"
       title={jobSourceCopy.employerListHeading}
-      headingProps={{ id: `${id}-heading` }}
+      headingProps={{ id: `${id}-heading`, tabIndex: -1 }}
       description={
         <span className="flex flex-col gap-1">
           {list.approvedAt ? (

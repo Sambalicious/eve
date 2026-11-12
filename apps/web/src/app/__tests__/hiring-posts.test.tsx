@@ -14,7 +14,7 @@ import {
   type StoredPost,
 } from "@/shared/testing"
 import { findToast } from "./career-setup-helpers"
-import { openHiringFeeds as openHiring, pastes } from "./hiring-view-helpers"
+import { openHiringPosts as openHiring, pastes, showTab } from "./hiring-view-helpers"
 
 /**
  * EPIC-0007 Phase 3 web: Hiring posts (design-spec r2 B4, H7) and Check this
@@ -281,9 +281,11 @@ describe("Hiring posts list (hiring-posts.feature, AC 7.4)", () => {
       posts: [storedPost({ canonicalUrl: POST_2, title: "A Stack post" })],
       hiringPosts: [storedPost({ canonicalUrl: POST_1, title: "A Hiring post" })],
     })
+    await showTab("Posts from your field")
     const stackPosts = await screen.findByRole("region", { name: "Posts from your field" })
     expect(await within(stackPosts).findByText("A Stack post")).toBeVisible()
     expect(within(stackPosts).queryByText("A Hiring post")).not.toBeInTheDocument()
+    await showTab("Hiring posts")
     const region = await postsRegion()
     expect(await within(region).findByText("A Hiring post")).toBeVisible()
     expect(within(region).queryByText("A Stack post")).not.toBeInTheDocument()
@@ -298,24 +300,25 @@ describe("Hiring posts empty states (hiring-posts.feature, AC 7.5)", () => {
   ])("HP:357 / HP:388 no own record (%s): find.hiring.empty with 'Set up alerts'", async (_, shared) => {
     openHiring({ stack: { verification: shared } })
     const region = await postsRegion()
-    expect(within(region).getByRole("heading", { name: "Hiring posts appear here once you set up job alerts. You can also use the search links above." })).toBeVisible()
+    expect(within(region).getByRole("heading", { name: "Hiring posts appear here once you set up job alerts. You can also use the Search tab." })).toBeVisible()
     expect(within(region).getByRole("link", { name: "Set up alerts" })).toHaveAttribute("href", "#set-up-alerts")
     expect(within(region).queryByText(POSTS_DESC)).not.toBeInTheDocument()
   })
 
   it("HP:373 'Set up alerts' opens that section and moves focus to its heading, where the one confirm step waits; the URL keeps view=hiring", async () => {
-    const { user, currentPath } = openHiring({ path: "/find-jobs?view=hiring" })
+    const { user, currentPath } = openHiring({ path: "/find-jobs?view=hiring#hiring-posts" })
     const region = await postsRegion()
     await user.click(within(region).getByRole("link", { name: "Set up alerts" }))
     await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "Set up alerts" })).toHaveFocus())
     expect(await screen.findByRole("button", { name: "I confirm" })).toBeVisible()
-    expect(currentPath()).toBe("/find-jobs?view=hiring")
+    // The tab click and the in-page link leave the URL as it arrived.
+    expect(currentPath()).toBe("/find-jobs?view=hiring#hiring-posts")
   })
 
   it("HP:395 own record, no feeds: find.hiring.empty with one action, 'Set up alerts'", async () => {
     const { user } = withRecord({})
     const region = await postsRegion()
-    expect(within(region).getByRole("heading", { name: "Hiring posts appear here once you set up job alerts. You can also use the search links above." })).toBeVisible()
+    expect(within(region).getByRole("heading", { name: "Hiring posts appear here once you set up job alerts. You can also use the Search tab." })).toBeVisible()
     await user.click(within(region).getByRole("link", { name: "Set up alerts" }))
     await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "Set up alerts" })).toHaveFocus())
   })
@@ -325,6 +328,7 @@ describe("Hiring posts empty states (hiring-posts.feature, AC 7.5)", () => {
     const region = await postsRegion()
     await user.click(within(region).getByRole("link", { name: "Set up alerts" }))
     await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "Set up alerts" })).toHaveFocus())
+    await showTab("Search")
     const links = screen.getByRole("region", { name: "Hiring search links" })
     expect(within(links).getByText("No role family to search for")).toBeVisible()
     expect(within(links).getByRole("link", { name: "Choose role families" })).toBeVisible()
@@ -353,7 +357,7 @@ describe("Hiring posts empty states (hiring-posts.feature, AC 7.5)", () => {
     openHiring({ stack: { hiringFeeds: [storedFeed({ url: HFEED_A })] } })
     const region = await postsRegion()
     expect(within(region).getAllByRole("heading", { level: 3 }).map((h) => h.textContent)).toEqual([
-      "Hiring posts appear here once you set up job alerts. You can also use the search links above.",
+      "Hiring posts appear here once you set up job alerts. You can also use the Search tab.",
     ])
   })
 })

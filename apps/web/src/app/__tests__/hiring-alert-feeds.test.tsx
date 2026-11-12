@@ -23,7 +23,7 @@ import {
   verifiedOn20Oct,
 } from "@/shared/testing"
 import { findToast } from "./career-setup-helpers"
-import { openHiringFeeds as openHiring } from "./hiring-view-helpers"
+import { openHiringFeeds as openHiring, showTab } from "./hiring-view-helpers"
 
 /**
  * EPIC-0007 Phase 3 web: Hiring alert feeds (design-spec r2 B3, H6, H6b)
@@ -169,8 +169,10 @@ describe("Hiring alert feeds: record and update her own permitted use (HAF, AC 6
 
   it("HAF:379 / HP:381 any Candidate records her own permitted use: PUT with CSRF, toast, recorded line, form, focus to Feed URL", async () => {
     const { user, stack } = openHiring()
+    await showTab("Hiring posts")
     const posts = await screen.findByRole("region", { name: "Hiring posts" })
-    expect(await within(posts).findByText("Hiring posts appear here once you set up job alerts. You can also use the search links above.")).toBeVisible()
+    expect(await within(posts).findByText("Hiring posts appear here once you set up job alerts. You can also use the Search tab.")).toBeVisible()
+    await showTab("Set up alerts")
     const { region, date, basis, save } = await openDialog(user, "Record permitted use")
     await user.clear(date)
     await user.type(date, "2026-10-21")
@@ -706,8 +708,10 @@ describe("Hiring alert feeds: removal (HAF:916, AC 6.4)", () => {
       stack: { hiringFeeds: [feed], hiringPosts: [1, 2, 3].map((n) => storedPost({ feedId: feed.id, title: `Hiring ${n}` })) },
     })
     const region = await hiringFeeds()
+    await showTab("Hiring posts")
     const posts = await screen.findByRole("region", { name: "Hiring posts" })
     expect(await within(posts).findAllByText("from Frontend hiring")).toHaveLength(3)
+    await showTab("Set up alerts")
     await user.click(within(region).getByRole("button", { name: "Remove Frontend hiring, feed ending 1 2 3 4 5 6" }))
     const dialog = await screen.findByRole("alertdialog", { name: "Remove this Hiring alert feed?" })
     expect(dialog).toHaveTextContent(

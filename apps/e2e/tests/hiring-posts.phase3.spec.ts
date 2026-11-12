@@ -30,7 +30,9 @@ test.beforeEach(async () => {
 async function openAs(page: Page, email: string): Promise<HiringPhase3Page> {
   await signIn(page.context(), email)
   const hiring = new HiringPhase3Page(page)
+  // openAndWait leaves the page on Set up alerts with its feeds loaded; the rows live on the Hiring posts tab.
   await hiring.openAndWait()
+  await hiring.showTab(COPY.hiringPostsTitle)
   return hiring
 }
 
@@ -106,6 +108,7 @@ test.describe("Hiring posts list (HP:221 to :348)", () => {
     await insertHiringPosts(ADA.email, [{ canonicalUrl: POST_1, title: "Only a Hiring post" }])
     await signIn(page.context(), ADA.email)
     await page.goto("/find-jobs")
+    await new HiringPhase3Page(page).showTab(COPY.stackPostsTitle)
     await expect(page.getByRole("region", { name: COPY.stackPostsTitle, exact: true })).not.toContainText("Only a Hiring post")
   })
 })
@@ -219,6 +222,8 @@ test.describe("Empty states (HP:357 to :424; AC 7.5)", () => {
   test("HP-12 after her first confirmation the empty state stays (no feeds yet) and nothing reloads", async ({ page }) => {
     const hiring = await openAs(page, BOLA.email)
     await expect(hiring.postsSection().getByText(P3.postsEmptyHiring, { exact: true })).toBeVisible()
+    // The confirm step is on the Set up alerts tab.
+    await hiring.openAlerts()
     let navigations = 0
     page.on("framenavigated", (frame) => {
       if (frame === page.mainFrame()) navigations += 1
@@ -226,6 +231,7 @@ test.describe("Empty states (HP:357 to :424; AC 7.5)", () => {
     await hiring.verifyMissingButton().click()
     await hiring.saveVerification("2026-10-21", "Read terms.")
     await expect(hiring.feedsSection().getByText(P3.verifyDone("21 Oct 2026"), { exact: true })).toBeVisible()
+    await hiring.showTab(COPY.hiringPostsTitle)
     await expect(hiring.postsSection().getByText(P3.postsEmptyHiring, { exact: true })).toBeVisible()
     await expect(hiring.postsSection().getByText(P3.postsEmptyWaitingTitle, { exact: true })).toHaveCount(0)
     expect(navigations).toBe(0)
@@ -253,7 +259,8 @@ test.describe("Empty states (HP:357 to :424; AC 7.5)", () => {
   test("HP-15r only Other targeted: the Hiring search links section shows its own \"No role family to search for\" and its action", async ({ page }) => {
     await setHiringVerification(ADA.email)
     await setHiringInputs(ADA.email, { families: ["other"] })
-    await openAs(page, ADA.email)
+    const hiring = await openAs(page, ADA.email)
+    await hiring.showTab(COPY.searchTab)
     const links = page.getByRole("region", { name: LINKS_COPY.title, exact: true })
     await expect(links.getByText(LINKS_COPY.noFamilyTitle, { exact: true })).toBeVisible()
     await expect(links.getByRole("link", { name: LINKS_COPY.noFamilyAction, exact: true })).toBeVisible()

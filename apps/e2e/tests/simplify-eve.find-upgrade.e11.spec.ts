@@ -1,5 +1,6 @@
 import { type Page, expect, test } from "@playwright/test"
 
+import { COPY } from "../support/copy.ts"
 import { signIn } from "../support/db.ts"
 import { E11, EXISTING_ROUTES, SIDEBAR_NAV } from "../support/epic-0011-copy.ts"
 import { ensureProfileInUse, readAutomatic, resetEpic11, seedApplication, setAdvanced, setAutomatic, setGlobalPause } from "../support/epic-0011-db.ts"
@@ -31,14 +32,24 @@ test.afterAll(async () => {
 })
 
 test.describe("Find jobs (AC-5.1 to AC-5.7)", () => {
-  test("FJ:12 Find jobs shows Search links, Hiring posts, Posts from your field and Set up alerts, in that order", async ({ page, context }) => {
+  test("FJ:12 Find jobs shows four tabs in order: Search, Hiring posts, Posts from your field, Set up alerts, each holding its own sections", async ({ page, context }) => {
     await signIn(context, BOLA.email)
     await page.goto("/find-jobs")
     await expect(h1(page, E11.findTitle)).toBeVisible()
+    const hiring = new HiringPage(page)
+    // EPIC-0015: the order is the tab order; a section is only on screen with its own tab selected.
+    await expect(hiring.tab(COPY.searchTab)).toHaveAttribute("aria-selected", "true")
+    const tabs = await page.getByRole("tablist", { name: E11.findTitle }).getByRole("tab").allInnerTexts()
+    expect(tabs.map((t) => t.trim())).toEqual([COPY.searchTab, ...E11.findSections.slice(1)])
+    // Search holds the three sections that were the top of the page.
     const headings = await page.getByRole("heading", { level: 2 }).allInnerTexts()
-    const positions = E11.findSections.map((name) => headings.findIndex((h) => h.trim().startsWith(name)))
-    expect(positions.every((p) => p >= 0), `headings: ${headings.join(" | ")}`).toBe(true)
-    expect([...positions].sort((a, b) => a - b)).toEqual(positions)
+    for (const name of ["Hiring search links", "Check this job", "Search links"]) {
+      expect(headings.some((h) => h.trim() === name), `headings: ${headings.join(" | ")}`).toBe(true)
+    }
+    for (const name of E11.findSections.slice(1)) {
+      await hiring.showTab(name)
+      await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible()
+    }
   })
 
   test("FJ:30 wording is plain: no Job Sources, Activation Gate or Uncertain Submission anywhere on the screen", async ({ page, context }) => {
@@ -58,7 +69,7 @@ test.describe("Find jobs (AC-5.1 to AC-5.7)", () => {
     await signIn(operator, ADA.email)
     const adaPage = await operator.newPage()
     await adaPage.goto("/find-jobs")
-    // Job boards sits inside the collapsed "Set up alerts" (FJ:35 says "under Set up alerts").
+    // Job boards sits inside the "Set up alerts" tab (FJ:35 says "under Set up alerts").
     await new HiringPage(adaPage).openAlerts()
     await expect(adaPage.getByText(E11.jobBoardsDescription)).toBeVisible()
     await operator.close()
