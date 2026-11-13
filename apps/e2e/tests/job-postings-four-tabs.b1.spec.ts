@@ -44,8 +44,8 @@ test.beforeEach(async ({ page }) => {
   await freshRecord(page, BOLA.email, kenyaValues())
 })
 
-test.describe("three tabs (jppc :507, :603, :613, :618; EPIC-0011 AC-4.5)", () => {
-  test("B1-P01 (:507) the tabs are Good matches, Not a match, All in order, none with a count; the old labels are gone", async ({ page }) => {
+test.describe("four tabs (jppc :507, :603, :613, :618; EPIC-0011 AC-4.5)", () => {
+  test("B1-P01 (:507) the tabs are Good matches, Manual apply, Not a match, All in order, none with a count; the old labels are gone", async ({ page }) => {
     await openPostings(page)
     await expect(page.getByRole("tablist").getByRole("tab")).toHaveText([...B1.tabs])
     for (const name of B1.tabs) await expect(tab(page, name)).not.toHaveText(/\d/)

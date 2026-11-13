@@ -160,7 +160,7 @@ test.describe("Record and update her own permitted use (HAF:362 to :421; AC 6.6;
     await expect(ada.feedsSection().getByText(P3.verifyDone("1 Oct 2026"), { exact: true })).toBeVisible()
     const adaBefore = await hiringVerification(ADA.email)
 
-    await bola.openAndWait() // reload collapses Set up alerts (EPIC-0011 FJ); reopen it as openAs does
+    await bola.openAndWait() // a reload lands on Search (EPIC-0015); openAndWait selects Set up alerts again
     await expect(bola.verifyMissingButton()).toBeVisible()
     await bola.verifyMissingButton().click()
     await bola.saveVerification("2026-10-21", "Bola's basis")
@@ -451,6 +451,8 @@ test.describe("Remove (HAF:910, :919, :998; masking)", () => {
     await expect(hiring.toasts().getByText(P3.removeDone, { exact: true })).toBeVisible()
     await expect(hiring.feedRows()).toHaveCount(0)
     await expect(hiring.feedsSection().getByText(P3.feedsNone, { exact: true })).toBeVisible()
+    // The posts that keep the removed feed's source live on the Hiring posts tab.
+    await hiring.openHiringPosts()
     await expect(hiring.postRows()).toHaveCount(2)
     for (const row of await hiring.postRows().all()) await expect(row).toContainText(P3.sourceRemoved)
     expect(await hiringPostCount(ADA.email)).toBe(2)

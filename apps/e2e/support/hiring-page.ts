@@ -40,9 +40,19 @@ export class HiringPage {
     await expect(tab).toHaveAttribute("aria-selected", "true")
   }
 
+  /** Selects Hiring posts, so its list section is shown. */
+  async openHiringPosts(): Promise<void> {
+    await this.showTab(COPY.hiringPostsTitle)
+  }
+
+  /** Selects Set up alerts, so the Hiring Alert feeds section is shown. */
+  async openHiringFeeds(): Promise<void> {
+    await this.showTab(COPY.setUpAlerts)
+  }
+
   /** Selects Set up alerts, so the Alert feeds and Hiring Alert feeds sections are shown. */
   async openAlerts(): Promise<void> {
-    await this.showTab(COPY.setUpAlerts)
+    await this.openHiringFeeds()
   }
 
   /** The "Check this job" section: a region named by its h2. */

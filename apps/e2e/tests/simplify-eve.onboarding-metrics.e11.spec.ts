@@ -51,7 +51,7 @@ test.describe("new user onboarding (AC-2.1 to AC-2.7)", () => {
     await expect(page.getByRole("link", { name: /read the terms/i })).toHaveAttribute("href", /\/privacy/)
   })
 
-  test("ONB:12 the new user's nav is the six default items and no setup checklist or Automatic applying group is shown", async ({ page, context }) => {
+  test("ONB:12 the new user's nav is the seven default items and no setup checklist or Automatic applying group is shown", async ({ page, context }) => {
     await signIn(context, NEW_INVITEE.email)
     await page.goto("/welcome")
     await expect(sidebar(page).getByRole("link")).toHaveCount(E11.navDefault.length)
@@ -162,7 +162,7 @@ test.describe("baseline metrics (prd.r1.md Success metrics)", () => {
     // The nav renders after the session and /v1/me reads; wait for it before counting (count() does not wait).
     await expect(sidebar(page).getByRole("link", { name: /^Settings/ })).toBeVisible()
     metrics.navItemsNewUserAdvancedOff = await navCount()
-    expect(metrics.navItemsNewUserAdvancedOff).toBe(6)
+    expect(metrics.navItemsNewUserAdvancedOff).toBe(7)
 
     const blockingSteps = [page.url().endsWith("/welcome") ? "sign in -> Upload (consent and confirmation on one screen)" : "unexpected"]
     metrics.stepsBeforeHomePasteWorks = { count: 2, path: blockingSteps }
@@ -176,8 +176,8 @@ test.describe("baseline metrics (prd.r1.md Success metrics)", () => {
     await expect(adaPage.locator(SIDEBAR_NAV).first().getByText(E11.navGroup, { exact: true })).toBeVisible()
     const total = await adaPage.locator(SIDEBAR_NAV).first().getByRole("link").count()
     metrics.navItemsOperatorAdvancedOn = total
-    metrics.navGroupItems = total - 6
-    expect(total - 6).toBeLessThanOrEqual(5)
+    metrics.navGroupItems = total - E11.navDefault.length
+    expect(total - E11.navDefault.length).toBeLessThanOrEqual(5)
     await operator.close()
 
     writeFileSync(path.join(E2E_DIR, "test-results", "epic-0011-metrics.json"), JSON.stringify(metrics, null, 2))

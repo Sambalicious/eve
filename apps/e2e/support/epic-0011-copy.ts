@@ -6,7 +6,7 @@
  */
 export const E11 = {
   // Nav (copy-deck nav.*). EXACT unless marked.
-  navDefault: ["Home", "Jobs", "Find jobs", "Applications", "Profile", "Settings"] as const,
+  navDefault: ["Home", "Jobs", "Find jobs", "Applications", "Pipeline", "Profile", "Settings"] as const,
   navGroup: "Automatic applying",
   navGate: "Check first sends", // PROPOSAL
   navBlocked: "Blocked", // PROPOSAL

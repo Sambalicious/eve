@@ -26,6 +26,24 @@ export class StackFeedPage {
     await expect(this.confirmButton().or(this.updateButton()).first()).toBeVisible()
   }
 
+  /** Selects a Find jobs tab by its label (EPIC-0015 design note section 1). */
+  async showTab(name: string): Promise<void> {
+    const tab = this.page.getByRole("tab", { name, exact: true })
+    await expect(tab).toBeVisible()
+    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click()
+    await expect(tab).toHaveAttribute("aria-selected", "true")
+  }
+
+  /** Selects Posts from your field, so its list section is shown. */
+  async openPosts(): Promise<void> {
+    await this.showTab(SP8.postsTitle)
+  }
+
+  /** Selects Set up alerts, so the Alert feeds section is shown. */
+  async openFeeds(): Promise<void> {
+    await this.showTab(SP8.setUpAlertsAction)
+  }
+
   feedsSection(): Locator {
     return this.page.getByRole("region", { name: SP8.feedsSectionTitle, exact: true })
   }

@@ -173,8 +173,8 @@ test.describe("The (i) and its popover (AC-10)", () => {
     const popover = await help.open("hiring")
     const hrefs = await popover.getByRole("link").evaluateAll((links) => links.map((a) => (a as HTMLAnchorElement).getAttribute("href") ?? ""))
     expect(hrefs).toEqual(["#hiring-search-links", "#check-this-job", "#hiring-alert-feeds"])
-    // EPIC-0011 FJ: Hiring Alert feeds sits inside the collapsed "Set up alerts", which mounts it when opened
-    // (the Go to link opens it: HH9-13). Check the first two now and the third once Set up alerts is open.
+    // Hiring Alert feeds sits on the Set up alerts tab (the Go to link selects it: HH9-13). Check the first two
+    // now and the third once Set up alerts is open.
     for (const href of hrefs.slice(0, 2)) await expect(page.locator(href)).toHaveCount(1)
     for (const [name, href] of [
       [EH.hiringLinksGo, "#hiring-search-links"],

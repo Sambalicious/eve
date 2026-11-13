@@ -26,20 +26,28 @@ test.beforeEach(async ({ context }) => {
   await signIn(context, ADA.email)
 })
 
-test("OUT3-01 Find jobs holds the four Hiring sections in order (links, check, posts) with the feeds in Set up alerts, and no placeholder (HV:104 r5; replaces retired HV1-01)", async ({ page }) => {
+test("OUT3-01 Find jobs holds the four Hiring sections in order across its tabs (Search: links, check; Hiring posts; Posts from your field; Set up alerts: the feeds) and no placeholder (HV:104 r5; replaces retired HV1-01)", async ({ page }) => {
   const hiring = new HiringPhase3Page(page)
-  await hiring.openAndWait()
-  const main = page.getByRole("main")
-  const headings = await main.getByRole("heading", { level: 2 }).allInnerTexts()
-  const order = [LINKS_COPY.title, COPY.checkTitle, P3.postsTitle, P3.feedsTitle].map((t) => headings.findIndex((h) => h.trim() === t))
-  expect(order.every((i) => i >= 0), `headings: ${headings.join(" | ")}`).toBe(true)
-  expect([...order].sort((a, b) => a - b)).toEqual(order)
-  await expect(main).not.toContainText(PLACEHOLDER_PATTERN)
+  await hiring.open()
+  // The four tabs are the page's order (EPIC-0015): Search carries the links and the check, then one list per tab,
+  // then the feeds in Set up alerts.
+  await expect(page.getByRole("tab")).toHaveText([COPY.searchTab, P3.postsTitle, COPY.stackSectionTitle, COPY.setUpAlerts])
+  await hiring.showTab(COPY.searchTab)
+  expect(await page.getByRole("heading", { level: 2 }).allInnerTexts()).toEqual([LINKS_COPY.title, COPY.checkTitle, COPY.stackLinksSectionTitle])
+  await hiring.openHiringPosts()
+  await expect(hiring.postsSection()).toBeVisible()
+  await hiring.showTab(COPY.stackSectionTitle)
+  await expect(hiring.heading(COPY.stackPostsTitle)).toBeVisible()
+  await hiring.openAlerts()
+  await expect(hiring.feedsSection()).toBeVisible()
+  await expect(page.getByRole("main")).not.toContainText(PLACEHOLDER_PATTERN)
 })
 
 test("OUT3-02 with Phase 3 the Alerts disclosure says C-HP-ALERTQ-HOWTO-FEEDS and its \"Hiring Alert feeds\" links to the section (HSL:89 r5; replaces retired HSL-06)", async ({ page }) => {
   const hiring = new HiringPhase3Page(page)
   await hiring.openAndWait()
+  // The links live on Search; the link itself moves the page to the feeds' tab.
+  await hiring.showTab(COPY.searchTab)
   const links = page.getByRole("region", { name: LINKS_COPY.title, exact: true })
   await links.getByRole("button", { name: /^Google Alerts query/ }).first().click()
   await expect(links.getByText(LINKS_COPY.alertsHowToFeeds, { exact: false }).first()).toBeVisible()
@@ -56,6 +64,7 @@ test("OUT3-03 loading the Hiring view with a feed and a post: no api outbound re
   const before = outboundRequests().length
   const hiring = new HiringPhase3Page(page)
   await hiring.openAndWait()
+  await hiring.openHiringPosts()
   await expect(hiring.postRows()).toHaveCount(1)
   await page.waitForLoadState("networkidle")
   expect(outboundRequests().slice(before)).toEqual([])
@@ -74,6 +83,7 @@ test("OUT3-04 registering HFEED_A reaches only the feed stand-in: no other api h
   const hiring = new HiringPhase3Page(page)
   await hiring.openAndWait()
   expect((await hiring.registerFeed(HFEED_A, "Frontend hiring")).status()).toBe(201)
+  await hiring.openHiringPosts()
   await expect(hiring.postRows()).toHaveCount(20)
   await page.waitForLoadState("networkidle")
   expect(await feedRequests()).toEqual([{ path: new URL(HFEED_A).pathname, at: expect.any(String) }])
@@ -88,6 +98,7 @@ test("OUT3-05 a Hiring post title link to linkedin.com opens in a new tab with n
   const browserRequests = recordRequests(page)
   const hiring = new HiringPhase3Page(page)
   await hiring.openAndWait()
+  await hiring.openHiringPosts()
   const link = hiring.postRow("Linked title").getByRole("link", { name: /^Linked title/ })
   await expect(link).toHaveAttribute("target", "_blank")
   await expect(link).toHaveAttribute("rel", "noopener noreferrer")

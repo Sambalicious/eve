@@ -154,7 +154,7 @@ test.describe("Record and update her own Stack posts permitted use (own-record:3
     await expect(ada.stack.recordedLine("1 Oct 2026")).toBeVisible()
     const adaBefore = await ownStackRecord(ADA.email)
 
-    await bola.stack.openAndWait() // a reload collapses Set up alerts (EPIC-0011 FJ); reopen it as openAs does
+    await bola.stack.openAndWait() // a reload lands on Search (EPIC-0015); openAndWait selects Set up alerts again
     await expect(bola.stack.recordButton()).toBeVisible()
     await bola.stack.recordButton().click()
     await bola.stack.saveVerification("2026-10-21", "Bola's basis")
@@ -406,6 +406,8 @@ test.describe("Invitee legacy feeds before her own record: read-only (migration:
     await expect(stack.feedUrlField()).toHaveCount(0)
     await expect(stack.addFeedButton()).toHaveCount(0)
     await expect(feeds.getByText(SP8.feedsChangeHelp, { exact: true })).toHaveCount(0)
+    // The list and its unconfirmed note live on the Posts from your field tab.
+    await stack.openPosts()
     await expect(stack.postsSection().getByText(SP8.postsUnverifiedNote, { exact: true })).toBeVisible()
     await expect(stack.postsSection().getByText("Legacy post 0")).toBeVisible()
     expect(await feedRequests()).toHaveLength(0)
@@ -454,6 +456,8 @@ test.describe("Invitee legacy feeds before her own record: read-only (migration:
 test.describe("Posts empty state and pause note (copy-and-unchanged:83 to :104)", () => {
   test("E8-22 no confirmation and no posts: the Posts from your field empty state; its 'Set up alerts' action focuses that section; exactly one confirm control", async ({ page }) => {
     const stack = await openAs(page, BOLA.email)
+    // The empty state lives on the Posts from your field tab; its action moves the page to Set up alerts.
+    await stack.openPosts()
     const posts = stack.postsSection()
     // EPIC-0011 repair wave 1 (find.stack.empty): not confirmed and no feeds read the same, with one action.
     await expect(posts.getByText(SP8.postsEmpty, { exact: true })).toBeVisible()
@@ -542,15 +546,19 @@ test.describe("No Operator wording (copy-and-unchanged:27, :62, :69, :107; AC 7.
     // so the regions are scanned only with no dialog open; with a dialog open, the dialog and toasts are scanned.
     const scanRegions = async (stack: StackFeedPage, where: string) => {
       await expect(stack.dialog()).toHaveCount(0)
-      for (const [name, root] of [
-        ["Alert feeds", stack.feedsSection()],
-        ["Posts", stack.postsSection()],
+      // Each list is on its own tab (EPIC-0015), so select the tab before reading its region.
+      for (const [name, root, tab] of [
+        ["Alert feeds", stack.feedsSection(), SP8.setUpAlertsAction],
+        ["Posts", stack.postsSection(), SP8.postsTitle],
       ] as const) {
+        await stack.showTab(tab)
         const text = await stack.surfaceText(root)
         for (const hit of bannedIn(text)) found.push(`${where} / ${name}: ${hit}`)
         // Retired slots, including "Verified" in recorded states (CR-E8-03: no exemption; see retiredIn).
         for (const retired of retiredIn(text)) found.push(`${where} / ${name}: retired "${retired}"`)
       }
+      // Leave the page where every caller expects it: Set up alerts.
+      await stack.openFeeds()
     }
     const scanToasts = async (stack: StackFeedPage, where: string) => {
       for (const hit of bannedIn(await stack.surfaceText(stack.toasts()))) found.push(`${where} / toast: ${hit}`)

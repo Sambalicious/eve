@@ -48,10 +48,11 @@ export const B1 = {
   saveWizard: "Save and continue", // 103 prefs.save.primary.wizard
   wizardTitle: "Job preferences", // 60 C-WIZ-S3-T
 
-  // Jobs: three tabs since EPIC-0011 R4 (AC-4.5), copy deck jobs.* (PROPOSAL except where noted). The old four
-  // tabs (Ranked, Skipped by rules, Excluded families, All) are now Good matches, Not a match (two stacked
-  // lists: the old Skipped by rules, then the old Excluded families) and All.
-  tabs: ["Good matches", "Not a match", "All"], // jobs.tab.good / .notMatch / .all (EXACT)
+  // Jobs: four tabs since the manual-apply lane (AC-4.5; Manual apply added after EPIC-0011 R4), copy deck jobs.*
+  // (PROPOSAL except where noted). The old four tabs (Ranked, Skipped by rules, Excluded families, All) are now
+  // Good matches, Manual apply, Not a match (two stacked lists: the old Skipped by rules, then the old Excluded
+  // families) and All.
+  tabs: ["Good matches", "Manual apply", "Not a match", "All"], // jobs.tab.good / .manual / .notMatch / .all (EXACT)
   retiredTabs: ["Ranked", "Skipped by rules", "Excluded families"],
   retiredSkippedTab: "Skipped and excluded",
   notMatchRulesHeading: "Doesn't fit your criteria", // PROPOSAL (FE copy gap, progress-fe.md)

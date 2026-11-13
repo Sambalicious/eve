@@ -43,7 +43,7 @@ test.afterAll(async () => {
 })
 
 test.describe("navigation (AC-3.2, AC-3.2a, OQ-8)", () => {
-  test("NAV:24 Advanced off: the nav lists exactly the six items in order, with no group heading", async ({ page, context }) => {
+  test("NAV:24 Advanced off: the nav lists exactly the seven items in order, with no group heading", async ({ page, context }) => {
     await signIn(context, BOLA.email)
     await openHome(page)
     await expect.poll(() => navLabels(page)).toEqual([...E11.navDefault])
@@ -51,7 +51,7 @@ test.describe("navigation (AC-3.2, AC-3.2a, OQ-8)", () => {
     await expect(sidebar(page).getByText(E11.needsYou)).toHaveCount(0)
   })
 
-  test("NAV:33 Advanced on: the six items plus the Automatic applying group, at most 5 items, each opening its page", async ({ page, context }) => {
+  test("NAV:33 Advanced on: the seven items plus the Automatic applying group, at most 5 items, each opening its page", async ({ page, context }) => {
     await signIn(context, ADA.email)
     await openHome(page)
     await expect(sidebar(page).getByText(E11.navGroup, { exact: true })).toBeVisible()
@@ -165,7 +165,7 @@ test.describe("Needs you safety rule (AC-3.7)", () => {
 })
 
 test.describe("first paint and read failure (AC-3.8)", () => {
-  test("NAV:139 while the /v1/me read is held the nav never shows the Automatic applying group; after it, the six items", async ({ page, context }) => {
+  test("NAV:139 while the /v1/me read is held the nav never shows the Automatic applying group; after it, the seven items", async ({ page, context }) => {
     await signIn(context, BOLA.email)
     const held = await holdRequests(page, "/v1/me")
     await page.goto("/dashboard")
