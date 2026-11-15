@@ -371,6 +371,52 @@ describe("D1, D9 and D11: the stylesheet keeps one outline shape, a forced-colou
   })
 })
 
+describe("A1: the manifest declares toolbar icons, and every one is a real PNG of its size", () => {
+  interface Manifest {
+    icons?: Record<string, string>
+    action?: { default_icon?: Record<string, string> }
+  }
+
+  const MANIFEST = JSON.parse(readFileSync(join(EXTENSION, "manifest.json"), "utf8")) as Manifest
+  const SIZES = ["16", "32", "48", "128"]
+  const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+
+  /**
+   * The edge of the PNG, not its dimensions. Chrome draws the default letter tile
+   * when the manifest names no icon, and a wrong-size or renamed file fails silently.
+   */
+  function iconWidth(path: string): number {
+    const bytes = readFileSync(join(EXTENSION, path))
+    if (!PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) throw new Error(`${path} is not a PNG`)
+    // IHDR is the first chunk: 8 signature bytes, 4 length, 4 type, then width and height.
+    const width = bytes.readUInt32BE(16)
+    const height = bytes.readUInt32BE(20)
+    if (width !== height) throw new Error(`${path} is ${width}x${height}, not square`)
+    return width
+  }
+
+  it("declares 16, 32, 48 and 128 in the top-level icons", () => {
+    expect(Object.keys(MANIFEST.icons ?? {}).sort((one, other) => Number(one) - Number(other))).toEqual(SIZES)
+  })
+
+  it("action.default_icon maps the same four sizes to the same four paths", () => {
+    const declared = MANIFEST.icons ?? {}
+    const action = MANIFEST.action?.default_icon ?? {}
+    expect(Object.keys(action).sort((one, other) => Number(one) - Number(other))).toEqual(SIZES)
+    expect(action).toEqual(declared)
+  })
+
+  it("ships each declared icon as a PNG of exactly the declared width and height", () => {
+    for (const [size, path] of Object.entries(MANIFEST.icons ?? {})) {
+      expect(iconWidth(path), `${path} is not ${size}px`).toBe(Number(size))
+    }
+  })
+
+  it("fails on a declared icon whose file is missing, so a rename cannot pass unnoticed", () => {
+    expect(() => iconWidth("icons/icon16-not-here.png")).toThrow()
+  })
+})
+
 describe("A1: the popup width is fixed px, because vw is circular in an action popup", () => {
   const body = block(CSS, /\nbody\s*\{([^}]*)\}/)
   // The body's one comment explains the vw trap and names vw, so scan declarations only.

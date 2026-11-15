@@ -3,9 +3,21 @@
   "name": "Eve fill",
   "version": "0.1.0",
   "description": "Fills the form you are on from your Eve answers and attaches your prepared PDFs after you review them. It never signs in anywhere, never opens a file chooser, and never clicks Submit or a link; it may click a checkbox or radio to set it.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_title": "Eve fill",
-    "default_popup": "src/popup.html"
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "background": {
     "service_worker": "dist/background.js"

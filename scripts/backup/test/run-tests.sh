@@ -964,7 +964,23 @@ q=""
 for a in "$@"; do [[ "$a" == Q=* ]] && q="${a#Q=}"; done
 if [[ $1 == ps ]]; then echo fakepg0029; exit 0; fi
 if [[ -n $q ]]; then
+  [[ -n ${STUB_Q_LOG:-} ]] && printf '%s\n' "$q" >>"$STUB_Q_LOG"
   case "$q" in
+    *information_schema.columns*)
+      # The schema probes: which column, and does STUB_MODE make that probe fail?
+      col=""
+      case "$q" in
+        *column_name\ =\ \'candidate_id\'*) col=cid ;;
+        *column_name\ =\ \'status\'*) col=status ;;
+      esac
+      case "$STUB_MODE:$col" in
+        cidfail:cid) echo "psql: error: could not read information_schema.columns" >&2; exit 1 ;;
+        statusfail:status) echo "psql: error: could not read information_schema.columns" >&2; exit 1 ;;
+        prea2:*) echo 0; exit 0 ;;
+      esac
+      # The A2 schema (and the default): both columns are there.
+      echo 1
+      exit 0 ;;
     *string_agg*)
       # The two reference queries: fail the one STUB_MODE names, answer the other.
       case "$STUB_MODE:$q" in
@@ -995,7 +1011,9 @@ tar -cf - -C "$T/rf-src/documents" . | age -e -r "$RECIPIENT" -o "$T/rf-set/eve-
 tar -cf - -C "$T/rf-src/resumes" . | age -e -r "$RECIPIENT" -o "$T/rf-set/eve-resumes-20261023T010000Z.tar.age"
 refs_run() { # refs_run MODE: a full restore against the stub, into fresh empty target dirs
   rm -rf "$T/rf-docs" "$T/rf-res"; mkdir -p "$T/rf-docs" "$T/rf-res"
-  out="$(env -i PATH="$FDRF:$PATH" HOME="$TEST_HOME" STUB_MODE="$1" bash "$SCRIPTS/restore.sh" --env-file /dev/null --identity "$KEY" --set 20261023T010000Z --backup-dir "$T/rf-set" --no-verify-log --target-project ja-a2j-refs --documents-dir "$T/rf-docs" --resumes-dir "$T/rf-res" 2>&1)"; rc=$?
+  : >"$T/rf.queries"
+  out="$(env -i PATH="$FDRF:$PATH" HOME="$TEST_HOME" STUB_MODE="$1" STUB_Q_LOG="$T/rf.queries" bash "$SCRIPTS/restore.sh" --env-file /dev/null --identity "$KEY" --set 20261023T010000Z --backup-dir "$T/rf-set" --no-verify-log --target-project ja-a2j-refs --documents-dir "$T/rf-docs" --resumes-dir "$T/rf-res" 2>&1)"; rc=$?
+  queries="$(cat "$T/rf.queries")"
 }
 refs_run resfail
 check "REG-006: a failed resume reference query exits 1 with status=failed step=references reason=refs and never prints status=ok" \
@@ -1006,6 +1024,23 @@ check "REG-007: a failed tailored_document reference query fails the same way (e
 refs_run empty
 check "REG-008: a reference query that succeeds with no rows still passes (an empty table is legitimate): exit 0, refs=0, missing=0" \
   bash -c '[[ $1 == 0 ]] && grep -q "step=references resume_refs=0 resume_missing=0 document_refs=0 document_missing=0" <<<"$2" && grep -q "eve-restore status=ok set=20261023T010000Z verified=references-only" <<<"$2"' _ "$rc" "$out"
+
+# #172 review: the schema probes fail the same way. `[[ "$(has_cid ...)" == 1 ]]` is
+# false on an empty string, so a failed probe chose the pre-A2 fallback and the run
+# carried on comparing references against it. The probe status now propagates to the
+# existing `|| die count` at the call sites.
+refs_run cidfail
+check "REG-009: a failed candidate_id schema probe exits 1 with status=failed step=references reason=count, before any reference query, and never prints status=ok" \
+  bash -c '[[ $1 == 1 ]] && grep -q "status=failed step=references reason=count" <<<"$2" && ! grep -q "status=ok" <<<"$2" && ! grep -q "resume_missing" <<<"$2" && grep -q "column_name = .candidate_id." <<<"$3" && ! grep -q "string_agg" <<<"$3"' _ "$rc" "$out" "$queries"
+refs_run statusfail
+check "REG-010: a failed status schema probe fails the same way (exit 1, step=references reason=count, no status=ok, no reference query)" \
+  bash -c '[[ $1 == 1 ]] && grep -q "status=failed step=references reason=count" <<<"$2" && ! grep -q "status=ok" <<<"$2" && ! grep -q "resume_missing" <<<"$2" && grep -q "column_name = .candidate_id." <<<"$3" && grep -q "column_name = .status." <<<"$3" && ! grep -q "string_agg" <<<"$3"' _ "$rc" "$out" "$queries"
+refs_run prea2
+check "REG-011: probes that succeed and report both columns absent (a pre-A2 schema) still pass with the plain refs and no failed filter" \
+  bash -c '[[ $1 == 0 ]] && grep -q "step=references resume_refs=0 resume_missing=0 document_refs=0 document_missing=0" <<<"$2" && grep -q "status=ok set=20261023T010000Z verified=references-only" <<<"$2" && ! grep -q "candidate_id::text" <<<"$3" && ! grep -q "status is distinct from" <<<"$3"' _ "$rc" "$out" "$queries"
+refs_run a2
+check "REG-012: probes that succeed and report both columns present keep today's A2 expressions (candidate_id::text and the failed filter)" \
+  bash -c '[[ $1 == 0 ]] && grep -q "status=ok set=20261023T010000Z verified=references-only" <<<"$2" && grep -q "candidate_id::text" <<<"$3" && grep -q "status is distinct from" <<<"$3"' _ "$rc" "$out" "$queries"
 
 # F-SEC-24: on_signal waits for every process of the step (the docker CLIs restore.sh
 # started), not only restore.sh, before teardown runs.

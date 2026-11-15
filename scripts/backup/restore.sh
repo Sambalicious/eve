@@ -311,17 +311,32 @@ list_files() {
 }
 # A2 layout: <candidate_id>/<area>/<name> in the candidates target. Tables
 # without candidate_id (pre-EPIC-0002 schema) give an empty Candidate ID.
+# A schema query that fails must stop the restore too (the same defect as a failed
+# reference query): a column list it could not read is not a table without the column,
+# and the fallback would quietly change what the check below compares against.
 has_cid() { # has_cid TABLE: prints 1 when public.TABLE has candidate_id
-  q_names "select count(*) from information_schema.columns where table_schema = 'public' and table_name = '$1' and column_name = 'candidate_id'"
+  local n
+  n="$(q_names "select count(*) from information_schema.columns where table_schema = 'public' and table_name = '$1' and column_name = 'candidate_id'")" || return $?
+  printf '%s\n' "$n"
 }
-cid_expr() { if [[ "$(has_cid "$1")" == 1 ]]; then echo "candidate_id::text"; else echo "''"; fi; }
+cid_expr() {
+  local has
+  has="$(has_cid "$1")" || return $?
+  if [[ "$has" == 1 ]]; then echo "candidate_id::text"; else echo "''"; fi
+}
 # A failed upload is not required to have a stored file (it may or may not have one): the API treats such a row as not required
 # (apps/api/src/files/storage-migrate-rows.ts, `required: row.status !== "failed"`).
 # Older schemas have no status column, so add the filter only when it exists.
 has_status() { # has_status TABLE: prints 1 when public.TABLE has a status column
-  q_names "select count(*) from information_schema.columns where table_schema = 'public' and table_name = '$1' and column_name = 'status'"
+  local n
+  n="$(q_names "select count(*) from information_schema.columns where table_schema = 'public' and table_name = '$1' and column_name = 'status'")" || return $?
+  printf '%s\n' "$n"
 }
-failed_filter() { if [[ "$(has_status "$1")" == 1 ]]; then echo " where status is distinct from 'failed'"; else echo ""; fi; }
+failed_filter() {
+  local has
+  has="$(has_status "$1")" || return $?
+  if [[ "$has" == 1 ]]; then echo " where status is distinct from 'failed'"; else echo ""; fi
+}
 RES_CID="$(cid_expr resume_upload)" || die count
 DOC_CID="$(cid_expr tailored_document)" || die count
 RES_WHERE="$(failed_filter resume_upload)" || die count
