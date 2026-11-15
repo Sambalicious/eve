@@ -225,13 +225,19 @@ test.describe("moves (AC-6.3 to AC-6.6)", () => {
     expect(await outcomeTypes(app.id)).toEqual(["interview_invitation"])
   })
 
-  test("BRD:215 an Applied card cannot go back to Draft: Draft is not offered and a line explains why", async ({ page, context }) => {
+  test("BRD:215 an Applied card cannot go back to Draft: Draft is offered disabled and a line explains why", async ({ page, context }) => {
     await seedApplication(BOLA.email, { company: "NoBack", submissionState: "manual" })
     await signIn(context, BOLA.email)
     await openBoard(page)
     await card(page, "Applied", "NoBack").getByRole("button", { name: /^Move .* to…/ }).click()
-    await expect(page.getByRole("menuitem", { name: "Draft" })).toHaveCount(0)
-    await expect(page.getByText(/can't be undone/i).first()).toBeVisible()
+    // AC-6.5: the item stays on the menu, disabled, carrying its reason. Asserting its absence passed
+    // only because it looked before the menu rendered (moveOptions pushes it for an Applied card).
+    const menu = page.getByRole("menu")
+    await expect(menu).toBeVisible()
+    const draftItem = menu.getByRole("menuitem", { name: /^Draft/ })
+    await expect(draftItem).toBeVisible()
+    await expect(draftItem).toHaveAttribute("aria-disabled", "true")
+    await expect(draftItem).toContainText("Can't go back to Draft. A record that you applied can't be undone.")
   })
 
   test("BRD:222 the Move to menu works from the keyboard without drag", async ({ page, context }) => {
@@ -254,12 +260,9 @@ test.describe("moves (AC-6.3 to AC-6.6)", () => {
       await openBoard(page)
       const item = card(page, column_, `Auto ${column_}`)
       await expect(item).toBeVisible()
-      const trigger = item.getByRole("button", { name: /^Move .* to…/ })
-      if (await trigger.count()) {
-        await trigger.click()
-        await expect(page.getByRole("menuitem", { name: /^(Sending|Needs you)$/ })).toHaveCount(0)
-        await expect(page.getByRole("menuitem")).toHaveCount(0)
-      }
+      // AC-6.7: an automatic card has no Move to trigger at all (moveOptions returns [] for placement.automatic),
+      // so assert that absence hard: a guard would pass vacuously whenever nothing rendered.
+      await expect(item.getByRole("button", { name: /^Move .* to…/ })).toHaveCount(0)
     })
   }
 
