@@ -949,6 +949,64 @@ check "F-QA-24: every helper docker run in restore.sh is guarded by the stop-fla
   bash -c 'n=$(grep -c "docker run --rm" "$1"); [[ $(grep -B3 "docker run --rm" "$1" | grep -c "^ *helper_guard || return 15") == "$n" ]]' _ "$SCRIPTS/restore.sh"
 check "F-QA-24: teardown writes the stop flag before it removes anything" \
   bash -c 'awk "/^teardown\\(\\) \\{/{t=1} t&&/stop_flag/{print NR; exit}" "$1" | grep -q . && grep -q "EVE_RESTORE_STOP_FILE" "$1"' _ "$SCRIPTS/restore-drill.sh"
+
+# --------------- a failed reference query must fail the restore (#164 review)
+# q_names fails when psql fails (a broken schema, a lost connection). A `|| true` on the
+# whole pipeline swallowed that, leaving an empty refs file, so the run reported
+# resume_missing=0 document_missing=0 and status=ok on a query that never ran: a silent
+# pass on the very check the drill exists for. The stub docker answers every step of
+# restore.sh and fails only the reference query STUB_MODE names, so the run reaches
+# step=references either way. Real age files and local target dirs keep it in $T.
+FDRF="$T/fakedocker-refs"; mkdir -p "$FDRF"
+cat >"$FDRF/docker" <<'STUB'
+#!/usr/bin/env bash
+q=""
+for a in "$@"; do [[ "$a" == Q=* ]] && q="${a#Q=}"; done
+if [[ $1 == ps ]]; then echo fakepg0029; exit 0; fi
+if [[ -n $q ]]; then
+  case "$q" in
+    *string_agg*)
+      # The two reference queries: fail the one STUB_MODE names, answer the other.
+      case "$STUB_MODE:$q" in
+        resfail:*string_agg*public.resume_upload*) echo "psql: error: could not read resume_upload" >&2; exit 1 ;;
+        docfail:*string_agg*public.tailored_document*) echo "psql: error: could not read tailored_document" >&2; exit 1 ;;
+      esac
+      # A query that succeeded over an empty table: one row, the empty string.
+      echo ""
+      exit 0 ;;
+    *) echo 0; exit 0 ;;
+  esac
+fi
+case "$*" in
+  exec\ -i*) cat >/dev/null ;;
+  *EVE_COUNT_SH*) echo "EVECOUNTS tables=1 rows=1 counts=0123456789abcdef" ;;
+  exec*) echo 0 ;;
+  run\ *) cat >/dev/null; echo 0 ;;
+esac
+exit 0
+STUB
+chmod 755 "$FDRF/docker"
+mkdir -p "$T/rf-src/documents" "$T/rf-src/resumes" "$T/rf-set"
+printf 'doc\n' >"$T/rf-src/documents/kept.pdf"
+printf 'res\n' >"$T/rf-src/resumes/kept.pdf"
+printf 'dump\n' >"$T/rf-src/db"
+age -e -r "$RECIPIENT" -o "$T/rf-set/eve-db-20261023T010000Z.dump.age" "$T/rf-src/db"
+tar -cf - -C "$T/rf-src/documents" . | age -e -r "$RECIPIENT" -o "$T/rf-set/eve-documents-20261023T010000Z.tar.age"
+tar -cf - -C "$T/rf-src/resumes" . | age -e -r "$RECIPIENT" -o "$T/rf-set/eve-resumes-20261023T010000Z.tar.age"
+refs_run() { # refs_run MODE: a full restore against the stub, into fresh empty target dirs
+  rm -rf "$T/rf-docs" "$T/rf-res"; mkdir -p "$T/rf-docs" "$T/rf-res"
+  out="$(env -i PATH="$FDRF:$PATH" HOME="$TEST_HOME" STUB_MODE="$1" bash "$SCRIPTS/restore.sh" --env-file /dev/null --identity "$KEY" --set 20261023T010000Z --backup-dir "$T/rf-set" --no-verify-log --target-project ja-a2j-refs --documents-dir "$T/rf-docs" --resumes-dir "$T/rf-res" 2>&1)"; rc=$?
+}
+refs_run resfail
+check "REG-006: a failed resume reference query exits 1 with status=failed step=references reason=refs and never prints status=ok" \
+  bash -c '[[ $1 == 1 ]] && grep -q "status=failed step=references reason=refs" <<<"$2" && ! grep -q "status=ok" <<<"$2"' _ "$rc" "$out"
+refs_run docfail
+check "REG-007: a failed tailored_document reference query fails the same way (exit 1, step=references reason=refs, no status=ok)" \
+  bash -c '[[ $1 == 1 ]] && grep -q "status=failed step=references reason=refs" <<<"$2" && ! grep -q "status=ok" <<<"$2"' _ "$rc" "$out"
+refs_run empty
+check "REG-008: a reference query that succeeds with no rows still passes (an empty table is legitimate): exit 0, refs=0, missing=0" \
+  bash -c '[[ $1 == 0 ]] && grep -q "step=references resume_refs=0 resume_missing=0 document_refs=0 document_missing=0" <<<"$2" && grep -q "eve-restore status=ok set=20261023T010000Z verified=references-only" <<<"$2"' _ "$rc" "$out"
+
 # F-SEC-24: on_signal waits for every process of the step (the docker CLIs restore.sh
 # started), not only restore.sh, before teardown runs.
 check "F-SEC-24: on_signal waits until no descendant of the step is left (bounded, then KILL)" \
@@ -1771,6 +1829,68 @@ env -i PATH="$PATH" HOME="$TEST_HOME" DOCKER_CONFIG="$DOCKER_CFG" bash "$SCRIPTS
 check "A2: a pre-A2 three-file set still restores and verifies (candidates skipped, references found flat)" \
   bash -c '[[ $1 == 0 ]] && grep -q "step=candidates status=skipped reason=no-archive" "$2" && grep -q "eve-restore status=ok set=$3 verified=backup-log" "$2"' _ "$rc" "$T/a2-drill-old.out" "$LATEST"
 check "A2: outputs hold no markers, identity or recipient" no_markers "$T"/a2-*.out
+
+# --------------- a failed resume upload needs no stored file (GitHub Sambalicious/eve-factory#47)
+# A resume_upload row with status='failed' is not required to have a file, and the API treats it
+# as not required (apps/api/src/files/storage-migrate-rows.ts, `required: row.status !== "failed"`),
+# so the restore references check must not require one. The shared fixture above has no
+# status column, so every drill so far ran the status-less path (REG-004); this section
+# adds the column and its own rows, and drops both again at the end, so no earlier or
+# later check sees them.
+echo "# integration: a failed resume upload needs no stored file"
+check "REG-004: the shared fixture has no resume_upload.status column (the drills above ran the status-less path)" \
+  test "$(psql_owner -c "select count(*) from information_schema.columns where table_schema = 'public' and table_name = 'resume_upload' and column_name = 'status'")" = 0
+psql_owner >/dev/null <<SQL
+ALTER TABLE public.resume_upload ADD COLUMN status text;
+UPDATE public.resume_upload SET status = 'drafted';
+INSERT INTO public.resume_upload VALUES ('r-failed', 'gone.pdf', 'r-failed.pdf', '$C1'::uuid, 'failed');
+SQL
+failed_backup() { env -i PATH="$PATH" HOME="$TEST_HOME" DOCKER_CONFIG="$DOCKER_CFG" bash "$SCRIPTS/backup.sh" --env-file "$T/a2.env" >"$1" 2>&1; }
+failed_set() { sed -nE 's/.* status=ok set=([0-9]{8}T[0-9]{6}Z) .*/\1/p' "$1" | tail -n 1; }
+failed_drill() { env -i PATH="$PATH" HOME="$TEST_HOME" DOCKER_CONFIG="$DOCKER_CFG" bash "$SCRIPTS/restore-drill.sh" --identity "$KEY" --backup-dir "$B" --set "$2" --project "$DRILL_PROJECT" --env-file /dev/null >"$1" 2>&1; }
+
+# REG-001: status='failed' and no file at all.
+failed_backup "$T/failed-nofile.out"; rc=$?
+SETF1="$(failed_set "$T/failed-nofile.out")"
+check "REG-001: a backup holding a failed, file-less upload row exits 0" test "$rc" = 0 -a -n "$SETF1"
+failed_drill "$T/failed-nofile-drill.out" "$SETF1"; rc=$?
+check "REG-001: restoring it verifies ok (exit 0) and resume_refs leaves the failed row out" \
+  bash -c '[[ $1 == 0 ]] && grep -q "step=references resume_refs=2 resume_missing=0" "$2" && grep -q "eve-restore status=ok set=$3 " "$2"' _ "$rc" "$T/failed-nofile-drill.out" "$SETF1"
+
+# REG-003: status='failed' with a file: not required, but its file still counts.
+# The row carries a Candidate ID, so its file lives in the candidates volume (A2
+# layout) and is counted by candidates_files, which the drill still compares.
+docker run --rm --network none -e C1="$C1" -v "$CAND_VOL:/c" --entrypoint sh postgres:17-alpine -c \
+  'printf "fake failed upload\n" >"/c/$C1/resumes/r-failed.pdf"; chown 1000:1000 "/c/$C1/resumes/r-failed.pdf"; chmod 600 "/c/$C1/resumes/r-failed.pdf"' >/dev/null
+failed_backup "$T/failed-withfile.out"; rc=$?
+SETF2="$(failed_set "$T/failed-withfile.out")"
+failed_drill "$T/failed-withfile-drill.out" "$SETF2"; rc2=$?
+check "REG-003: a failed row that does have a file restores ok, and the file count still matches backup.log" \
+  bash -c '[[ $1 == 0 && $2 == 0 ]] && grep -q " status=ok set=$3 .* candidates_files=8 " "$4/backup.log" && grep -q "eve-restore status=ok set=$3 verified=backup-log .* candidates_files=8 " "$5"' _ "$rc" "$rc2" "$SETF2" "$B" "$T/failed-withfile-drill.out"
+
+# REG-002: any other status is still required. 'drafted' with no file must fail.
+docker run --rm --network none -e C1="$C1" -v "$CAND_VOL:/c" --entrypoint sh postgres:17-alpine -c 'rm -f "/c/$C1/resumes/r-failed.pdf"' >/dev/null
+psql_owner -c "UPDATE public.resume_upload SET status = 'drafted' WHERE id = 'r-failed'" >/dev/null
+failed_backup "$T/failed-drafted.out"; rc=$?
+SETF3="$(failed_set "$T/failed-drafted.out")"
+failed_drill "$T/failed-drafted-drill.out" "$SETF3"; rc2=$?
+check "REG-002: a 'drafted' row with a missing file still fails with reason=mismatch,resume-files-missing" \
+  bash -c '[[ $1 == 0 && $2 == 1 ]] && grep -q "resume_missing=1" "$3" && grep -q "reason=mismatch,resume-files-missing" "$3"' _ "$rc" "$rc2" "$T/failed-drafted-drill.out"
+
+# REG-005: 'drafting' is still required too.
+psql_owner -c "UPDATE public.resume_upload SET status = 'drafting' WHERE id = 'r-failed'" >/dev/null
+failed_backup "$T/failed-drafting.out"; rc=$?
+SETF4="$(failed_set "$T/failed-drafting.out")"
+failed_drill "$T/failed-drafting-drill.out" "$SETF4"; rc2=$?
+check "REG-005: a 'drafting' row with a missing file is still reported missing (resume_refs counts it)" \
+  bash -c '[[ $1 == 0 && $2 == 1 ]] && grep -q "step=references resume_refs=3 resume_missing=1" "$3" && grep -q "reason=mismatch,resume-files-missing" "$3"' _ "$rc" "$rc2" "$T/failed-drafting-drill.out"
+check "failed-upload outputs hold no markers, identity or recipient" no_markers "$T"/failed-*.out
+
+# Leave the fixture as the other checks expect it: no extra row, no status column.
+psql_owner >/dev/null <<SQL
+DELETE FROM public.resume_upload WHERE id = 'r-failed';
+ALTER TABLE public.resume_upload DROP COLUMN status;
+SQL
 
 check "no backup run anywhere in this suite printed a marker" no_markers "$T"/*.out "$B/backup.log" "$B2/backup.log"
 

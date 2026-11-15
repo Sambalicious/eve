@@ -6,9 +6,11 @@
 # into target volumes (or empty host directories), then checks the result:
 #   - table count, total rows and the per-table count digest match backup.log;
 #   - document, resume (and candidates) file counts match backup.log;
-#   - every resume_upload / tailored_document row points at a restored file,
+#   - every resume_upload / tailored_document row points at a restored file
+#     (a resume_upload row with status=failed is not required to have one),
 #     either flat (pre-A2) or at <candidate_id>/{resumes,documents}/<name> in the
-#     candidates target (A2 layout).
+#     candidates target (A2 layout). A reference query that fails stops the restore
+#     (reason=refs): a list it could not read is not a set with no rows.
 #
 # Usage:
 #   restore.sh --identity FILE --target-project NAME [--target-db NAME] [--target-db-user NAME]
@@ -313,12 +315,30 @@ has_cid() { # has_cid TABLE: prints 1 when public.TABLE has candidate_id
   q_names "select count(*) from information_schema.columns where table_schema = 'public' and table_name = '$1' and column_name = 'candidate_id'"
 }
 cid_expr() { if [[ "$(has_cid "$1")" == 1 ]]; then echo "candidate_id::text"; else echo "''"; fi; }
+# A failed upload is not required to have a stored file (it may or may not have one): the API treats such a row as not required
+# (apps/api/src/files/storage-migrate-rows.ts, `required: row.status !== "failed"`).
+# Older schemas have no status column, so add the filter only when it exists.
+has_status() { # has_status TABLE: prints 1 when public.TABLE has a status column
+  q_names "select count(*) from information_schema.columns where table_schema = 'public' and table_name = '$1' and column_name = 'status'"
+}
+failed_filter() { if [[ "$(has_status "$1")" == 1 ]]; then echo " where status is distinct from 'failed'"; else echo ""; fi; }
 RES_CID="$(cid_expr resume_upload)" || die count
 DOC_CID="$(cid_expr tailored_document)" || die count
-RES_SQL="select case when to_regclass('public.resume_upload') is null then '' else (select coalesce(string_agg($RES_CID || '|' || storage_name, E'\n'), '') from public.resume_upload) end"
+RES_WHERE="$(failed_filter resume_upload)" || die count
+RES_SQL="select case when to_regclass('public.resume_upload') is null then '' else (select coalesce(string_agg($RES_CID || '|' || storage_name, E'\n'), '') from public.resume_upload$RES_WHERE) end"
 DOC_SQL="select case when to_regclass('public.tailored_document') is null then '' else (select coalesce(string_agg(c || '|' || n, E'\n'), '') from (select $DOC_CID as c, pdf_storage_name as n from public.tailored_document union all select $DOC_CID, docx_storage_name from public.tailored_document) s) end"
-q_names "$RES_SQL" | grep . | sort -u >"$WORK/res.refs" || true
-q_names "$DOC_SQL" | grep . | sort -u >"$WORK/doc.refs" || true
+# A reference query that fails must stop the restore (found in the #164 review).
+# Swallowing it with `|| true` would leave an empty list, which is exactly what a set
+# with no rows looks like, and the drill would report resume_missing=0
+# document_missing=0 on a query that never ran.
+# `grep .` finding nothing is legitimate (an empty table) and is still tolerated.
+refs_into() { # refs_into SQL OUT: the stored names, one per line, deduplicated
+  local sql="$1" out="$2" raw
+  raw="$(q_names "$sql")" || die refs
+  printf '%s\n' "$raw" | grep . | sort -u >"$out" || true
+}
+refs_into "$RES_SQL" "$WORK/res.refs"
+refs_into "$DOC_SQL" "$WORK/doc.refs"
 helper_guard || die stopped
 list_files "$RES_VOLUME" "$RES_DIR" | sort -u >"$WORK/res.files" || die list
 list_files "$DOC_VOLUME" "$DOC_DIR" | sort -u >"$WORK/doc.files" || die list
