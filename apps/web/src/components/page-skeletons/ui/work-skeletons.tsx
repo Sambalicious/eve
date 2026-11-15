@@ -104,16 +104,11 @@ export function PostingsListSkeleton() {
   )
 }
 
-/** "Add a job link" and the three line tabs above the list, for the first load. */
+/** "Add a job link" as the page's one outline button, plus the three line tabs, for the first load. */
 export function PostingsSkeleton() {
   return (
     <div className="flex w-full max-w-[1120px] flex-col gap-4 px-4 lg:px-6" aria-hidden="true">
-      <SkeletonSection titleWidth="w-28" className="mb-6">
-        <div className="flex max-w-xl flex-col gap-1.5">
-          <Skeleton className="h-10 w-full rounded-lg pointer-coarse:h-12" />
-          <SkeletonText className="text-sm leading-normal" widths={["w-full", "w-1/2"]} />
-        </div>
-      </SkeletonSection>
+      <Skeleton className="h-8 w-full rounded-lg pointer-coarse:h-10 sm:w-40 sm:self-start" />
       <div className="flex gap-5 border-b">
         {["w-14", "w-36", "w-6"].map((width, i) => (
           <SkeletonText key={i} className="w-auto pb-2.5 text-sm" widths={[width]} />

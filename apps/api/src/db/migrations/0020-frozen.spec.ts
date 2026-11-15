@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
@@ -16,6 +16,14 @@ import { frozenFamilyWithDuties, frozenFold, frozenMigratedFamily, frozenSeniori
  */
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 const EPICS = "../../../../../epics/active/"
+
+/**
+ * The feature files are process artifacts: the public repository does not carry `epics/`, so the
+ * corpus checks cannot run there. They are skipped instead of failing a build for a file the
+ * contributor was never given; the migration-source check keeps running.
+ */
+const EPIC6_GHERKIN = here(`${EPICS}EPIC-0006-role-relevance-filter/gherkin/`)
+const hasFeatures = existsSync(EPIC6_GHERKIN) && ["role-family-classification.feature", "pre-filter-titles.feature"].every((name) => existsSync(here(`${EPICS}EPIC-0001-job-application-assistant/gherkin/${name}`)))
 
 function featureStrings(path: string): string[] {
   const text = readFileSync(here(`${EPICS}${path}`), "utf8")
@@ -43,20 +51,24 @@ function generatedTitles(count: number): string[] {
   return Array.from({ length: count }, () => Array.from({ length: 1 + (next() % 5) }, () => words[next() % words.length]).join(" "))
 }
 
-const epic6 = readdirSync(here(`${EPICS}EPIC-0006-role-relevance-filter/gherkin/`))
-  .filter((name) => name.endsWith(".feature"))
-  .flatMap((name) => featureStrings(`EPIC-0006-role-relevance-filter/gherkin/${name}`))
-const slice8 = ["role-family-classification.feature", "pre-filter-titles.feature"].flatMap((name) => featureStrings(`EPIC-0001-job-application-assistant/gherkin/${name}`))
+const epic6 = hasFeatures
+  ? readdirSync(EPIC6_GHERKIN)
+      .filter((name) => name.endsWith(".feature"))
+      .flatMap((name) => featureStrings(`EPIC-0006-role-relevance-filter/gherkin/${name}`))
+  : []
+const slice8 = hasFeatures
+  ? ["role-family-classification.feature", "pre-filter-titles.feature"].flatMap((name) => featureStrings(`EPIC-0001-job-application-assistant/gherkin/${name}`))
+  : []
 const corpus = [...new Set([...epic6, ...slice8, ...generatedTitles(600)])]
 const DUTIES = [[], ["Hiring and performance reviews for direct reports"], ["Write production React code"], ["Line management of 8 engineers", "Ship features"]]
 
 describe("migration 0020 frozen copies", () => {
-  it("the corpus holds the AC-1.3 and AC-2.3 fixture titles", () => {
+  it.skipIf(!hasFeatures)("the corpus holds the AC-1.3 and AC-2.3 fixture titles", () => {
     expect(corpus).toEqual(expect.arrayContaining(["TAM Architect", "Senior Platform Engineer", "Jr. Software Engineer", "Leader Junior Developer", "Head of Infrastructure"]))
     expect(corpus.length).toBeGreaterThan(1000)
   })
 
-  it("the frozen fold, classifier and seniority marker agree with the live functions on every title", () => {
+  it.skipIf(!hasFeatures)("the frozen fold, classifier and seniority marker agree with the live functions on every title", () => {
     const disagreements = corpus.filter(
       (title) =>
         frozenFold(title) !== foldForKeywords(title) ||

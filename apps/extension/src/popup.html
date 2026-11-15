@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Eve fill</title>
+    <!-- The two faces above the fold load before the first paint. `crossorigin` is required on a font preload. -->
+    <link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/bricolage-grotesque-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!-- Icons: one sprite, one <use> per icon. Tone is a class on the icon only. -->
+    <svg hidden aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <symbol id="i-info" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7.5" />
+        <path d="M10 9.2v4.3" />
+        <path d="M10 6.6h.01" />
+      </symbol>
+      <symbol id="i-spinner" viewBox="0 0 20 20">
+        <path d="M10 3a7 7 0 1 1-6.6 4.7" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7.5" />
+        <path d="m6.4 10.4 2.5 2.5 4.7-5.2" />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 20 20">
+        <path d="M10 3.2 17.4 16.4H2.6Z" />
+        <path d="M10 8v3.6" />
+        <path d="M10 13.9h.01" />
+      </symbol>
+      <symbol id="i-stop" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7.5" />
+        <rect x="7.6" y="7.6" width="4.8" height="4.8" rx="1" />
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7.5" />
+        <path d="m7.4 7.4 5.2 5.2m0-5.2-5.2 5.2" />
+      </symbol>
+    </svg>
+
+    <header>
+      <h1>Eve fill</h1>
+      <p id="connection"><span id="connection-text">Not connected to Eve.</span> <span id="connection-tail" hidden><span aria-hidden="true">·</span> <button id="change" class="btn-link" type="button" aria-label="Change Eve address">Change</button></span></p>
+    </header>
+
+    <!-- The address block: collapsed once an Eve address is saved, until Change is pressed. -->
+    <section class="connect" id="address-block">
+      <label class="field-label" for="origin">Eve address</label>
+      <div class="row">
+        <input id="origin" type="url" placeholder="https://eve.example.com" autocomplete="off" spellcheck="false" />
+        <button id="connect" class="btn-primary" type="button">Connect</button>
+      </div>
+    </section>
+
+    <div class="actions" id="actions">
+      <button id="fill" class="btn-outline" type="button" disabled>Review values</button>
+    </div>
+
+    <div id="status" hidden>
+      <svg id="status-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <use href="#i-info" />
+      </svg>
+      <div class="status-body">
+        <p id="status-text"></p>
+        <p id="status-sub" hidden></p>
+      </div>
+    </div>
+
+    <!-- Outside the status panel on purpose: an item line updates on every item and is not announced. -->
+    <ul id="result-lines" hidden></ul>
+
+    <div id="progress-block" hidden>
+      <p id="progress-text"></p>
+      <progress id="progress" value="0" max="1" aria-labelledby="progress-text"></progress>
+    </div>
+
+    <section id="review" hidden>
+      <h2>Review</h2>
+      <p id="review-summary"></p>
+      <p id="upload-note" hidden>Attaching a file can send it to the employer's site right away, before you submit.</p>
+      <p id="page-note">The employer's page and its scripts can read every value Eve types. Check each one before you fill.</p>
+      <ul id="review-values"></ul>
+    </section>
+
+    <footer>
+      <p class="note">Review, then click the employer's Submit yourself.</p>
+      <p id="limits" class="limits">Eve fills text, choices and checkboxes from your approved answers, and attaches your prepared resume and cover letter as PDFs only after you press Fill. It never signs in anywhere, never opens a file chooser, and never clicks Submit or a link; it may click a checkbox or radio to set it the way you would.</p>
+    </footer>
+
+    <div id="bar" hidden>
+      <button id="apply" class="btn-primary" type="button" disabled>Fill these values</button>
+      <button id="stop" class="btn-outline" type="button" aria-label="Stop filling" hidden>Stop</button>
+    </div>
+
+    <!-- The one live region: the visible status updates on every render, this only on a change worth hearing. -->
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+
+    <script type="module" src="../dist/popup.js"></script>
+  </body>
+</html>

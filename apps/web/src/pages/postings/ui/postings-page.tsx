@@ -20,7 +20,7 @@ import {
 import { CheckAgainPanel, useCheckAgain } from "@/features/check-again"
 import { FilterBar, POSTINGS_TABS, postingsSearch, type PostingsWebTab } from "@/features/filter-postings"
 import { hasExcludedFamily, preferencesQueryOptions } from "@/entities/job-preferences"
-import { AddJobLink } from "@/features/paste-job-link"
+import { AddJobLinkDialog } from "@/features/paste-job-link"
 import { useOverflowEnd } from "@/shared/lib/use-overflow-end"
 import { useDocumentTitle } from "@/shared/lib/use-document-title"
 import { Button } from "@/shared/ui/button"
@@ -62,7 +62,7 @@ export function PostingsPage() {
   return (
     <AppShell title={jobPostingCopy.pageTitle} description={jobPostingCopy.pageDescription}>
       <div className="flex w-full max-w-[1120px] flex-col gap-4 px-4 lg:px-6">
-        <AddJobLink className="mb-6" />
+        <AddJobLinkDialog />
         {/* recheckableCount ignores tab, filter and cursor: the same panel on every tab (P13). */}
         {page && page.recheckableCount > 0 && (
           <CheckAgainPanel

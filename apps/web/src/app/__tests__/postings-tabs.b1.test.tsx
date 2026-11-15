@@ -112,7 +112,7 @@ describe("Jobs tabs (B1 reasons, EPIC-0011 AC-4.5)", () => {
   it(":705 the Good matches empty state says what will appear", async () => {
     open("/postings", { postings: [vue()] })
     expect(await screen.findByRole("heading", { level: 2, name: "No good matches yet" })).toBeVisible()
-    expect(screen.getByText("Jobs that fit your profile appear here. Paste one on Home or set up alerts.")).toBeVisible()
+    expect(screen.getByText("Jobs that fit your profile appear here. Add a job link above or set up alerts.")).toBeVisible()
   })
 
   it(":711 filtering Not a match to a family with no postings gives the filter empty state", async () => {

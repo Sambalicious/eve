@@ -41,7 +41,7 @@ import { SubmissionStateService } from "./submission-state.service.js"
     { provide: FORM_SESSION_FACTORY, useValue: unavailableFormSessions },
     { provide: QUESTION_SCHEMAS, useFactory: () => createGreenhouseQuestionSchemas(createBoardHttp()) },
   ],
-  exports: [SubmissionService],
+  exports: [SubmissionService, SubmissionRepository],
 })
 export class SubmissionModule {}
 

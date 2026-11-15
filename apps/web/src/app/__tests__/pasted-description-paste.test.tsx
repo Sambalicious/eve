@@ -45,8 +45,15 @@ const LI_WARN =
 
 type User = ReturnType<typeof openDiscovery>["user"]
 
-async function addRegion() {
-  return screen.findByRole("region", { name: "Add a job link" })
+/**
+ * `/postings` opens the paste form in a dialog now: open it (unless already open)
+ * and return the dialog, which scopes every query the inline region used to.
+ */
+async function addRegion(user: User) {
+  const existing = screen.queryByRole("dialog", { name: "Add a job link" })
+  if (existing) return existing
+  await user.click(await screen.findByRole("button", { name: "Add a job link" }))
+  return await screen.findByRole("dialog", { name: "Add a job link" })
 }
 
 /** Opens the panel in `region` and fills what is given. Text is pasted, as the Candidate would. */
@@ -80,7 +87,7 @@ const linkPastes = (api: ReturnType<typeof openDiscovery>["api"]) => api.request
 describe("PD-1.1 the description panel in each paste form (PD:44)", () => {
   it("closed on load, the toggle reveals the description, its 0 / 30,000 counter, Job title and Company; focus moves to the description", async () => {
     const { user } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     const toggle = within(region).getByRole("button", { name: "Add the job description" })
     expect(toggle).toHaveAttribute("aria-expanded", "false")
     expect(within(region).queryByRole("textbox", { name: /^Job description/ })).not.toBeInTheDocument()
@@ -104,7 +111,7 @@ describe("PD-1.1 the description panel in each paste form (PD:44)", () => {
 
   it("the counter shows the trimmed, grouped count as text is pasted", async () => {
     const { user } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: `  ${"a".repeat(1240)}  ` })
     expect(within(region).getByText("1,240 / 30,000")).toBeVisible()
   })
@@ -119,7 +126,7 @@ describe("PD-1.1 the description panel in each paste form (PD:44)", () => {
 
   it("Remove description clears the description, title and company, closes the panel and returns focus to the toggle", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await user.click(within(region).getByRole("button", { name: "Remove description" }))
     expect(within(region).queryByRole("textbox", { name: /^Job description/ })).not.toBeInTheDocument()
@@ -128,6 +135,29 @@ describe("PD-1.1 the description panel in each paste form (PD:44)", () => {
     expect(within(region).getByRole("textbox", { name: /^Job description/ })).toHaveValue("")
     expect(within(region).getByRole("textbox", { name: "Job title" })).toHaveValue("")
     expect(linkPastes(api)).toHaveLength(0)
+  })
+
+  it("keeps the label and Remove on one row: a block label with Optional on its line, and a muted Remove with its icon", async () => {
+    const { user } = openDiscovery("/postings")
+    const region = await addRegion(user)
+    await fill(user, region, {})
+
+    const description = within(region).getByRole("textbox", { name: /^Job description/ }) as HTMLTextAreaElement
+    const label = description.labels?.[0]
+    expect(label).toHaveClass("block")
+    expect(label).toHaveTextContent("Job description (Optional)")
+    // Optional stays a muted span inside the label, on the same line.
+    expect(label?.querySelector("span")).toHaveTextContent("(Optional)")
+
+    const remove = within(region).getByRole("button", { name: "Remove description" })
+    // Neutral, not `text-primary`: cobalt stays on the primary action, focus and the
+    // active nav item (DESIGN.md), and this only clears text. The hover colour and the
+    // base focus ring carry the affordance instead.
+    expect(remove).toHaveClass("text-muted-foreground", "hover:text-foreground")
+    expect(remove).not.toHaveClass("text-primary")
+    expect(remove).toHaveClass("h-auto", "px-0", "py-1", "ml-auto", "pointer-coarse:min-h-11")
+    expect(remove).toHaveClass("focus-visible:ring-3", "focus-visible:ring-ring/40")
+    expect(remove.querySelector("svg")).toHaveAttribute("aria-hidden", "true")
   })
 })
 
@@ -149,7 +179,7 @@ describe("Hiring post row panel label (design review P2)", () => {
 describe("PD-1.1 a description-only paste (PD:58, EV:182)", () => {
   it("sends description, title and company, shows C-PD-30 with the Checking badge and View it, clears the form and closes the panel", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION, title: "Senior Frontend Engineer", company: "Paystack" })
     await send(user, region)
 
@@ -174,9 +204,9 @@ describe("PD-1.1 a description-only paste (PD:58, EV:182)", () => {
     const expected = [input]
 
     const postings = openDiscovery("/postings")
-    await fill(postings.user, await addRegion(), input)
-    await send(postings.user, await addRegion())
-    await resultLine(await addRegion())
+    await fill(postings.user, await addRegion(postings.user), input)
+    await send(postings.user, await addRegion(postings.user))
+    await resultLine(await addRegion(postings.user))
     expect(linkPastes(postings.api).map((r) => r.body)).toEqual(expected)
     postings.unmount()
 
@@ -192,15 +222,16 @@ describe("PD-1.1 a description-only paste (PD:58, EV:182)", () => {
 describe("PD-1.2 link-only stays as today (PD:91, PD:99, PD:112)", () => {
   it("PD:91 with the panel closed, a link sends exactly { url } and toasts C-LINK-1", async () => {
     const { user, api } = openDiscovery("/postings")
-    await user.type(await screen.findByRole("textbox", { name: "Job link" }), "https://jobs.lever.co/globex/abc-123")
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    const region = await addRegion(user)
+    await user.type(within(region).getByRole("textbox", { name: "Job link" }), "https://jobs.lever.co/globex/abc-123")
+    await user.click(within(region).getByRole("button", { name: "Check link" }))
     expect(await findToast("Checking the link. It goes through the same Eligibility, Match, duplicate and cap rules as discovered postings.")).toBeTruthy()
     expect(linkPastes(api).map((r) => r.body)).toEqual([{ url: "https://jobs.lever.co/globex/abc-123" }])
   })
 
   it("PD:99 a description of only spaces and line breaks counts as blank: the paste is { url } only", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: "https://jobs.lever.co/globex/abc-123", description: "   \n\n  \n", title: "Ignored" })
     await send(user, region)
     await waitFor(() => expect(linkPastes(api)).toHaveLength(1))
@@ -209,7 +240,7 @@ describe("PD-1.2 link-only stays as today (PD:91, PD:99, PD:112)", () => {
 
   it("PD:112 with the panel open and both blank, C-PD-20 shows on the link and nothing is sent", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, {})
     await send(user, region)
     const link = within(region).getByRole("textbox", { name: "Job link (Optional)" })
@@ -243,7 +274,7 @@ describe("PD-1.2 link-only stays as today (PD:91, PD:99, PD:112)", () => {
 describe("PD-1.3, PD-1.4 field validation (PD:167, PD:191, PD:205)", () => {
   it("PD:167 over 30,000 shows C-PD-22 live, the counter turns destructive and send is unavailable: no request", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     const description = await fill(user, region, { description: "a".repeat(30_001), title: "T", company: "C" })
     expect(within(region).getByText(C_PD_22)).toBeVisible()
     expect(description).toHaveAttribute("aria-invalid", "true")
@@ -273,7 +304,7 @@ describe("PD-1.3, PD-1.4 field validation (PD:167, PD:191, PD:205)", () => {
 
   it("a description under 200 characters shows C-PD-21 on send, with focus on the description", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     const description = await fill(user, region, { description: "a".repeat(199), title: "T", company: "C" })
     expect(within(region).queryByText(C_PD_21)).not.toBeInTheDocument()
     await send(user, region)
@@ -284,7 +315,7 @@ describe("PD-1.3, PD-1.4 field validation (PD:167, PD:191, PD:205)", () => {
 
   it("PD:191 a description-only paste without names shows C-PD-23 and C-PD-24, focus on Job title, nothing sent", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION })
     await send(user, region)
     const title = within(region).getByRole("textbox", { name: "Job title" })
@@ -296,7 +327,7 @@ describe("PD-1.3, PD-1.4 field validation (PD:167, PD:191, PD:205)", () => {
 
   it("PD:205 a non-ATS link without names: the server's 422 maps each fieldErrors entry onto its field", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: "https://careers.paystack.com/jobs/42", description: DESCRIPTION })
     await send(user, region)
     const title = within(region).getByRole("textbox", { name: "Job title" })
@@ -310,7 +341,7 @@ describe("PD-1.3, PD-1.4 field validation (PD:167, PD:191, PD:205)", () => {
 
   it("names over 200 characters are refused on send (C-PD-25, C-PD-25b), never cut", async () => {
     const { user } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     const long = "x".repeat(201)
     await fill(user, region, { description: DESCRIPTION })
     await user.click(within(region).getByRole("textbox", { name: "Job title" }))
@@ -327,7 +358,7 @@ describe("PD-1.3, PD-1.4 field validation (PD:167, PD:191, PD:205)", () => {
 describe("PD-5.1 Greenhouse, Lever or Ashby link with a description (RP:46, RP:96, RP:113)", () => {
   it("RP:46 a readable ATS link uses the employer's page: C-PD-31 and View it", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: "https://boards.greenhouse.io/acme/jobs/1042", description: DESCRIPTION })
     await send(user, region)
     const line = await resultLine(region)
@@ -338,7 +369,7 @@ describe("PD-5.1 Greenhouse, Lever or Ashby link with a description (RP:46, RP:9
 
   it("RP:96 a failed lookup with both names uses the description: C-PD-38", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: "https://boards.greenhouse.io/acme/jobs/4019999", description: DESCRIPTION, title: "Engineer", company: "Acme" })
     await send(user, region)
     expect(await resultLine(region)).toHaveTextContent(C_PD_38)
@@ -347,7 +378,7 @@ describe("PD-5.1 Greenhouse, Lever or Ashby link with a description (RP:46, RP:9
 
   it("RP:113 a failed lookup with no names shows C-PD-27, keeps every value, marks the names and focuses Job title", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     const link = "https://boards.greenhouse.io/acme/jobs/4019999"
     await fill(user, region, { link, description: DESCRIPTION })
     await send(user, region)
@@ -375,7 +406,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
   it("RP:130 a description for a held link with no text attaches: C-PD-32 and View it to the new posting id", async () => {
     const held = rankedPosting({ applicationUrl: LINK, applyUrl: LINK, origin: "pasted_link", postingText: "", status: "skipped", skipReason: "unsupported_application_system", rank: null })
     const { user, api } = openDiscovery("/postings", { postings: [held] })
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: LINK, description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
     const line = await resultLine(region)
@@ -389,7 +420,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
   it("RP:148 a new description replaces an earlier one with no Application: C-PD-32", async () => {
     const held = pastedPosting({ applicationUrl: LINK, applyUrl: LINK })
     const { user } = openDiscovery("/postings", { postings: [held] })
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: LINK, description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
     const line = await resultLine(region)
@@ -404,7 +435,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
       postings: [held],
       existingApplication: (id) => (id === held.id ? { id: appId, submissionState: null, isSample: false, detailsDeleted: false } : null),
     })
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: LINK, description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
     const line = await resultLine(region)
@@ -419,7 +450,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
 
   it("RP:205 an identical description-only paste: C-PD-33 and View it to the earlier posting, values kept", async () => {
     const { user, api } = openDiscovery("/postings")
-    const region = await addRegion()
+    const region = await addRegion(user)
     const input = { description: DESCRIPTION, title: "Senior Frontend Engineer", company: "Paystack" }
     await fill(user, region, input)
     await send(user, region)
@@ -445,7 +476,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
     const { user } = openDiscovery("/postings")
     // Registered after the fakes so it runs first; it returns nothing after the gate, so the contract fake answers.
     server.use(http.post(JOB_POSTING_LINKS_PATH, async () => { await gate }))
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     const button = within(region).getByRole("button", { name: "Check this job" })
     button.focus()
@@ -460,7 +491,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
   it("re-paste while the posting is still checking: C-PD-28 above send, values kept, focus on send", async () => {
     const held = pastedPosting({ applicationUrl: LINK, applyUrl: LINK, status: "checking", rank: null })
     const { user } = openDiscovery("/postings", { postings: [held] })
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { link: LINK, description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
     expect(await within(region).findByRole("alert")).toHaveTextContent(C_PD_28)
@@ -472,7 +503,7 @@ describe("PD-5.2 to PD-5.4 re-paste outcomes (RP:130, RP:148, RP:182, RP:205)", 
 describe("PD-6.3, PD-6.4 waiting results (SAFE:152, SAFE:195)", () => {
   it("SAFE:152 during a cost pause the description is saved as waiting: C-PD-36 with the WAT resume date", async () => {
     const { user } = openDiscovery("/postings", { pasteWaitingReason: "cost_pause" })
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
     const line = await resultLine(region)
@@ -485,7 +516,7 @@ describe("PD-6.3, PD-6.4 waiting results (SAFE:152, SAFE:195)", () => {
 
   it("SAFE:195 an invitee whose postings may not be checked: C-PD-37", async () => {
     const { user } = openDiscovery("/postings", { pasteWaitingReason: "checks_not_enabled" })
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
     expect(await resultLine(region)).toHaveTextContent(C_PD_37)
@@ -493,13 +524,15 @@ describe("PD-6.3, PD-6.4 waiting results (SAFE:152, SAFE:195)", () => {
 })
 
 describe("B5 send failure", () => {
-  it("a network failure with a description toasts C-ERR-2 with 'check the job' and keeps the panel and values", async () => {
+  it("a network failure with a description in the Add a job link dialog shows C-ERR-2 inline with 'check the job' and keeps the panel and values", async () => {
     const { user } = openDiscovery("/postings")
     server.use(http.post(JOB_POSTING_LINKS_PATH, () => HttpResponse.error()))
-    const region = await addRegion()
+    const region = await addRegion(user)
     await fill(user, region, { description: DESCRIPTION, title: "Engineer", company: "Paystack" })
     await send(user, region)
-    expect(await findToast("Couldn't check the job. Nothing changed. Try again.")).toBeTruthy()
+    const alert = await within(region).findByRole("alert")
+    expect(alert).toHaveTextContent("Couldn't check the job. Nothing changed. Try again.")
     expect(within(region).getByRole("textbox", { name: /^Job description/ })).toHaveValue(DESCRIPTION)
+    expect(screen.getByRole("region", { name: "Messages" })).not.toHaveTextContent("Couldn't check the job")
   })
 })

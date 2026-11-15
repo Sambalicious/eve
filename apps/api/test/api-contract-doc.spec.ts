@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { HttpStatus } from "@nestjs/common"
@@ -17,9 +17,18 @@ const EPIC_0010_CONTRACT = fileURLToPath(new URL("../../../epics/active/EPIC-001
 /** v1.28.0: EPIC-0011's handoff documents `advanced_locked` (message not in backticks, so the row pattern allows both). */
 const EPIC_0011_CONTRACT = fileURLToPath(new URL("../../../epics/active/EPIC-0011-simplify-eve/api-contract.md", import.meta.url))
 
+/**
+ * The handoffs are process artifacts: the public repository does not carry `epics/`, so the checks
+ * that read them cannot run there. They are skipped instead of failing a build for a file the
+ * contributor was never given; the checks that read only repository source keep running.
+ */
+const hasContract = existsSync(CONTRACT)
+const hasErrorTables = [CONTRACT, EPIC_0006_CONTRACT, EPIC_0010_CONTRACT, EPIC_0011_CONTRACT].every((path) => existsSync(path))
+
 /** Rows of the "Error format" tables: | `code` | HTTP | `message` | When | */
 function documentedErrors(): Map<string, { status: number; message: string }> {
   const rows = new Map<string, { status: number; message: string }>()
+  if (!hasErrorTables) return rows
   for (const line of [readFileSync(CONTRACT, "utf8"), readFileSync(EPIC_0006_CONTRACT, "utf8"), readFileSync(EPIC_0010_CONTRACT, "utf8"), readFileSync(EPIC_0011_CONTRACT, "utf8")].join("\n").split("\n")) {
     const match = /^\| `([a-z_]+)` \| (\d{3}) \| `?([^`|]*?)`? \|/.exec(line)
     if (match) rows.set(match[1]!, { status: Number(match[2]), message: match[3]! })
@@ -28,7 +37,7 @@ function documentedErrors(): Map<string, { status: number; message: string }> {
 }
 
 // The handoff document is what the Frontend Engineer reads; it must match the code.
-describe("api-contract.md error table", () => {
+describe.skipIf(!hasErrorTables)("api-contract.md error table", () => {
   const documented = documentedErrors()
 
   it("documents every ApiErrorCode and nothing else", () => {
@@ -46,8 +55,8 @@ describe("api-contract.md error table", () => {
 // v1.20.0, so EPIC-0002 A2's additions are v1.21.0. EPIC-0008 then took v1.22.0, apply anyway v1.23.0 and EPIC-0008
 // hardening v1.23.1, so B1 was v1.24.0 (D19, renumbered at the merge with main 6933243). Apply anyway bounds then
 // took v1.24.0, so B1 is v1.25.0 (renumbered at the merge with main 0422b14).
-describe("api-contract.md EPIC-0002 A2 version", () => {
-  const contract = readFileSync(CONTRACT, "utf8")
+describe.skipIf(!hasContract)("api-contract.md EPIC-0002 A2 version", () => {
+  const contract = hasContract ? readFileSync(CONTRACT, "utf8") : ""
 
   it("labels A2's GET /v1/me and feature_not_yet_available v1.21.0, v1.18.0 EPIC-0006 and v1.19.0/v1.20.0 EPIC-0007", () => {
     // v1.25.1 (EPIC-0002 B1 patch CR-B1-02) took the header, on v1.25.0 (EPIC-0002 B1) and v1.24.0 (apply anyway, bounds and consent); the A2 label stays as its "Earlier header".
@@ -83,10 +92,10 @@ describe("api-contract.md EPIC-0002 A2 version", () => {
 
 // Slice 8d (PF-80, 8d.19, 8d.21, 8d.26): the contract states the 8d rules and no stale keyword sentence.
 describe("api-contract.md slice 8d content", () => {
-  const contract = readFileSync(CONTRACT, "utf8")
+  const contract = hasContract ? readFileSync(CONTRACT, "utf8") : ""
   const fold = readFileSync(fileURLToPath(new URL("../../../packages/contracts/src/keyword-fold.ts", import.meta.url)), "utf8")
 
-  it("states the cursor bound, the invisible keyword rule, both statement timeouts and the fold backfill rule", () => {
+  it.skipIf(!hasContract)("states the cursor bound, the invisible keyword rule, both statement timeouts and the fold backfill rule", () => {
     expect(contract).toMatch(/outside 1970-01-01T00:00:00Z to 2200-01-01T00:00:00Z \(both inclusive\) is `400`/)
     expect(contract).toMatch(/empty after `foldForKeywords`[^|]*is no keyword/)
     expect(contract).toMatch(/`keywordFoldsToEmpty`/)
@@ -98,7 +107,7 @@ describe("api-contract.md slice 8d content", () => {
     expect(fold).toMatch(/any change to this function ships a migration that\s+\*?\s*recomputes `job_posting\.title_folded` for every titled row/)
   })
 
-  it("never says the web's postings URL parser checks only the keyword length", () => {
+  it.skipIf(!hasContract)("never says the web's postings URL parser checks only the keyword length", () => {
     expect(contract).not.toMatch(/postings-url\.ts[^.\n]*only[^.\n]*length/i)
     expect(contract).not.toMatch(/checks only the (keyword )?length/i)
   })
@@ -130,7 +139,7 @@ function operatorOnlyRoutes(): string[] {
 // v1.25.0 (EPIC-0002 B1): PUT /v1/eligibility-settings is removed, so four Operator-only writes remain.
 // The code assertion is red until the B1 implementation deletes the route.
 describe("api-contract.md EPIC-0002 A2 Operator-only writes (D27, F-CR-10)", () => {
-  const contract = readFileSync(CONTRACT, "utf8")
+  const contract = hasContract ? readFileSync(CONTRACT, "utf8") : ""
   const paragraph = /^\*\*Operator-only shared catalog writes \(A2\)\.\*\*.*$/m.exec(contract)?.[0] ?? ""
 
   it("the code has the four Operator-only shared writes left after B1", () => {
@@ -142,7 +151,7 @@ describe("api-contract.md EPIC-0002 A2 Operator-only writes (D27, F-CR-10)", () 
     ])
   })
 
-  it("the A2 Operator-only paragraph names every @OperatorOnly route and says four", () => {
+  it.skipIf(!hasContract)("the A2 Operator-only paragraph names every @OperatorOnly route and says four", () => {
     expect(paragraph).not.toBe("")
     for (const route of operatorOnlyRoutes()) {
       const [method, path] = route.split(" ")
@@ -152,7 +161,7 @@ describe("api-contract.md EPIC-0002 A2 Operator-only writes (D27, F-CR-10)", () 
     expect(paragraph).toMatch(/`PUT \/v1\/eligibility-settings` was the fifth until EPIC-0002 B1, v1\.25\.0, which removed it/)
   })
 
-  it("the POST /v1/ai-provider/approval section documents the 404 for anyone but the Operator", () => {
+  it.skipIf(!hasContract)("the POST /v1/ai-provider/approval section documents the 404 for anyone but the Operator", () => {
     const section = /^### `POST \/v1\/ai-provider\/approval`$([\s\S]*?)^### /m.exec(contract)?.[1] ?? ""
     expect(section).toMatch(/^- \*\*Error responses:\*\* .*`404 not_found`.*Operator/m)
   })

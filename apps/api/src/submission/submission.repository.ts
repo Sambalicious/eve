@@ -6,10 +6,10 @@ import { sql } from "../db/sql.js"
 import { CandidateScope } from "../db/candidate-scope.js"
 import type { QueuedPostingDroppedDetail, SamplePostingDroppedDetail } from "@eve/contracts"
 
-import type { BlockedReason, BlockedSubReason, EvidenceKind } from "../db/schema.js"
+import type { BlockedReason, BlockedSubReason, EvidenceKind, SubmissionState } from "../db/schema.js"
 import { type CandidateTx, TenantDatabase } from "../db/tenant-database.js"
 import { applyTransactionTimeouts, transactionTimeouts } from "../db/transaction-timeouts.js"
-import { normaliseApplicationUrl } from "../discovery/application-url.js"
+import { normaliseApplicationUrl, isWebUrl, locateAts } from "../discovery/application-url.js"
 import { tierMapIn } from "../discovery/tier-map.js"
 import { sharePreferences } from "../preferences/preferences-lock.js"
 import { readPreferences } from "../preferences/preferences-read.js"
@@ -25,8 +25,24 @@ import { postingState } from "../documents/override-reader.js"
 
 export const DAILY_CAP = 5
 
+/**
+ * ADR 0016: the submission states a fill may touch. Only `blocked`, where the automatic path gave up and the
+ * Candidate is applying by hand. A `queued` Application is left out on purpose: the worker could submit it while
+ * the Candidate fills it by hand, and that duplicate is worse than no fill.
+ */
+const FILLABLE_SUBMISSION_STATES: readonly SubmissionState[] = ["blocked"]
+
 /** States in which an Application is "active" for the same-company rule (AC 6.6). */
 export const ACTIVE_STATES = ["queued", "submit_claimed", "submitting", "confirmed", "uncertain", "blocked"] as const
+
+/** A job board's own requisition query parameter, which `normaliseApplicationUrl` strips as tracking. */
+function jobIdParam(raw: string): string | null {
+  try {
+    return new URL(raw).searchParams.get("gh_jid")
+  } catch {
+    return null
+  }
+}
 
 export type ClaimRefusal = "paused" | "gate_not_passed" | "automatic_disabled" | "cap_reached" | "duplicate" | "same_company" | "not_claimable" | "posting_closed"
 
@@ -39,6 +55,9 @@ export type ClaimRefusal = "paused" | "gate_not_passed" | "automatic_disabled" |
 export const CLAIM_TIMEOUTS = transactionTimeouts(5_000, 10_000)
 
 type Db = CandidateTx
+
+/** The Application a page matched, as ADR 0016 may show it (no page or Candidate state). */
+export type MatchedApplicationRow = Readonly<{ id: string; company: string | null; role_title: string | null }>
 
 /** The Candidate whose `CandidateTx` a method runs in (`forCandidate` sets the scope with the setting). */
 const cid = (): string => CandidateScope.require()
@@ -139,6 +158,88 @@ export class SubmissionRepository {
       grossSalaryPolicy: salary("gross_salary_policy"),
       currentSalary: salary("current_salary"),
     }
+  }
+
+  /**
+   * ADR 0016 matching: the Candidate's own Application for a page the extension
+   * read, or null. The stored URL is compared in the same normalised form the
+   * write path uses: an exact normalised URL first, then the ATS identity the
+   * URL names (so Lever `/apply`, Ashby `/application` and a Greenhouse board
+   * host redirect all match), and only then a unique host+path row whose stored
+   * query is empty.
+   *
+   * A host+path match is never a guess: two Applications on one page (or one
+   * page served on a different port), or one whose stored URL carries a query,
+   * answer null rather than binding a sponsorship answer or a later
+   * manual-complete to the wrong Application. Only an Application that can still
+   * be applied to is eligible: `documents_ready`, with no submission or a
+   * `blocked` one. A queued Application is excluded so a manual fill cannot race
+   * the worker; a confirmed, manual, declined, not_submitted or uncertain one is
+   * never filled again. The SQL host prefilter keeps
+   * this from reading every Application the Candidate owns.
+   */
+  async matchApplication(pageUrl: string): Promise<MatchedApplicationRow | null> {
+    if (!isWebUrl(pageUrl)) return null
+    // A page served over plain http can be rewritten in transit; only a local form is filled over http.
+    const rawPage = new URL(pageUrl)
+    if (rawPage.protocol === "http:" && rawPage.hostname !== "localhost" && rawPage.hostname !== "127.0.0.1") return null
+    const wanted = normaliseApplicationUrl(pageUrl)
+    const wantedUrl = new URL(wanted)
+    const wantedAts = locateAts(wanted)
+    const hostFragments = new Set<string>([`://${wantedUrl.hostname}`, `://www.${wantedUrl.hostname}`])
+    if (wantedAts !== null) hostFragments.add(atsHostFragment(wantedAts.system))
+    return this.tenant.run(async (tx, candidateId) => {
+      const rows = await tx
+        .selectFrom("application")
+        .select(["id", "application_url", "company", "role_title"])
+        .where("candidate_id", "=", candidateId)
+        // A minimal record has no details left to fill from; it is not an Application the Candidate can apply through.
+        .where("details_deleted_at", "is", null)
+        // ADR 0016: only an Application that can still be applied to is filled, and only when nothing can race
+        // the Candidate: no submission, or the blocked state where the automatic path already gave up.
+        .where("state", "=", "documents_ready")
+        .where((eb) => eb.or([eb("submission_state", "is", null), eb("submission_state", "in", FILLABLE_SUBMISSION_STATES)]))
+        .where((eb) => eb.or([...hostFragments].map((fragment) => eb("application_url", "like", `%${fragment}%`))))
+        .orderBy("created_at", "desc")
+        .execute()
+      const matched = (row: (typeof rows)[number]): MatchedApplicationRow => ({ id: row.id, company: row.company, role_title: row.role_title })
+      const exact: typeof rows = []
+      const byAts: typeof rows = []
+      for (const row of rows) {
+        if (!isWebUrl(row.application_url)) continue
+        const stored = normaliseApplicationUrl(row.application_url)
+        // `gh_jid` is stripped as a tracking parameter, so two jobs on one careers page normalise alike. Exactness
+        // must include it: the page and the stored URL have to name the same requisition.
+        if (stored === wanted && jobIdParam(row.application_url) === jobIdParam(pageUrl)) {
+          exact.push(row)
+          continue
+        }
+        if (wantedAts === null) continue
+        const storedAts = locateAts(stored)
+        if (storedAts === null || storedAts.system !== wantedAts.system || storedAts.board !== wantedAts.board || storedAts.jobId !== wantedAts.jobId) continue
+        byAts.push(row)
+      }
+      // An exact URL is only usable when exactly one Application owns it; two rows on one URL are ambiguous.
+      if (exact.length === 1) return matched(exact[0]!)
+      if (exact.length > 1) return null
+      if (byAts.length === 1) return matched(byAts[0]!)
+      if (byAts.length > 1) return null
+      const samePage = rows.filter((row) => {
+        if (!isWebUrl(row.application_url)) return false
+        const storedUrl = new URL(normaliseApplicationUrl(row.application_url))
+        return (
+          storedUrl.hostname === wantedUrl.hostname &&
+          storedUrl.port === wantedUrl.port &&
+          storedUrl.pathname === wantedUrl.pathname &&
+          // The stripped requisition parameter still decides: two jobs on one careers page are not one Application.
+          jobIdParam(row.application_url) === jobIdParam(pageUrl)
+        )
+      })
+      if (samePage.length !== 1) return null
+      const only = samePage[0]!
+      const storedUrl = new URL(normaliseApplicationUrl(only.application_url))
+      return storedUrl.search === "" ? matched(only) : null
+    })
   }
 
   /**
@@ -828,4 +929,9 @@ const PREFERENCES_SKIP_REASONS: ReadonlySet<string> = new Set(["excluded_role_fa
 /** D47: a posting no longer ranked because of a skip B1 added (keyword or excluded role family). */
 export function isRulesDrop(status: string, skipReason: string | null): boolean {
   return status === "skipped" && skipReason !== null && PREFERENCES_SKIP_REASONS.has(skipReason)
+}
+
+/** The ATS domain a stored URL may use instead of the page's own host (Greenhouse board redirects, Lever/Ashby hosts). */
+function atsHostFragment(system: "greenhouse" | "lever" | "ashby"): string {
+  return { greenhouse: "greenhouse.io", lever: "lever.co", ashby: "ashbyhq.com" }[system]
 }

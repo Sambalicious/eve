@@ -1,4 +1,4 @@
-export { AddJobLink } from "./ui/add-job-link"
+export { AddJobLinkDialog } from "./ui/add-job-link-dialog"
 export {
   CHECK_THIS_JOB_SECTION_ID,
   CheckThisJobSection,

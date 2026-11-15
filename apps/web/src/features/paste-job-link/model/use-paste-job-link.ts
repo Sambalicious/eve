@@ -11,7 +11,7 @@ import {
 } from "@/entities/job-posting"
 import { ensureCsrfToken } from "@/entities/session"
 import { hasErrorCode, type ApiError } from "@/shared/api"
-import { toastActionFailed, toastSuccess } from "@/shared/lib/action-failed"
+import { actionFailedMessage, toastActionFailed, toastSuccess } from "@/shared/lib/action-failed"
 import { fieldMessages, type PasteFieldMessages } from "./description"
 import { LINK_EMPTY, LINK_INVALID } from "./job-link"
 import { pasteCopy } from "./paste-copy"
@@ -29,6 +29,8 @@ export type PasteOutcome =
   | { kind: "created"; posting: JobPosting; waitingReason: WaitingReason | null }
   | { kind: "existing"; posting: JobPosting; waitingReason: WaitingReason | null }
   | { kind: "refused"; message: string }
+  /** In a dialog: the request failed (C-ERR-2), shown inline instead of as a toast. */
+  | { kind: "failed"; message: string }
   /** v1.27.0: a paste that carried a description, answered with a `descriptionOutcome`. */
   | { kind: "description"; result: PasteResult }
   /** v1.27.0: a description paste refused on one or more fields. */
@@ -74,9 +76,17 @@ function descriptionRefusal(error: unknown): PasteOutcome | null {
  * `descriptionOutcome` (the form shows the result line, no toast), field
  * refusals and the two form-level refusals. Network and server failures toast
  * C-ERR-2 ("check the link", or C-PD-26 "check the job" with a description) and
- * keep the form.
+ * keep the form, unless the caller asked for `reportFailure`: then the failure
+ * reports `{ kind: "failed", message }` so the form can show it in place (with a
+ * description the verb is still "check the job").
  */
-export function usePasteJobLink({ onOutcome }: { onOutcome: (outcome: PasteOutcome) => void }) {
+export function usePasteJobLink({
+  onOutcome,
+  reportFailure = false,
+}: {
+  onOutcome: (outcome: PasteOutcome) => void
+  reportFailure?: boolean
+}) {
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: async (request: PasteRequest) => pasteJobLink(request, await ensureCsrfToken(queryClient)),
@@ -92,10 +102,13 @@ export function usePasteJobLink({ onOutcome }: { onOutcome: (outcome: PasteOutco
       if ("description" in request) {
         const refusal = descriptionRefusal(error)
         if (refusal) return onOutcome(refusal)
+        // In the dialog the toast would sit behind the scrim: the form shows C-PD-26 itself.
+        if (reportFailure) return onOutcome({ kind: "failed", message: actionFailedMessage(pasteCopy.failedVerb) })
         return toastActionFailed(pasteCopy.failedVerb)
       }
       if (hasErrorCode(error, "job_link_empty")) return onOutcome({ kind: "refused", message: LINK_EMPTY })
       if (hasErrorCode(error, "job_link_invalid")) return onOutcome({ kind: "refused", message: LINK_INVALID })
+      if (reportFailure) return onOutcome({ kind: "failed", message: actionFailedMessage("check the link") })
       toastActionFailed("check the link")
     },
   })

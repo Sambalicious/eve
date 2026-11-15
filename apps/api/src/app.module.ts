@@ -11,6 +11,7 @@ import type { AppConfig } from "./config/env.js"
 import { DatabaseModule } from "./db/database.module.js"
 import { DiscoveryModule } from "./discovery/discovery.module.js"
 import { DocumentsModule } from "./documents/documents.module.js"
+import { ExtensionModule } from "./extension/extension.module.js"
 import { FilesModule } from "./files/files.module.js"
 import { HealthModule } from "./health/health.module.js"
 import { JobCriteriaModule } from "./job-criteria/job-criteria.module.js"
@@ -46,6 +47,7 @@ export class AppModule {
         LeadsModule,
         PreferencesModule,
         DocumentsModule,
+        ExtensionModule,
         OutreachModule,
         SubmissionModule,
         NotificationModule,

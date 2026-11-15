@@ -3,6 +3,7 @@
  * Phase 1 (contract v1.19.0) and Phase 3 (v1.20.0) both come from `@eve/contracts`.
  */
 export {
+  buildHiringBroadSearch,
   buildHiringSearchGroups,
   HIRING_SEARCH_INPUTS_PATH,
   hiringFamilies,

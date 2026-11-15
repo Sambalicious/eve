@@ -368,6 +368,18 @@ describe("Blocked Applications before the click (AC 6.7 to 6.12, 7.2)", () => {
     expect(await row(id)).toMatchObject({ blocked_reason: "automation_incomplete", blocked_sub_reason: subReason, blocked_detail: detail, submitted_local_day: null })
   })
 
+  it.each([
+    [0, "The assistant found no submit button on the form, so nothing was clicked."],
+    [2, "The assistant found 2 submit buttons on the form and stopped rather than guess which one sends it."],
+  ] as const)("automation incomplete (submit controls %i) records how many it found", async (count, detail) => {
+    await passGate()
+    forms.use({ host: APPLY_HOST, controls: STANDARD_FORM, submitControls: count })
+    const { id } = await queued()
+    expect(await service().submit(id, "automatic")).toEqual({ result: "blocked" })
+    expect(forms.clicks).toEqual([])
+    expect(await row(id)).toMatchObject({ blocked_reason: "automation_incomplete", blocked_sub_reason: null, blocked_detail: detail, submit_clicked_at: null })
+  })
+
   it("a seventh-reason Blocked Application cannot return to automatic submission", async () => {
     const { id } = await readyApplication()
     await database.db.updateTable("application").set({ submission_state: "blocked", blocked_reason: "automation_incomplete" }).where("id", "=", id).execute()

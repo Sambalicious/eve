@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
@@ -15,9 +15,18 @@ import { frozenClassifyTitle, frozenFold } from "./0011-postings-paging-filter.j
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 const GHERKIN = "../../../../../epics/active/EPIC-0001-job-application-assistant/gherkin/"
 
+/**
+ * The feature files are process artifacts: the public repository does not carry `epics/`, so the
+ * corpus checks cannot run there. They are skipped instead of failing a build for a file the
+ * contributor was never given; the migration-source check keeps running.
+ */
+const hasFeatures = ["role-family-classification.feature", "pre-filter-titles.feature"].every((name) => existsSync(here(`${GHERKIN}${name}`)))
+
 /** Every table cell and every double-quoted string in a feature file: a superset of its titles. */
 function featureStrings(file: string): string[] {
-  const text = readFileSync(here(`${GHERKIN}${file}`), "utf8")
+  const path = here(`${GHERKIN}${file}`)
+  if (!existsSync(path)) return []
+  const text = readFileSync(path, "utf8")
   const found = new Set<string>()
   for (const line of text.split("\n")) {
     if (line.trim().startsWith("#")) continue
@@ -47,7 +56,7 @@ const corpus = [...featureStrings("role-family-classification.feature"), ...feat
 const generated = generatedTitles(500)
 
 describe("migration 0011 frozen copies (8d.18)", () => {
-  it("the corpus holds the RF and PRE titles", () => {
+  it.skipIf(!hasFeatures)("the corpus holds the RF and PRE titles", () => {
     expect(corpus).toEqual(expect.arrayContaining(["Head of Infrastructure", "Senior Backend Engineer", "DÉVELOPPEUR MOBILE", "Sales Engineer", "Développeur·euse Full Stack"]))
     expect(corpus.length).toBeGreaterThan(200)
     expect(generated).toHaveLength(500)
@@ -59,7 +68,7 @@ describe("migration 0011 frozen copies (8d.18)", () => {
    * cdd6102, when it still equalled the slice 8 live classifier). The fold still matches the live fold.
    * 0020-frozen.spec.ts compares the live classifier with 0020's copy.
    */
-  it("RF-33: the frozen fold agrees with the live fold, and the frozen classifier with its own snapshot", () => {
+  it.skipIf(!hasFeatures)("RF-33: the frozen fold agrees with the live fold, and the frozen classifier with its own snapshot", () => {
     const snapshot = JSON.parse(readFileSync(here("./__fixtures__/0011-classifier.snap.json"), "utf8")) as Record<string, string>
     const titles = [...corpus, ...generated]
     expect(titles.filter((title) => frozenFold(title) !== foldForKeywords(title))).toEqual([])

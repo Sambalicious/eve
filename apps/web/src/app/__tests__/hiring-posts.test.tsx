@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from "@testing-library/react"
+import { http, HttpResponse } from "msw"
 import { describe, expect, it } from "vitest"
 import { JOB_POSTING_LINKS_PATH, STACK_POSTS_PATH } from "@eve/contracts"
 
@@ -27,6 +28,7 @@ const ROW_HELP = "Paste the employer's application link from this post, or add t
 const LI_WARN =
   "Eve can't read LinkedIn, so this link will be saved as not supported. Paste the employer's application link if the post has one, or add the job description."
 const GREENHOUSE = "https://boards.greenhouse.io/acme/jobs/4012345"
+const ERR_2 = "Couldn't check the link. Nothing changed. Try again."
 const POSTS_DESC =
   "LinkedIn posts and articles from your Hiring alert feeds, newest first. Eve hasn't vetted them. To check a job from one, use Check this job."
 
@@ -439,6 +441,18 @@ describe("Check this job from a Hiring post row (check-this-job.feature, AC 8.1,
     await user.click(within(row).getByRole("button", { name: "Check link" }))
     expect(await within(row).findByText("Paste a job link.")).toBeVisible()
     expect(pastes(discovery)).toEqual([])
+  })
+
+  it("HV:182 a row form keeps its C-ERR-2 toast on a network failure and shows no inline alert", async () => {
+    const { user } = withRecord({ hiringPosts: [titled("Hiring")] })
+    server.use(http.post(JOB_POSTING_LINKS_PATH, () => HttpResponse.error()))
+    const { row, field } = await openRow(user, "Hiring")
+    await user.type(field, GREENHOUSE)
+    await user.click(within(row).getByRole("button", { name: "Check link" }))
+
+    expect(await findToast(ERR_2)).toBeInTheDocument()
+    expect(within(row).queryByRole("alert")).not.toBeInTheDocument()
+    expect(field).toHaveValue(GREENHOUSE)
   })
 
   it("CTJ:398 opening the second row leaves the others closed; opening another discards the first panel's value", async () => {

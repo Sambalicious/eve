@@ -202,6 +202,9 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "GET", path: "/v1/existing-applications", kind: "own-scope", proof: "B's existing applications; none of A's" },
   { method: "POST", path: "/v1/existing-applications", kind: "own-scope", proof: "creates B's row only", send: { company: "B Co", roleTitle: "B Role", applicationUrl: "https://example.test/b", appliedOn: "2026-10-01" } },
   { method: "POST", path: "/v1/existing-applications/complete", kind: "own-scope", proof: "completes B's step only; A's activation row is unchanged" },
+  // ADR 0016: the extension's fill reads B's own answers only. A's Application URL, matching only B's own rows,
+  // answers null for B; A's rows stay byte-equal.
+  { method: "POST", path: "/v1/extension/fill", kind: "own-scope", proof: "B's fill of A's Application URL answers application null with empty values; A's rows are unchanged", send: { url: "https://boards.greenhouse.io/ada-registry/jobs/1", fields: [] } },
 
   // ── Slice 6: notifications (guarded before slice F) ─────────────────
   { method: "GET", path: "/v1/notifications/status", kind: "own-scope", guarded: true, proof: "409 for B before F; none of A's send counts" },

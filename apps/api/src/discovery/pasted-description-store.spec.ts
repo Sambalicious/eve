@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { downloadName } from "../documents/documents.service.js"
 import { hiddenReason, buildVisibilityContext } from "./visibility.js"
 import { pasteFingerprint, pasteLockKey, publicLink } from "./pasted-description-store.js"
 
-/** EPIC-0010 pure rules: fingerprint (PD-5.4, I-3), URN hiding, lock key, visibility exemption (OQ-5), download name (DOC:85). */
+/** EPIC-0010 pure rules: fingerprint (PD-5.4, I-3), URN hiding, lock key, visibility exemption (OQ-5). */
 describe("pasted descriptions", () => {
   it("RP:214 the fingerprint ignores whitespace runs in the text but keeps case and punctuation", () => {
     const base = pasteFingerprint("Engineer", "Paystack", "Build React\n\nfeatures.")
@@ -30,10 +29,5 @@ describe("pasted descriptions", () => {
     const facts = { titled: true, prefilterSkip: null, roleFamily: null, seniorityMarker: "entry", postedAt: null }
     expect(hiddenReason({ ...facts, pastedDescription: false }, ctx)).toBe("off_target")
     expect(hiddenReason({ ...facts, pastedDescription: true }, ctx)).toBeNull()
-  })
-
-  it("DOC:85 a pasted Application's download name leaves out the synthetic requisition", () => {
-    expect(downloadName({ company: "Paystack", requisition_id: "pasted:8b0e" }, "resume", "pdf")).toBe("Resume - Paystack.pdf")
-    expect(downloadName({ company: "Acme", requisition_id: "R-1042" }, "resume", "pdf")).toBe("Resume - Acme - R-1042.pdf")
   })
 })

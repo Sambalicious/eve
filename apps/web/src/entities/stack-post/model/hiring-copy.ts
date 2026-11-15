@@ -63,6 +63,28 @@ export const hiringCopy = {
   alertsToggle: "Google Alerts query",
   /** C-HP-ALERTQ-TOGGLE-SR. */
   alertsToggleSr: (group: string) => `Google Alerts query for ${group}`,
+  // Broad hiring search (PROPOSAL: no copy-deck slot yet; the row the Candidate asked for in the
+  // Find jobs review, "we're hiring plus my technologies")
+  /** Broad search heading. */
+  broadTitle: "Broad hiring search",
+  /** Broad search description. */
+  broadNote:
+    "One search with the usual hiring phrases and every framework and technology you saved, without a job title. You'll see more posts, and fewer of them will fit.",
+  /** Broad search phrases label. */
+  broadPhrasesLabel: "Phrases",
+  /** Broad search LinkedIn accessible name. */
+  broadLinkLinkedInSr: (group: string) => `LinkedIn posts for a broad hiring search, ${group} ${NEW_TAB}`,
+  /** Broad search Google accessible name. */
+  broadLinkGoogleSr: (group: string) => `Google posts for a broad hiring search, ${group} ${NEW_TAB}`,
+  /** Broad search alerts-toggle accessible name. */
+  broadAlertsToggleSr: (group: string) => `Google Alerts query for a broad hiring search, ${group}`,
+  /** Broad search query block accessible name. */
+  broadQueryBlockSr: (group: string) => `Broad hiring query for ${group}`,
+  /** Broad search copy button accessible name. */
+  broadCopySr: (group: string) => `Copy broad hiring query for ${group}`,
+  /** Broad search copied announcement. */
+  broadLiveCopied: "Broad hiring query copied.",
+
   /** C-HP-ALERTQ-HOWTO (before Phase 3). */
   alertsHowTo: 'Create an alert with this query and set "Deliver to" to "RSS feed".',
   /**

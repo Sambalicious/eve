@@ -209,6 +209,22 @@ function hiringGroup(chunk: readonly string[], fixed: Readonly<{ hiring: string 
 }
 
 /**
+ * The broad hiring search: every framework and technology in one query with the
+ * fixed hiring phrases, and nothing else. It drops the role-family clause and the
+ * hint clause, so a post only has to say "we're hiring" and name a technology to
+ * match, whatever its job title and however it describes remote or relocation.
+ *
+ * One group, never chunked: the whole point is that one query covers every saved
+ * term. null when nothing is saved, because the role groups already render the
+ * any-technology row and a second one would only repeat it.
+ */
+export function buildHiringBroadSearch(frameworks: readonly string[], technologies: readonly string[]): HiringSearchGroup | null {
+  const terms = unquoted([...frameworks, ...technologies])
+  if (terms.length === 0) return null
+  return hiringGroup(terms, { hiring: clause(unquoted(HIRING_PHRASES)), role: null, hints: null })
+}
+
+/**
  * Pure. No I/O, no AI, no write. The Hiring view and the daily summary both call
  * it (AC 3.1). Frameworks then Technologies, saved order, entered form, no
  * dedupe, in groups of HIRING_SEARCH_GROUP_SIZE; no terms give exactly one

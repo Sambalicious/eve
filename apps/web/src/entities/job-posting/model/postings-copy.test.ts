@@ -35,10 +35,10 @@ const SUPERSEDED_BY_EPIC_0006 = (key: string) => key.startsWith("postings.family
  */
 const REWRITTEN_BY_EPIC_0011: Readonly<Record<string, string>> = {
   "postings.firstRun.title": "No jobs yet",
-  "postings.firstRun.text": "Every job Eve finds or you paste appears here. Paste one on Home to start.",
+  "postings.firstRun.text": "Every job Eve finds or you paste appears here. Add a job link above to start.",
   "postings.firstRun.action": "Find jobs",
   "postings.rankedEmpty.title": "No good matches yet",
-  "postings.rankedEmpty.text": "Jobs that fit your profile appear here. Paste one on Home or set up alerts.",
+  "postings.rankedEmpty.text": "Jobs that fit your profile appear here. Add a job link above or set up alerts.",
   "postings.list.skipNotSoftware": "This isn't a software engineering role.",
 }
 

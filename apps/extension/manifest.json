@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Eve fill",
+  "version": "0.1.0",
+  "description": "Fills the form you are on from your Eve answers and attaches your prepared PDFs after you review them. It never signs in anywhere, never opens a file chooser, and never clicks Submit or a link; it may click a checkbox or radio to set it.",
+  "action": {
+    "default_title": "Eve fill",
+    "default_popup": "src/popup.html"
+  },
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "minimum_chrome_version": "111"
+}

@@ -33,7 +33,8 @@ test("OUT3-01 Find jobs holds the four Hiring sections in order across its tabs 
   // then the feeds in Set up alerts.
   await expect(page.getByRole("tab")).toHaveText([COPY.searchTab, P3.postsTitle, COPY.stackSectionTitle, COPY.setUpAlerts])
   await hiring.showTab(COPY.searchTab)
-  expect(await page.getByRole("heading", { level: 2 }).allInnerTexts()).toEqual([LINKS_COPY.title, COPY.checkTitle, COPY.stackLinksSectionTitle])
+  // Broad hiring search sits with the links, because it is the same hiring query with the role and hint clauses dropped.
+  expect(await page.getByRole("heading", { level: 2 }).allInnerTexts()).toEqual([LINKS_COPY.title, LINKS_COPY.broadTitle, COPY.checkTitle, COPY.stackLinksSectionTitle])
   await hiring.openHiringPosts()
   await expect(hiring.postsSection()).toBeVisible()
   await hiring.showTab(COPY.stackSectionTitle)

@@ -744,3 +744,63 @@ describe("Search-hint note and Check this job help (HV AC 1.4, H4 step 1)", () =
     expect(within(await checkRegion()).getByText(HELP_SOLO)).toBeVisible()
   })
 })
+
+describe("Broad hiring search: the hiring phrases plus every saved technology", () => {
+  const broadRegion = () => screen.findByRole("region", { name: "Broad hiring search" })
+
+  /** The broad row's Google Alerts query, from its own disclosure. */
+  async function broadQueryOf(row: HTMLElement, user: ReturnType<typeof openHiring>["user"]) {
+    const toggle = within(row).getByRole("button", { name: /^Google Alerts query for a broad hiring search/ })
+    if (toggle.getAttribute("aria-expanded") !== "true") await user.click(toggle)
+    return within(row).getByLabelText(/^Broad hiring query for/).textContent ?? ""
+  }
+
+  it("uses every term in one group, with no role family and no hint terms", async () => {
+    const { user } = openHiring({
+      criteria: { targetRoleFamilies: ["senior_frontend"], frameworks: ["React", "Next.js"], technologies: ["TypeScript"] },
+      // All three hints are on, and none may appear: this search is technology only.
+      hints: { preferences: OPERATOR_PREFERENCES },
+    })
+    const region = await broadRegion()
+    const rows = within(region).getAllByRole("listitem")
+    expect(rows).toHaveLength(1)
+    const { linkedin, google } = linksOf(rows[0])
+    expect(decoded(linkedin, "keywords")).toBe(`${HIRING} AND ("React" OR "Next.js" OR "TypeScript")`)
+    const q = `site:linkedin.com/posts ${HIRING} ("React" OR "Next.js" OR "TypeScript")`
+    expect(decoded(google, "q")).toBe(q)
+    expect(decoded(google, "tbs")).toBe("qdr:w")
+    expect(await broadQueryOf(rows[0], user)).toBe(q)
+    expect(q).not.toContain("frontend engineer")
+    expect(q).not.toContain("remote")
+  })
+
+  it("stays one row when the role groups split the same terms in fours", async () => {
+    openHiring({
+      criteria: {
+        targetRoleFamilies: ["senior_frontend"],
+        frameworks: ["React", "Next.js", "Vue", "Nuxt"],
+        technologies: ["TypeScript", "GraphQL"],
+      },
+    })
+    const region = await broadRegion()
+    expect(within(region).getAllByRole("listitem")).toHaveLength(1)
+    expect(within(region).getByText("React, Next.js, Vue, Nuxt, TypeScript, GraphQL", { exact: true })).toBeVisible()
+    // The role section still splits the same six terms into two groups of four.
+    expect(await groupRows()).toHaveLength(2)
+  })
+
+  it("announces its own copy, so the two sections never share an announcement", async () => {
+    const { user } = openHiring({ criteria: { frameworks: ["React"] } })
+    const region = await broadRegion()
+    const [row] = within(region).getAllByRole("listitem")
+    await user.click(within(row).getByRole("button", { name: /^Google Alerts query for a broad hiring search/ }))
+    await user.click(within(row).getByRole("button", { name: /^Copy broad hiring query for/ }))
+    await waitFor(() => expect(within(region).getByRole("status")).toHaveTextContent("Broad hiring query copied."))
+  })
+
+  it("is absent when nothing is saved, rather than repeating the any-technology row", async () => {
+    openHiring({ criteria: { frameworks: [], technologies: [] } })
+    await within(await linksRegion()).findByText("Any technology", { exact: true })
+    expect(screen.queryByRole("region", { name: "Broad hiring search" })).toBeNull()
+  })
+})

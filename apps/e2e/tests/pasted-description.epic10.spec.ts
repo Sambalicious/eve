@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect, test } from "@playwright/test"
 
 import { GREENHOUSE_JOB_URL } from "../support/ats-fixtures.mjs"
+import { openAddJobLink } from "../support/add-job-link.ts"
 import { JOB_POSTING_LINKS_PATH, outboundRequests, postingsWithUrl, resetPostings, signIn } from "../support/db.ts"
 import { HiringPage } from "../support/hiring-page.ts"
 import { PD, PD_PREFIX, applicationRow, description, holdsOf, markEvaluated, postingsContaining, resetPastedDescription, seedGeneratedDocuments } from "../support/pasted-description.ts"
@@ -31,8 +32,9 @@ test.afterAll(async () => {
   await resetPastedDescription()
 })
 
-function addJobLink(page: Page): Locator {
-  return page.getByRole("region", { name: "Add a job link" })
+/** `/postings` opens the add form in a dialog (EPIC-0011): open it and scope queries to it. */
+async function addJobLink(page: Page): Promise<Locator> {
+  return await openAddJobLink(page)
 }
 
 async function openPanel(form: Locator): Promise<void> {
@@ -100,7 +102,7 @@ test.describe("the description panel in every paste form (PD-1.1, PD-1.3)", () =
 
   test("PD:167 30,001 characters: C-PD-22 shows, send is unavailable and no request is sent", async ({ page }) => {
     await page.goto("/postings")
-    const form = addJobLink(page)
+    const form = await addJobLink(page)
     await form.getByRole("textbox").first().fill("https://careers.flutterwave.com/jobs/senior-frontend-42")
     await openPanel(form)
     const pastes: string[] = []
@@ -126,7 +128,7 @@ test.describe("journey: paste a description → evaluated → Prepare documents 
     const company = `${PD_PREFIX} Paystack`
     const text = description("QA-E2E-PD-F1")
     await page.goto("/postings")
-    const form = addJobLink(page)
+    const form = await addJobLink(page)
     await openPanel(form)
     await fillDescription(form, text, TITLE, company)
 
@@ -207,7 +209,7 @@ test.describe("journey: a readable ATS link wins over the description (RP:46, OQ
   test("RP:46 / RP:88 Greenhouse link + description, no names, on Job Postings: C-PD-31; employer's text used; the description stored nowhere", async ({ page }) => {
     const marker = "QA-E2E-PD-RP46"
     await page.goto("/postings")
-    const form = addJobLink(page)
+    const form = await addJobLink(page)
     await form.getByRole("textbox").first().fill(GREENHOUSE_JOB_URL)
     await openPanel(form)
     await fillDescription(form, description(marker))

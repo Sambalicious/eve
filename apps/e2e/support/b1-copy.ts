@@ -58,7 +58,7 @@ export const B1 = {
   notMatchRulesHeading: "Doesn't fit your criteria", // PROPOSAL (FE copy gap, progress-fe.md)
   notMatchFamiliesHeading: "Outside your role families", // PROPOSAL (FE copy gap)
   rankedEmptyTitle: "No good matches yet", // jobs.empty.good title
-  rankedEmptyText: "Jobs that fit your profile appear here. Paste one on Home or set up alerts.", // jobs.empty.good
+  rankedEmptyText: "Jobs that fit your profile appear here. Add a job link above or set up alerts.", // jobs.empty.good
   skippedEmptyTitle: "Nothing ruled out", // jobs.empty.notMatch title
   skippedEmptyText: "Jobs Eve rules out appear here, with the reason.", // jobs.empty.notMatch
   excludedNoneTitle: "No excluded role families", // 71

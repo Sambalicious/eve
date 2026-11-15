@@ -118,9 +118,13 @@ describe("Detail posted date and age (AC-6.3, AC-6.4)", () => {
 })
 
 describe("Paste result for a hidden link (AC-5.7)", () => {
+  /** `/postings` opens the form in a dialog now: open it and fill the link. */
   const paste = async (user: ReturnType<typeof openDiscovery>["user"], url: string) => {
-    await user.type(await screen.findByLabelText("Job link"), url)
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    await user.click(await screen.findByRole("button", { name: "Add a job link" }))
+    const dialog = await screen.findByRole("dialog", { name: "Add a job link" })
+    await user.type(within(dialog).getByLabelText("Job link"), url)
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
+    return dialog
   }
 
   it.each([
@@ -132,10 +136,10 @@ describe("Paste result for a hidden link (AC-5.7)", () => {
     const { user, currentPath } = openDiscovery("/postings", {
       nextPasted: (url) => rankedPosting({ applicationUrl: url, applyUrl: url, status: "not_checked", rank: null, hiddenReason: reason }),
     })
-    await paste(user, "https://jobs.lever.co/globex/abc-999")
-    const line = await screen.findByText(`Saved, but hidden: ${phrase}.`, { exact: false })
+    const dialog = await paste(user, "https://jobs.lever.co/globex/abc-999")
+    const line = await within(dialog).findByText(`Saved, but hidden: ${phrase}.`, { exact: false })
     expect(line).toHaveAttribute("role", "status")
-    expect(screen.getByLabelText("Job link")).toHaveAccessibleDescription(expect.stringContaining(`Saved, but hidden: ${phrase}.`))
+    expect(within(dialog).getByLabelText("Job link")).toHaveAccessibleDescription(expect.stringContaining(`Saved, but hidden: ${phrase}.`))
     expect(screen.queryByText(/^Checking the link\./)).not.toBeInTheDocument()
     const created = await waitFor(() => {
       const href = within(line).getByRole("link", { name: "View it" }).getAttribute("href")
@@ -149,15 +153,16 @@ describe("Paste result for a hidden link (AC-5.7)", () => {
   it("a known hidden link says the Candidate already has it and names the reason", async () => {
     const stored = rankedPosting({ applicationUrl: "https://jobs.lever.co/globex/abc-999", hiddenReason: "undated", ...UNDATED })
     const { user, api } = openDiscovery("/postings", { postings: [stored] })
-    await paste(user, "https://jobs.lever.co/globex/abc-999")
-    expect(await screen.findByText("You already have this Job Posting. It's hidden: no posted date.", { exact: false })).toBeVisible()
+    const dialog = await paste(user, "https://jobs.lever.co/globex/abc-999")
+    expect(await within(dialog).findByText("You already have this Job Posting. It's hidden: no posted date.", { exact: false })).toBeVisible()
     expect(api.state.postings).toHaveLength(1)
   })
 
-  it("a visible new link keeps the success toast and shows no hidden line", async () => {
+  it("a visible new link closes the dialog, keeps the success toast and shows no hidden line", async () => {
     const { user } = openDiscovery("/postings")
     await paste(user, "https://jobs.lever.co/globex/fe-1")
     expect(await screen.findByText(/^Checking the link\./)).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Add a job link" })).not.toBeInTheDocument())
     expect(screen.queryByText(/hidden:/)).not.toBeInTheDocument()
   })
 })

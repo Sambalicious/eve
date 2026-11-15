@@ -578,7 +578,8 @@ export class DocumentsService implements OnApplicationBootstrap {
     const document = await this.repository.findDocument(id, kind)
     if (!document) throw new ApiException("document_not_available")
     const bytes = await this.files.read(CandidateScope.require(), "documents", format === "pdf" ? document.pdf_storage_name : document.docx_storage_name)
-    return { bytes, filename: downloadName(application, kind, format) }
+    const contact = await this.repository.readContact()
+    return { bytes, filename: downloadName(contact.full_name, application.company, kind, format) }
   }
 
   /** v1.26.0 (ATS): the Candidate's minimum ATS match for automatic submission (default 40 without a row). */
@@ -728,9 +729,15 @@ function sha256(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex")
 }
 
-/** ASCII-only download name, e.g. "Resume - Acme Payments - R-1042.pdf". */
-export function downloadName(application: Pick<ApplicationTable, "company" | "requisition_id">, kind: DocumentKind, format: DocumentFormatValue): string {
-  const label = kind === "resume" ? "Resume" : "Cover letter"
+/**
+ * The filename an employer sees, e.g. "Ada Okafor - Resume - Acme Payments.pdf".
+ * A missing name or company is omitted rather than left as an empty segment, and
+ * no requisition key appears, synthetic or real: the employer sees a person.
+ * ASCII only, because the header is plain `filename=`: NFKD folds accents, then
+ * anything outside printable ASCII and the characters Windows forbids go.
+ */
+export function downloadName(fullName: string, company: string | null, kind: DocumentKind, format: DocumentFormatValue): string {
+  const label = kind === "resume" ? "Resume" : "Cover Letter"
   const safe = (text: string) =>
     text
       .normalize("NFKD")
@@ -739,8 +746,7 @@ export function downloadName(application: Pick<ApplicationTable, "company" | "re
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 60)
-  // v1.27.0: a pasted Application's synthetic requisition key never appears in the name ("Resume - Paystack.pdf").
-  const requisition = isPastedRequisition(application.requisition_id) ? "" : safe(application.requisition_id)
-  const parts = [label, safe(application.company ?? ""), requisition].filter((part) => part !== "")
+      .trimEnd()
+  const parts = [fullName, label, company ?? ""].map(safe).filter((part) => part !== "")
   return `${parts.join(" - ")}.${format}`
 }

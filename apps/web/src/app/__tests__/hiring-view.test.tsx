@@ -29,6 +29,12 @@ import {
 } from "./hiring-view-helpers"
 import { renderApp } from "./test-app"
 
+/** `/postings` opens the add form in a dialog now: open it and return the dialog. */
+async function addJobLinkDialog(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: "Add a job link" }))
+  return await screen.findByRole("dialog", { name: "Add a job link" })
+}
+
 /** Focus moves from the selected tab through that panel's controls; the targets never reached are returned. */
 async function unreachedAfterTabbing(
   user: ReturnType<typeof userEvent.setup>,
@@ -70,7 +76,7 @@ describe("Hiring view frame (hiring-view.feature, Phase 2)", () => {
     }
   )
 
-  it("HV:104 @ac-1.2 R5: the tabs in order, each holding its sections: Search (Hiring search links, Check this job, Search links), Hiring posts, Posts from your field, Set up alerts (inside it, Hiring alert feeds)", async () => {
+  it("HV:104 @ac-1.2 R5: the tabs in order, each holding its sections: Search (Hiring search links, Broad hiring search, Check this job, Search links), Hiring posts, Posts from your field, Set up alerts (inside it, Hiring alert feeds)", async () => {
     const { user } = openHiringFeeds({ criteria: { frameworks: ["React"] } })
     await screen.findByRole("heading", { name: "Hiring alert feeds" })
     const tabs = within(screen.getByRole("tablist", { name: "Find jobs" })).getAllByRole("tab")
@@ -79,8 +85,8 @@ describe("Hiring view frame (hiring-view.feature, Phase 2)", () => {
     // The hash selects Set up alerts; each tab then shows its own sections in order.
     expect(headings()).toEqual(["Set up alerts", "Alert feeds", "Hiring alert feeds"])
     await user.click(screen.getByRole("tab", { name: "Search" }))
-    await screen.findByRole("link", { name: /^LinkedIn posts for/ })
-    expect(headings()).toEqual(["Hiring search links", "Check this job", "Search links"])
+    await screen.findAllByRole("link", { name: /^LinkedIn posts for/ })
+    expect(headings()).toEqual(["Hiring search links", "Broad hiring search", "Check this job", "Search links"])
     await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
     expect(headings()).toEqual(["Hiring posts"])
     await user.click(screen.getByRole("tab", { name: "Posts from your field" }))
@@ -355,7 +361,7 @@ describe("Check this job (check-this-job.feature, Phase 2)", () => {
     ])
   })
 
-  it("CTJ:99 @ac-5.3 a 2,049-character link is sent with no browser length check; the plain 400 toasts C-ERR-2 and keeps the input unmarked", async () => {
+  it("CTJ:99 @ac-5.3 a 2,049-character link is sent with no browser length check; the plain 400 shows C-ERR-2 inline and keeps the input unmarked", async () => {
     const { user, discovery } = openHiring()
     const url = `https://boards.greenhouse.io/acme/jobs/${"1".repeat(2049 - 39)}`
     expect(url).toHaveLength(2049)
@@ -364,14 +370,16 @@ describe("Check this job (check-this-job.feature, Phase 2)", () => {
     await user.paste(url)
     await user.click(checkLink())
 
-    expect(await findToast(ERR_2)).toBeInTheDocument()
+    const dialog = await checkRegion()
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(ERR_2)
     expect(pastes(discovery)).toEqual([
       { method: "POST", path: "/v1/job-postings/links", body: { url } },
     ])
     expect(field).toHaveValue(url)
     expect(field).not.toHaveAttribute("aria-invalid")
+    // A dialog shows its failure in place: the toast would sit behind the overlay.
     expect(
-      within(await checkRegion()).queryByRole("alert")
+      within(screen.getByRole("region", { name: "Messages" })).queryByText(ERR_2)
     ).not.toBeInTheDocument()
     expect(discovery.state.postings).toHaveLength(0)
   })
@@ -535,13 +543,9 @@ describe("Check this job (check-this-job.feature, Phase 2)", () => {
     hiring.unmount()
 
     const postings = openHiring({ path: "/postings" })
-    await postings.user.type(
-      await screen.findByLabelText("Job link"),
-      GREENHOUSE
-    )
-    await postings.user.click(
-      screen.getByRole("button", { name: "Check link" })
-    )
+    const dialog = await addJobLinkDialog(postings.user)
+    await postings.user.type(within(dialog).getByLabelText("Job link"), GREENHOUSE)
+    await postings.user.click(within(dialog).getByRole("button", { name: "Check link" }))
     expect(await findToast(LINK_ACCEPTED)).toBeInTheDocument()
     expect(pastes(postings.discovery)).toEqual(fromHiring)
     // The existing form keeps its own lines: no Hiring result line or LinkedIn warning there.
@@ -555,24 +559,28 @@ describe("Check this job (check-this-job.feature, Phase 2)", () => {
     expect(await findToast(LINK_ACCEPTED)).toBeInTheDocument()
   })
 
-  it("HV:182 @ac-1.3 a network failure shows the retry error toast and keeps the input", async () => {
+  it("HV:182 @ac-1.3 a network failure shows C-ERR-2 inline with no toast and keeps the input", async () => {
     const { user } = openHiring()
     server.use(http.post(JOB_POSTING_LINKS_PATH, () => HttpResponse.error()))
     const field = await applicationLink()
     await user.type(field, GREENHOUSE)
     await user.click(checkLink())
-    expect(await findToast(ERR_2)).toBeInTheDocument()
+    expect(await within(await checkRegion()).findByRole("alert")).toHaveTextContent(ERR_2)
+    expect(
+      within(screen.getByRole("region", { name: "Messages" })).queryByText(ERR_2)
+    ).not.toBeInTheDocument()
     expect(field).toHaveValue(GREENHOUSE)
     expect(field).not.toHaveAttribute("aria-invalid")
   })
 
   it("the existing paste form does not warn for a LinkedIn link (unchanged behaviour)", async () => {
     const { user, discovery } = openHiring({ path: "/postings" })
+    const dialog = await addJobLinkDialog(user)
     await user.type(
-      await screen.findByLabelText("Job link"),
+      within(dialog).getByLabelText("Job link"),
       "https://www.linkedin.com/jobs/view/3999999999"
     )
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
     expect(await findToast(LINK_ACCEPTED)).toBeInTheDocument()
     expect(screen.queryByText(LI_WARN)).not.toBeInTheDocument()
     expect(pastes(discovery)).toHaveLength(1)

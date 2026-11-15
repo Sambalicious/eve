@@ -363,9 +363,13 @@ describe("AC-3.8 @AC-3.8 the hidden notice on the detail page (applications-and-
 })
 
 describe("AC-5.7 @AC-5.7 the paste result for a hidden link (posted-date:363-398)", () => {
+  /** `/postings` opens the form in a dialog now: open it, fill the link and submit. */
   async function pasteIt(user: ReturnType<typeof openBoard>["user"], url: string) {
-    await user.type(await screen.findByRole("textbox", { name: /job link/i }), url)
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    await user.click(await screen.findByRole("button", { name: "Add a job link" }))
+    const dialog = await screen.findByRole("dialog", { name: "Add a job link" })
+    await user.type(within(dialog).getByRole("textbox", { name: /job link/i }), url)
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
+    return dialog
   }
 
   it.each([
@@ -376,16 +380,16 @@ describe("AC-5.7 @AC-5.7 the paste result for a hidden link (posted-date:363-398
   ] as const)("a new hidden link (%s) shows the status line with 'View it' and no success toast", async (reason, text) => {
     const p = posting({ status: "not_checked", rank: null, hiddenReason: reason, applicationUrl: "https://jobs.lever.co/globex/abc-999", applyUrl: "https://jobs.lever.co/globex/abc-999", applicationSystem: "Lever" })
     const { user } = openBoard("/postings", { paste: { status: 201, created: true, posting: p } })
-    await pasteIt(user, "https://jobs.lever.co/globex/abc-999")
-    const status = await screen.findByText((_, el) => el?.getAttribute("role") === "status" && (el.textContent ?? "").includes(text))
+    const dialog = await pasteIt(user, "https://jobs.lever.co/globex/abc-999")
+    const status = await within(dialog).findByText((_, el) => el?.getAttribute("role") === "status" && (el.textContent ?? "").includes(text))
     expect(within(status).getByRole("link", { name: "View it" })).toHaveAttribute("href", `/postings/${p.id}`)
   })
 
   it("a known hidden link says it is already saved and names the reason", async () => {
     const p = posting({ status: "not_checked", rank: null, hiddenReason: "undated", postedAt: null, postedOn: null, postedDateKind: null, ageDays: null })
     const { user } = openBoard("/postings", { paste: { status: 200, created: false, posting: p } })
-    await pasteIt(user, "https://jobs.lever.co/globex/abc-999")
-    expect(await screen.findByText((_, el) => el?.getAttribute("role") === "status" && (el.textContent ?? "").includes("You already have this Job Posting. It's hidden: no posted date."))).toBeVisible()
+    const dialog = await pasteIt(user, "https://jobs.lever.co/globex/abc-999")
+    expect(await within(dialog).findByText((_, el) => el?.getAttribute("role") === "status" && (el.textContent ?? "").includes("You already have this Job Posting. It's hidden: no posted date."))).toBeVisible()
   })
 
   it("a visible pasted link names no hidden reason", async () => {

@@ -1,5 +1,5 @@
 import type { RefObject } from "react"
-import { CircleX, Clock } from "lucide-react"
+import { CircleX, ClipboardX, Clock } from "lucide-react"
 
 import { Alert, AlertTitle } from "@/shared/ui/alert"
 import { Button } from "@/shared/ui/button"
@@ -67,11 +67,21 @@ export function DescriptionPanel(props: DescriptionPanelProps) {
   return (
     <div id={`${id}-panel`} className={`flex flex-col gap-4 ${props.motion === "exit" ? EXIT_MOTION : OPEN_MOTION}`}>
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-end justify-between gap-3">
-          <FieldLabel htmlFor={`${id}-description`}>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <FieldLabel htmlFor={`${id}-description`} className="block">
             {pasteCopy.descriptionLabel} <span className="font-normal text-muted-foreground">({pasteCopy.optional})</span>
           </FieldLabel>
-          <Button type="button" variant="ghost" size="sm" className="pointer-coarse:h-11" onClick={props.onRemove}>
+          {/* Neutral, not `text-primary`: DESIGN.md keeps cobalt to the primary action, focus
+              and the active nav item, and Remove only clears the pasted text. The link
+              variant owns the geometry and the underline-on-hover, and the hover colour
+              does the affordance, so no accent is needed here. */}
+          <Button
+            type="button"
+            variant="link"
+            className="ml-auto h-auto px-0 py-1 text-muted-foreground hover:text-foreground pointer-coarse:min-h-11"
+            onClick={props.onRemove}
+          >
+            <ClipboardX aria-hidden="true" />
             {pasteCopy.remove}
           </Button>
         </div>
@@ -79,7 +89,7 @@ export function DescriptionPanel(props: DescriptionPanelProps) {
         <Textarea
           ref={props.descriptionRef}
           id={`${id}-description`}
-          className="max-h-[50vh] min-h-40 overflow-y-auto font-sans whitespace-pre-wrap [overflow-wrap:anywhere]"
+          className="max-h-[50dvh] min-h-40 overflow-y-auto font-sans whitespace-pre-wrap [overflow-wrap:anywhere]"
           value={fields.description}
           readOnly={props.readOnly}
           aria-invalid={errors.description ? true : undefined}

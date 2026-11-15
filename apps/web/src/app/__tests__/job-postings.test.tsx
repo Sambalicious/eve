@@ -187,17 +187,39 @@ describe("Job Postings list (F4)", () => {
 })
 
 describe("Add a job link (F3)", () => {
-  it("checks a link: clears the field, toasts C-LINK-1, and lists it as Checking", async () => {
+  /** `/postings` opens the form in a dialog (EPIC-0011): open it unless it is already open. */
+  async function openAddJobLink(user: ReturnType<typeof openDiscovery>["user"]) {
+    const existing = screen.queryByRole("dialog", { name: "Add a job link" })
+    if (existing) return existing
+    await user.click(await screen.findByRole("button", { name: "Add a job link" }))
+    return await screen.findByRole("dialog", { name: "Add a job link" })
+  }
+
+  it("shows one trigger and no form until it opens the dialog", async () => {
+    const { user } = openDiscovery("/postings")
+
+    expect(await screen.findByRole("button", { name: "Add a job link" })).toBeVisible()
+    expect(screen.queryByRole("region", { name: "Add a job link" })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Job link")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Add a job link" }))
+    const dialog = await screen.findByRole("dialog", { name: "Add a job link" })
+    expect(within(dialog).getByLabelText("Job link")).toBeVisible()
+  })
+
+  it("checks a link: clears the field, closes the dialog, toasts C-LINK-1, and lists it as Checking", async () => {
     const { user, api } = openDiscovery("/postings?tab=all")
 
-    const field = await screen.findByLabelText("Job link")
+    const dialog = await openAddJobLink(user)
+    const field = within(dialog).getByLabelText("Job link")
     await user.type(field, "https://jobs.lever.co/globex/abc-123")
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
 
     expect(
       await findToast("Checking the link. It goes through the same Eligibility, Match, duplicate and cap rules as discovered postings.")
     ).toBeInTheDocument()
-    expect(field).toHaveValue("")
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Add a job link" })).not.toBeInTheDocument())
+    expect(screen.getByRole("button", { name: "Add a job link" })).toHaveFocus()
     expect(api.requests).toEqual([{ method: "POST", path: "/v1/job-postings/links", body: { url: "https://jobs.lever.co/globex/abc-123" } }])
     const region = await table()
     expect(await within(region).findByText("Checking")).toBeVisible()
@@ -211,13 +233,15 @@ describe("Add a job link (F3)", () => {
   ])("refuses %j inline and creates nothing", async (input, error) => {
     const { user, api } = openDiscovery("/postings")
 
-    const field = await screen.findByLabelText("Job link")
+    const dialog = await openAddJobLink(user)
+    const field = within(dialog).getByLabelText("Job link")
     if (input) await user.type(field, input)
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
 
-    expect(await screen.findByText(error)).toBeVisible()
+    expect(await within(dialog).findByText(error)).toBeVisible()
     expect(field).toHaveAttribute("aria-invalid", "true")
     expect(field).toHaveFocus()
+    expect(dialog).toBeVisible()
     expect(api.requests).toEqual([])
   })
 
@@ -225,34 +249,40 @@ describe("Add a job link (F3)", () => {
     const { user } = openDiscovery("/postings")
     server.use(http.post("/v1/job-postings/links", () => apiErrorResponse("job_link_invalid")))
 
-    await user.type(await screen.findByLabelText("Job link"), "https://localhost")
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    const dialog = await openAddJobLink(user)
+    await user.type(within(dialog).getByLabelText("Job link"), "https://localhost")
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
 
-    expect(await screen.findByText("Enter a full link that starts with https:// or http://.")).toBeVisible()
+    expect(await within(dialog).findByText("Enter a full link that starts with https:// or http://.")).toBeVisible()
   })
 
-  it("an already stored link shows C-LINK-2 with View it and creates no second posting", async () => {
+  it("an already stored link shows C-LINK-2 with View it, keeps the dialog open and creates no second posting", async () => {
     const stored = rankedPosting({ applicationUrl: "https://jobs.lever.co/globex/abc-123", title: "Product Engineer", company: "Globex" })
     const { user, api, currentPath } = openDiscovery("/postings", { postings: [stored] })
 
-    await user.type(await screen.findByLabelText("Job link"), "https://jobs.lever.co/globex/abc-123")
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    const dialog = await openAddJobLink(user)
+    await user.type(within(dialog).getByLabelText("Job link"), "https://jobs.lever.co/globex/abc-123")
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
 
-    expect(await screen.findByText(/You already have this Job Posting\./)).toBeVisible()
+    expect(await within(dialog).findByText(/You already have this Job Posting\./)).toBeVisible()
+    expect(dialog).toBeVisible()
     expect(api.state.postings).toHaveLength(1)
-    await user.click(screen.getByRole("link", { name: "View it" }))
+    await user.click(within(dialog).getByRole("link", { name: "View it" }))
     expect(currentPath()).toBe(`/postings/${stored.id}`)
   })
 
-  it("a server failure toasts C-ERR-2 and keeps the link", async () => {
+  it("a server failure shows C-ERR-2 in the dialog, keeps the link and sends no toast", async () => {
     const { user } = openDiscovery("/postings")
     server.use(http.post("/v1/job-postings/links", () => apiErrorResponse("internal_error")))
 
-    const field = await screen.findByLabelText("Job link")
+    const dialog = await openAddJobLink(user)
+    const field = within(dialog).getByLabelText("Job link")
     await user.type(field, "https://jobs.lever.co/globex/abc-123")
-    await user.click(screen.getByRole("button", { name: "Check link" }))
+    await user.click(within(dialog).getByRole("button", { name: "Check link" }))
 
-    expect(await findToast("Couldn't check the link. Nothing changed. Try again.")).toBeInTheDocument()
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Couldn't check the link. Nothing changed. Try again.")
     expect(field).toHaveValue("https://jobs.lever.co/globex/abc-123")
+    expect(field).toHaveFocus()
+    expect(within(screen.getByRole("region", { name: "Messages" })).queryByText(/Couldn't check the link/)).toBeNull()
   })
 })

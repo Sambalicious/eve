@@ -59,8 +59,10 @@ export function HomePasteBox({ onPasted, filled }: { onPasted: (job: PastedJob) 
         }
         return
       }
-      setErrors({ link: outcome.message })
-      textRef.current?.focus()
+      if (outcome.kind === "refused") {
+        setErrors({ link: outcome.message })
+        textRef.current?.focus()
+      }
     },
   })
 

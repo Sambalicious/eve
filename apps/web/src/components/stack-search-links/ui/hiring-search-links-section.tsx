@@ -122,6 +122,13 @@ function ReadyBody({
 }) {
   const selectId = useId()
   const familyName = roleFamilyLabel[state.family]
+  const roleNames: HiringGroupNames = {
+    linkedin: (group) => h.linkLinkedInSr(familyName, group),
+    google: (group) => h.linkGoogleSr(familyName, group),
+    alerts: h.alertsToggleSr,
+    queryBlock: h.queryBlockSr,
+    copy: h.copySr,
+  }
   const anyTechnology = state.groups.length === 1 && state.groups[0].terms.length === 0
   return (
     <div className="flex flex-col gap-4">
@@ -196,7 +203,7 @@ function ReadyBody({
             // Labels can repeat (the same term saved twice), so the position keys the row.
             key={index}
             group={group}
-            familyName={familyName}
+            names={roleNames}
             position={state.groups.length > 1 ? c.groupN(index + 1, state.groups.length) : null}
             onCopied={onCopied}
             onFeedsLink={onFeedsLink}
@@ -207,15 +214,27 @@ function ReadyBody({
   )
 }
 
-function HiringGroupRow({
+/**
+ * The accessible names a group row uses. The role-family rows and the broad row
+ * search for different things, so their names differ; everything else is shared.
+ */
+export type HiringGroupNames = Readonly<{
+  linkedin: (group: string) => string
+  google: (group: string) => string
+  alerts: (group: string) => string
+  queryBlock: (group: string) => string
+  copy: (group: string) => string
+}>
+
+export function HiringGroupRow({
   group,
-  familyName,
+  names,
   position,
   onCopied,
   onFeedsLink,
 }: {
   group: HiringSearchGroup
-  familyName: string
+  names: HiringGroupNames
   position: string | null
   onCopied: () => void
   onFeedsLink?: () => void
@@ -231,10 +250,10 @@ function HiringGroupRow({
           <span className="text-sm font-medium [overflow-wrap:anywhere]">{label}</span>
           <div className="flex flex-col items-start gap-2">
             <div className="flex flex-wrap gap-2">
-              <SearchLink href={group.linkedin} label={h.linkLinkedIn} accessibleName={h.linkLinkedInSr(familyName, label)} />
-              <SearchLink href={group.google} label={h.linkGoogle} accessibleName={h.linkGoogleSr(familyName, label)} />
+              <SearchLink href={group.linkedin} label={h.linkLinkedIn} accessibleName={names.linkedin(label)} />
+              <SearchLink href={group.google} label={h.linkGoogle} accessibleName={names.google(label)} />
             </div>
-            <AlertsToggle open={open} panelId={`${id}-panel`} label={h.alertsToggle} accessibleName={h.alertsToggleSr(label)} />
+            <AlertsToggle open={open} panelId={`${id}-panel`} label={h.alertsToggle} accessibleName={names.alerts(label)} />
           </div>
         </div>
         <CollapsibleContent id={`${id}-panel`} className="flex flex-col gap-3 pt-2">
@@ -263,8 +282,8 @@ function HiringGroupRow({
           <QueryBlock
             query={group.alertsQuery}
             label={h.queryLabel}
-            copyName={h.copySr(label)}
-            blockName={h.queryBlockSr(label)}
+            copyName={names.copy(label)}
+            blockName={names.queryBlock(label)}
             onCopied={onCopied}
           />
         </CollapsibleContent>

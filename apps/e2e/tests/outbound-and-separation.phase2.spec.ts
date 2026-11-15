@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 import { GREENHOUSE_JOB_URL } from "../support/ats-fixtures.mjs"
+import { AddJobLinkDialog } from "../support/add-job-link.ts"
 import { COPY } from "../support/copy.ts"
 import { outboundRequests, postingsWithUrl, resetPostings, setRelevance, signIn } from "../support/db.ts"
 import { HiringPage, isForbiddenHost, pasteRequests, recordRequests } from "../support/hiring-page.ts"
@@ -87,15 +88,15 @@ for (const row of OUT_162) {
   test(`OUT-05 (OUT:162) the existing paste form on /postings with ${row.link}: same request, stored posting and message as origin/main`, async ({ page }) => {
     const requests = recordRequests(page)
     await page.goto("/postings")
-    const legacy = page.getByRole("region", { name: COPY.addJobLinkTitle })
-    await legacy.getByRole("textbox").fill(row.link)
-    await legacy.getByRole("button", { name: COPY.submit, exact: true }).click()
-    const toast = page.getByRole("region", { name: "Messages" }).getByText(COPY.linkAccepted, { exact: true })
+    const legacy = new AddJobLinkDialog(page)
+    await legacy.submit(row.link)
+    const toast = legacy.toasts().getByText(COPY.linkAccepted, { exact: true })
     if (row.line === null) {
       await expect(toast).toBeVisible()
-      await expect(legacy.getByRole("status")).toHaveCount(0)
+      // A visible posting closes the dialog, exactly as the inline form showed nothing extra.
+      await expect(legacy.dialog()).toBeHidden()
     } else {
-      const status = legacy.getByRole("status").filter({ hasText: row.line })
+      const status = legacy.resultStatus().filter({ hasText: row.line })
       await expect(status).toHaveText(`${row.line} ${COPY.hiddenView}`)
       await expect(status.getByRole("link", { name: COPY.hiddenView, exact: true })).toHaveAttribute("href", /^\/postings\/[0-9a-f-]{36}$/)
       await page.waitForTimeout(500)
@@ -106,9 +107,9 @@ for (const row of OUT_162) {
     expect(stored).toHaveLength(1)
     expect(stored[0]).toMatchObject({ ...row.stored, candidateEmail: ADA.email })
     // The Hiring view's own copy never appears in the existing form.
-    await expect(legacy.getByText(COPY.created, { exact: true })).toHaveCount(0)
-    await expect(legacy.getByText(COPY.checkHelpSolo, { exact: true })).toHaveCount(0)
-    await expect(legacy.getByText(COPY.checkHelp, { exact: true })).toHaveCount(0)
+    await expect(legacy.dialog().getByText(COPY.created, { exact: true })).toHaveCount(0)
+    await expect(legacy.dialog().getByText(COPY.checkHelpSolo, { exact: true })).toHaveCount(0)
+    await expect(legacy.dialog().getByText(COPY.checkHelp, { exact: true })).toHaveCount(0)
   })
 }
 

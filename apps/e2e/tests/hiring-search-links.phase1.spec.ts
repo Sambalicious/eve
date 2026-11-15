@@ -708,3 +708,49 @@ test.describe("Build, never fetch (AC 3.9)", () => {
     })
   }
 })
+
+test.describe("Broad hiring search (Find jobs review: we're hiring plus my technologies)", () => {
+  test("E15-B01 one row searches the hiring phrases and every saved term, with no role family and no hint terms", async ({ page }) => {
+    await setHiringInputs(ADA.email, {
+      families: ["senior_frontend"],
+      frameworks: ["React", "Next.js"],
+      technologies: ["TypeScript"],
+      prefs: { remoteAccepted: true, relocationAccepted: true, sponsorshipNeededForRelocation: true },
+    })
+    const hiring = await openAs(page, ADA.email)
+    await expect(hiring.broadRegion()).toBeVisible()
+    await expect(hiring.broadRows()).toHaveCount(1)
+
+    const label = "React, Next.js, TypeScript"
+    const tech = '("React" OR "Next.js" OR "TypeScript")'
+    const q = `site:linkedin.com/posts ${HIRING_CLAUSE} ${tech}`
+    await expect(hiring.broadLinkedIn()).toHaveAccessibleName(LINKS_COPY.broadLiSr(label))
+    await expect(hiring.broadGoogle()).toHaveAccessibleName(LINKS_COPY.broadGSr(label))
+    expect(decodedParam((await hiring.broadLinkedIn().getAttribute("href"))!, "keywords")).toBe(`${HIRING_CLAUSE} AND ${tech}`)
+    expect(decodedParam((await hiring.broadGoogle().getAttribute("href"))!, "q")).toBe(q)
+    expect(decodedParam((await hiring.broadGoogle().getAttribute("href"))!, "tbs")).toBe("qdr:w")
+    expect(await hiring.broadQuery()).toBe(q)
+
+    // The two clauses this search exists to drop: the role family and the hint terms, even though both are set.
+    expect(q).not.toContain("frontend engineer")
+    expect(q).not.toContain("remote")
+    expect(q).not.toContain("visa sponsorship")
+  })
+
+  test("E15-B02 stays one row past the role groups' size: six terms give two role groups and one broad row", async ({ page }) => {
+    await setHiringInputs(ADA.email, {
+      families: ["senior_frontend"],
+      frameworks: ["React", "Next.js", "Vue", "Nuxt"],
+      technologies: ["TypeScript", "GraphQL"],
+      prefs: null,
+    })
+    const hiring = await openAs(page, ADA.email)
+    await hiring.waitForGroups(2)
+    await expect(hiring.broadRows()).toHaveCount(1)
+    const label = "React, Next.js, Vue, Nuxt, TypeScript, GraphQL"
+    await expect(hiring.broadRows().first()).toContainText(label)
+    expect(await hiring.broadQuery()).toBe(
+      `site:linkedin.com/posts ${HIRING_CLAUSE} ("React" OR "Next.js" OR "Vue" OR "Nuxt" OR "TypeScript" OR "GraphQL")`
+    )
+  })
+})

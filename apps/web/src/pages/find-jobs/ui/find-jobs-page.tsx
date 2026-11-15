@@ -16,6 +16,8 @@ import {
   StackPostPagination,
 } from "@/components/stack-post-list"
 import {
+  BROAD_HIRING_SEARCH_SECTION_ID,
+  BroadHiringSearchSection,
   HIRING_SEARCH_LINKS_SECTION_ID,
   HiringSearchLinksSection,
   SearchLinksSection,
@@ -51,6 +53,7 @@ import {
   CheckThisJobSection,
 } from "@/features/paste-job-link"
 import {
+  buildHiringBroadSearch,
   buildHiringSearchGroups,
   hiringFamilies,
   resolveHiringFamily,
@@ -94,6 +97,7 @@ const STACK_PAGE_PARAM = "spage"
 /** Every in-page target and the tab it lives in (design note section 3). */
 const TAB_FOR_TARGET: Readonly<Record<string, FindJobsTab | undefined>> = {
   [HIRING_SEARCH_LINKS_SECTION_ID]: FIND_JOBS_TABS.search,
+  [BROAD_HIRING_SEARCH_SECTION_ID]: FIND_JOBS_TABS.search,
   [CHECK_THIS_JOB_SECTION_ID]: FIND_JOBS_TABS.search,
   [FIND_JOBS_IDS.searchLinks]: FIND_JOBS_TABS.search,
   [FIND_JOBS_IDS.hiringPosts]: FIND_JOBS_TABS.hiringPosts,
@@ -130,6 +134,11 @@ function FindJobsSections() {
   const criteria = useQuery(jobCriteriaQueryOptions())
   const groups = useMemo(
     () => criteria.data && buildStackSearchGroups(criteria.data.frameworks, criteria.data.technologies),
+    [criteria.data]
+  )
+  // Independent of the Role family: it is the "any post that says we're hiring and names my stack" search.
+  const broadHiringGroup = useMemo(
+    () => criteria.data && buildHiringBroadSearch(criteria.data.frameworks, criteria.data.technologies),
     [criteria.data]
   )
   const tabs = useFindJobsTabs({
@@ -172,6 +181,12 @@ function FindJobsSections() {
                 loadingBody={<SearchLinksBodySkeleton />}
                 errorBody={<LoadErrorAlert onRetry={links.retry} />}
               />
+              {broadHiringGroup && (
+                <BroadHiringSearchSection
+                  group={broadHiringGroup}
+                  onFeedsLink={() => tabs.goTo(HIRING_ALERT_FEEDS_SECTION_ID)}
+                />
+              )}
               <CheckThisJobSection hintShown={links.state.kind === "ready"} />
               <SearchLinksSection
                 groups={groups}

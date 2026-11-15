@@ -35,6 +35,17 @@ export const LINKS_COPY = {
   noFamilyBody: "Hiring searches need job titles, and Other has none. Choose another role family in your job criteria.", // C-HP-NOFAMILY-BODY
   noFamilyAction: "Choose role families", // C-HP-NOFAMILY-ACTION
   groupN: (i: number, n: number) => `Group ${i} of ${n}`, // C-SP-GROUP-N (rendered uppercase by CSS)
+  // Broad hiring search: PROPOSAL, no copy-deck slot yet (Find jobs review: "we're hiring plus my technologies").
+  broadTitle: "Broad hiring search",
+  broadNote:
+    "One search with the usual hiring phrases and every framework and technology you saved, without a job title. You'll see more posts, and fewer of them will fit.",
+  broadPhrasesLabel: "Phrases",
+  broadLiSr: (group: string) => `LinkedIn posts for a broad hiring search, ${group} (opens in a new tab)`,
+  broadGSr: (group: string) => `Google posts for a broad hiring search, ${group} (opens in a new tab)`,
+  broadToggle: (group: string) => `Google Alerts query for a broad hiring search, ${group}`,
+  broadQueryLabel: (group: string) => `Broad hiring query for ${group}`,
+  broadCopySr: (group: string) => `Copy broad hiring query for ${group}`,
+  broadLiveCopied: "Broad hiring query copied.",
 } as const
 
 /** /settings#job-criteria: where C-HP-ANYTECH-NOTE-LINK and C-HP-NOFAMILY-ACTION lead. */

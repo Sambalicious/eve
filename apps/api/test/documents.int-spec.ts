@@ -326,7 +326,7 @@ describe("Tailored Documents (AC 5.1 to 5.4)", () => {
       res.on("end", () => done(null, Buffer.concat(chunks)))
     }).expect(200)
     expect(pdf.headers["content-type"]).toBe("application/pdf")
-    expect(pdf.headers["content-disposition"]).toBe('attachment; filename="Resume - Acme Payments - R-Acme Payments.pdf"')
+    expect(pdf.headers["content-disposition"]).toBe('attachment; filename="Ada Okafor - Resume - Acme Payments.pdf"')
     expect(pdf.headers["x-content-type-options"]).toBe("nosniff")
     expect(pdf.headers["cache-control"]).toBe("private, no-store")
     const text = await extractPdfText(pdf.body as Buffer)
@@ -335,7 +335,7 @@ describe("Tailored Documents (AC 5.1 to 5.4)", () => {
 
     const docx = await candidate.get(detail.documents[1]!.docxUrl).expect(200)
     expect(docx.headers["content-type"]).toBe("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    expect(docx.headers["content-disposition"]).toContain("Cover letter - Acme Payments")
+    expect(docx.headers["content-disposition"]).toBe('attachment; filename="Ada Okafor - Cover Letter - Acme Payments.docx"')
 
     const files = (await database.db.selectFrom("tailored_document").select(["pdf_storage_name", "docx_storage_name"]).execute()).flatMap((row) => [
       row.pdf_storage_name,

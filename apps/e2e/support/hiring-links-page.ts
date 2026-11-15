@@ -49,6 +49,31 @@ export class HiringLinksPage extends HiringPage {
     return this.linksSection().getByRole("combobox", { name: LINKS_COPY.familyLabel, exact: true })
   }
 
+  /** The broad hiring search: every saved term with the hiring phrases, and no role family. */
+  broadRegion(): Locator {
+    return this.page.getByRole("region", { name: LINKS_COPY.broadTitle, exact: true })
+  }
+
+  broadRows(): Locator {
+    return this.broadRegion().getByRole("listitem")
+  }
+
+  broadLinkedIn(scope: Locator = this.broadRegion()): Locator {
+    return scope.getByRole("link", { name: /^LinkedIn posts for a broad hiring search/ })
+  }
+
+  broadGoogle(scope: Locator = this.broadRegion()): Locator {
+    return scope.getByRole("link", { name: /^Google posts for a broad hiring search/ })
+  }
+
+  /** Expands the broad row's disclosure and returns its query text. */
+  async broadQuery(): Promise<string> {
+    const row = this.broadRows().first()
+    const toggle = row.getByRole("button", { name: /^Google Alerts query for a broad hiring search/ })
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click()
+    return (await row.getByLabel(/^Broad hiring query for /).textContent()) ?? ""
+  }
+
   /** Group rows: list items that carry a LinkedIn link. */
   groups(): Locator {
     return this.linksSection()

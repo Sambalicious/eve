@@ -1,0 +1,19 @@
+{
+  "name": "@eve/extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Eve's side-loaded fill assistant: fills a form in the Candidate's own browser, and never submits it.",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.7",
+    "@types/node": "^26.6.5",
+    "jsdom": "^30.1.3",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

@@ -57,7 +57,10 @@ const INCOMPLETE_DETAIL = {
     label ? `The "${label}" question changed on the page after it was answered, so it didn't submit.` : "A question changed on the page after it was answered, so it didn't submit.",
   mismatch: (label: string | null) =>
     label ? `The "${label}" field didn't hold the value the assistant set, so it didn't submit.` : "A field didn't hold the value the assistant set, so it didn't submit.",
-  noSubmitControl: "The assistant couldn't find exactly one submit button on the form.",
+  submitControls: (count: number) =>
+    count === 0
+      ? "The assistant found no submit button on the form, so nothing was clicked."
+      : `The assistant found ${count} submit buttons on the form and stopped rather than guess which one sends it.`,
   budget: "It used up its time or effort limit for this form before every field was filled.",
 }
 
@@ -310,11 +313,14 @@ export class SubmissionService {
         return { result: "refused", refusal: "paused" }
       }
       if (error instanceof IncompleteError) {
+        // The reason only reaches the UI and the email; the worker log said "blocked" and nothing else.
+        this.logger.warn(`Blocked ${applicationId}: ${error.subReason ?? "no sub-reason"} - ${error.detail}`)
         await this.repository.block(applicationId, attemptId, { reason: "automation_incomplete", subReason: error.subReason, detail: error.detail }, this.clock.now(), kind)
         return { result: "blocked" }
       }
       if (attemptId !== null) {
-        // A browser error before the click: nothing was submitted.
+        // A browser error before the click: nothing was submitted. The message is the only clue, so log it.
+        this.logger.warn(`Blocked ${applicationId}: browser error before the click - ${error instanceof Error ? error.message : String(error)}`)
         await this.repository.block(applicationId, attemptId, { reason: "automation_incomplete", subReason: null, detail: null }, this.clock.now())
         return { result: "blocked" }
       }
@@ -480,8 +486,11 @@ export class SubmissionService {
       if (want === undefined ? actual !== "" : actual !== want) throw new IncompleteError("value_mismatch", INCOMPLETE_DETAIL.mismatch(control.label || null))
       if (control.required && actual === "") throw new IncompleteError("value_mismatch", INCOMPLETE_DETAIL.mismatch(control.label || null))
     }
-    if (detectPageBlock(form.text)) throw new IncompleteError(null, INCOMPLETE_DETAIL.noSubmitControl)
-    if (form.submitControls !== 1) throw new IncompleteError(null, INCOMPLETE_DETAIL.noSubmitControl)
+    // Two different failures used to share one sentence here, so a block page and a button-count mismatch looked
+    // identical. Keep the page block's own words (login, CAPTCHA, assessment) and record the count otherwise.
+    const pageBlock = detectPageBlock(form.text)
+    if (pageBlock) throw new IncompleteError(null, pageBlock.detail)
+    if (form.submitControls !== 1) throw new IncompleteError(null, INCOMPLETE_DETAIL.submitControls(form.submitControls))
     return form.text
   }
 

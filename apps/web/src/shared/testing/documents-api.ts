@@ -314,7 +314,7 @@ export function createDocumentsApi(initial: Partial<DocumentsState> = {}) {
       return new HttpResponse(pdf ? TINY_PDF : "PK-docx", {
         headers: {
           "content-type": pdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "content-disposition": `attachment; filename="${kind === "resume" ? "Resume" : "Cover letter"} - ${app.company ?? ""} - ${app.requisitionId}.${match[2]}"`,
+          "content-disposition": `attachment; filename="${[state.contact.fullName, kind === "resume" ? "Resume" : "Cover Letter", app.company ?? ""].filter((part) => part !== "").join(" - ")}.${match[2]}"`,
           "x-content-type-options": "nosniff",
           "cache-control": "private, no-store",
           "content-security-policy": "sandbox; default-src 'none'",

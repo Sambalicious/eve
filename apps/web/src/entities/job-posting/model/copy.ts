@@ -105,14 +105,14 @@ export const jobPostingCopy = {
   emptyFirstRun: {
     title: "No jobs yet",
     /** Copy deck jobs.empty.all (PROPOSAL). */
-    text: "Every job Eve finds or you paste appears here. Paste one on Home to start.",
+    text: "Every job Eve finds or you paste appears here. Add a job link above to start.",
     action: "Find jobs",
   },
   /** Ranked tab empty, later. */
   emptyRanked: {
     title: "No good matches yet",
     /** Copy deck jobs.empty.good (PROPOSAL). */
-    text: "Jobs that fit your profile appear here. Paste one on Home or set up alerts.",
+    text: "Jobs that fit your profile appear here. Add a job link above or set up alerts.",
   },
   /** copy-b1 keys 69 to 75 (EPIC-0002 B1, F18a). */
   emptyManual: {

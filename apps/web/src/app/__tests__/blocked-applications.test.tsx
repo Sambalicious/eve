@@ -93,6 +93,16 @@ describe("Blocked Applications (/blocked)", () => {
     expect(await card("Fallback role at Acme Payments")).toHaveTextContent(line)
   })
 
+  it("seventh reason with a detail line and no sub-reason still shows the detail (the ClickHouse block)", async () => {
+    const detail = "The assistant found no submit button on the form, so nothing was clicked."
+    openSubmission("/blocked", [entry(blocked("automation_incomplete", detail), { roleTitle: "No sub-reason role" })])
+
+    const c = await card("No sub-reason role at Acme Payments")
+    expect(c).toHaveTextContent(detail)
+    expect(c).toHaveTextContent(C_BLOCK_10)
+    expect(within(c).getByRole("button", { name: "Mark completed manually" })).toBeVisible()
+  })
+
   it("Missing Approved Answer: Add Approved Answer opens the sheet pre-filled from blockedQuestion; saving shows C-BLOCK-9 and queues it", async () => {
     const app = entry(blocked("missing_approved_answer", VUE, { blockedQuestion: VUE_QUESTION }), { roleTitle: "Vue role" })
     const { user, api } = openSubmission("/blocked", [app])

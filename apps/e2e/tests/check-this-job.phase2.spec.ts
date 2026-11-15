@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 import { ASHBY_JOB_URL, GREENHOUSE_JOB_URL, HIDDEN_CASES, LEVER_JOB_URL } from "../support/ats-fixtures.mjs"
+import { AddJobLinkDialog } from "../support/add-job-link.ts"
 import { COPY } from "../support/copy.ts"
 import { CSRF_HEADER, aiCallsForUrl, insertPastedPosting, outboundRequests, postingCount, postingsWithUrl, resetPostings, setRelevance, signIn } from "../support/db.ts"
 import { HiringPage, expectNoPasteRequest, pasteRequests, recordRequests } from "../support/hiring-page.ts"
@@ -89,11 +90,12 @@ test.describe("Check this job: section and submit (AC 5.1 to 5.3)", () => {
   test("CTJ-03 the request carries no new field and goes to the same endpoint as the existing paste form", async ({ page }) => {
     const requests = recordRequests(page)
     await page.goto("/postings")
-    const legacy = page.getByRole("region", { name: COPY.addJobLinkTitle })
-    await legacy.getByRole("textbox").fill(LEVER_JOB_URL)
+    const legacy = new AddJobLinkDialog(page)
+    await legacy.open()
+    await legacy.field().fill(LEVER_JOB_URL)
     // Repair wave 1: wait for the paste response (the posting is stored) before removing it, or the reset races the insert.
     const stored = page.waitForResponse((r) => r.request().method() === "POST" && r.url().endsWith("/v1/job-postings/links"))
-    await legacy.getByRole("button", { name: COPY.submit, exact: true }).click()
+    await legacy.submitButton().click()
     await stored
     expect(pasteRequests(requests)).toHaveLength(1)
     await resetPostings()
@@ -184,7 +186,7 @@ test.describe("Check this job: section and submit (AC 5.1 to 5.3)", () => {
     expect((await postingsWithUrl(url))[0]).toMatchObject({ origin: "pasted_link" })
   })
 
-  test("CTJ-09 a 2,049-character link gets the plain 400, the C-ERR-2 toast, no field error, input kept, nothing stored", async ({ page }) => {
+  test("CTJ-09 a 2,049-character link gets the plain 400, C-ERR-2 inline, no field error, input kept, nothing stored", async ({ page }) => {
     const base = "https://careers.example.org/jobs/123?ref="
     const url = base + "a".repeat(2049 - base.length)
     expect(url).toHaveLength(2049)
@@ -201,8 +203,9 @@ test.describe("Check this job: section and submit (AC 5.1 to 5.3)", () => {
     expect(body.error.code).toBe("bad_request")
     expect(body.error.fieldErrors).toBeUndefined()
 
-    await expect(hiring.toasts().getByText(COPY.checkFailed, { exact: true })).toBeVisible()
-    await expect(hiring.dialog().getByRole("alert")).toHaveCount(0)
+    // A dialog reports its failure in place: a toast would sit behind the overlay.
+    await expect(hiring.dialog().getByRole("alert").filter({ hasText: COPY.checkFailed })).toBeVisible()
+    await expect(hiring.toasts().getByText(COPY.checkFailed, { exact: true })).toHaveCount(0)
     await expect(hiring.urlField()).not.toHaveAttribute("aria-invalid", "true")
     await expect(hiring.urlField()).toHaveValue(url)
     expect(await postingCount()).toBe(0)
@@ -288,11 +291,12 @@ test.describe("Check this job: same behaviour as the existing form (r3 CTJ:260, 
   test("CTJ-23 (CTJ:260) the same visible URL pasted by Ada through /postings, removed, then through Check this job gives the same stored result", async ({ page, context }) => {
     await signIn(context, ADA.email)
     await page.goto("/postings")
-    const legacy = page.getByRole("region", { name: COPY.addJobLinkTitle })
-    await legacy.getByRole("textbox").fill(GREENHOUSE_JOB_URL)
-    await legacy.getByRole("button", { name: COPY.submit, exact: true }).click()
-    await expect(page.getByRole("region", { name: "Messages" }).getByText(COPY.linkAccepted, { exact: true })).toBeVisible()
-    await expect(legacy.getByText(/Saved, but hidden/)).toHaveCount(0)
+    const legacy = new AddJobLinkDialog(page)
+    await legacy.submit(GREENHOUSE_JOB_URL)
+    await expect(legacy.toasts().getByText(COPY.linkAccepted, { exact: true })).toBeVisible()
+    // A visible posting closes the dialog: the hidden line is checked on the page, not in the form.
+    await expect(legacy.dialog()).toBeHidden()
+    await expect(page.getByText(/Saved, but hidden/)).toHaveCount(0)
     const settle = async () => {
       await expect.poll(async () => (await postingsWithUrl(GREENHOUSE_JOB_URL))[0]?.status, { timeout: 15_000 }).not.toBe("checking")
       const [row] = await postingsWithUrl(GREENHOUSE_JOB_URL)
@@ -315,10 +319,9 @@ test.describe("Check this job: same behaviour as the existing form (r3 CTJ:260, 
     await signIn(adaContext, ADA.email)
     const adaPage = await adaContext.newPage()
     await adaPage.goto("/postings")
-    const legacy = adaPage.getByRole("region", { name: COPY.addJobLinkTitle })
-    await legacy.getByRole("textbox").fill(GREENHOUSE_JOB_URL)
-    await legacy.getByRole("button", { name: COPY.submit, exact: true }).click()
-    await expect(adaPage.getByRole("region", { name: "Messages" }).getByText(COPY.linkAccepted, { exact: true })).toBeVisible()
+    const legacy = new AddJobLinkDialog(adaPage)
+    await legacy.submit(GREENHOUSE_JOB_URL)
+    await expect(legacy.toasts().getByText(COPY.linkAccepted, { exact: true })).toBeVisible()
     await adaContext.close()
 
     const bolaContext = await browser.newContext()
@@ -504,7 +507,7 @@ test.describe("Check this job: refused writes (AC 1.3)", () => {
     await expect(hiring.toasts().getByText(COPY.linkAccepted, { exact: true })).toBeVisible()
   })
 
-  test("HV-T5 a network failure shows the retry error and keeps the input", async ({ page, context }) => {
+  test("HV-T5 a network failure shows the retry error inline with no toast and keeps the input", async ({ page, context }) => {
     await signIn(context, ADA.email)
     const hiring = new HiringPage(page)
     await hiring.open()
@@ -524,7 +527,8 @@ test.describe("Check this job: refused writes (AC 1.3)", () => {
     })
     expect(await page.evaluate(() => navigator.onLine)).toBe(true)
     await hiring.submitButton().click()
-    await expect(hiring.toasts().getByText(COPY.checkFailed, { exact: true })).toBeVisible()
+    await expect(hiring.dialog().getByRole("alert").filter({ hasText: COPY.checkFailed })).toBeVisible()
+    await expect(hiring.toasts().getByText(COPY.checkFailed, { exact: true })).toHaveCount(0)
     expect(aborted).toBe(1)
     await page.unrouteAll()
     await expect(hiring.urlField()).toHaveValue(GREENHOUSE_JOB_URL)

@@ -8,6 +8,7 @@ import {
   HIRING_SEARCH_GROUP_SIZE,
   ROLE_FAMILY_HIRING_PHRASES,
   STACK_SEARCH_GROUP_SIZE,
+  buildHiringBroadSearch,
   buildHiringSearchGroups,
   buildStackSearchGroups,
   hiringFamilies,
@@ -364,6 +365,7 @@ describe("no I/O (AC 3.9, 10.3; threat model P1-3)", () => {
     expect(resolveHiringFamily(["senior_frontend"], null)).toBe("senior_frontend")
     expect(buildHiringSearchGroups({ family: "senior_frontend", frameworks: Array.from({ length: 20 }, (_, i) => `F${i}`), technologies: Array.from({ length: 20 }, (_, i) => `T${i}`), hintTerms: ["remote"] })).toHaveLength(10)
     expect(buildStackSearchGroups(["React"], ["TypeScript"])).toHaveLength(1)
+    expect(buildHiringBroadSearch(["React"], ["TypeScript"])?.terms).toEqual(["React", "TypeScript"])
     expect(thrower).not.toHaveBeenCalled()
   })
 
@@ -376,6 +378,7 @@ describe("no I/O (AC 3.9, 10.3; threat model P1-3)", () => {
       "LINKEDIN_CONTENT_SEARCH_BASE",
       "ROLE_FAMILY_HIRING_PHRASES",
       "STACK_SEARCH_GROUP_SIZE",
+      "buildHiringBroadSearch",
       "buildHiringSearchGroups",
       "buildStackSearchGroups",
       "hiringFamilies",
@@ -403,5 +406,38 @@ describe("GET /v1/stack-posts/hiring-search-inputs response (v1.19.0)", () => {
     [{ hintTerms: "remote" }],
   ])("refuses %j", (body) => {
     expect(hiringSearchInputsResponseSchema.safeParse(body).success).toBe(false)
+  })
+})
+
+describe("buildHiringBroadSearch: hiring phrases and every technology, nothing else", () => {
+  it("puts every term in one group with the hiring phrases, no role family and no hints", () => {
+    const group = buildHiringBroadSearch(["React", "TypeScript"], ["NestJS"])!
+    expect(group.terms).toEqual(["React", "TypeScript", "NestJS"])
+    expect(group.label).toBe("React, TypeScript, NestJS")
+    expect(group.alertsQuery).toBe(`site:linkedin.com/posts ${HIRING} ("React" OR "TypeScript" OR "NestJS")`)
+    expect(decoded(group.linkedin, "keywords")).toBe(`${HIRING} AND ("React" OR "TypeScript" OR "NestJS")`)
+    expect(decoded(group.google, "q")).toBe(`site:linkedin.com/posts ${HIRING} ("React" OR "TypeScript" OR "NestJS")`)
+    expect(decoded(group.google, "q")).not.toContain("remote")
+    expect(decoded(group.google, "q")).not.toContain("frontend engineer")
+  })
+
+  it("stays a single group past the role groups' chunk size, so one query covers every saved term", () => {
+    const frameworks = ["React", "Next.js", "Vue", "Nuxt", "Svelte", "Angular"]
+    const technologies = ["TypeScript", "GraphQL", "PostgreSQL"]
+    const group = buildHiringBroadSearch(frameworks, technologies)!
+    expect(group.terms).toHaveLength(9)
+    expect(group.alertsQuery).toContain('"Angular" OR "TypeScript"')
+    expect(buildHiringSearchGroups({ family: "senior_frontend", frameworks, technologies, hintTerms: [] })).toHaveLength(3)
+  })
+
+  it("gives null when nothing is saved, so the role groups' any-technology row is not repeated", () => {
+    expect(buildHiringBroadSearch([], [])).toBeNull()
+    expect(buildHiringBroadSearch(["", "  "], [])).toBeNull()
+  })
+
+  it("strips quotes, control characters and line separators, and drops blank entries", () => {
+    const group = buildHiringBroadSearch(['Re"act', "Type\u0000Script", "\u2028NestJS"], [" "])!
+    expect(group.terms).toEqual(["React", "TypeScript", "NestJS"])
+    expect(group.alertsQuery).toBe(`site:linkedin.com/posts ${HIRING} ("React" OR "TypeScript" OR "NestJS")`)
   })
 })

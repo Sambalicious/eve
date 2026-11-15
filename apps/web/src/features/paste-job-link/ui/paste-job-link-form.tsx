@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react"
-import { ClipboardPaste, Link2, TriangleAlert } from "lucide-react"
+import { CircleX, ClipboardPaste, Link2, TriangleAlert } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import {
@@ -14,7 +14,7 @@ import { useReducedMotion } from "@/shared/lib/use-reduced-motion"
 import { Alert, AlertTitle } from "@/shared/ui/alert"
 import { Button } from "@/shared/ui/button"
 import { ButtonSpinner } from "@/shared/ui/button-spinner"
-import { FieldDescription, FieldError, FieldLabel } from "@/shared/ui/field"
+import { FieldError, FieldLabel } from "@/shared/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -47,11 +47,15 @@ const EMPTY: PasteFields = { link: "", description: "", title: "", company: "" }
  * `usePasteJobLink`, with the same validation, toasts, C-LINK-2 line and
  * EPIC-0006 B7 hidden line (a created hidden posting shows that line instead
  * of the success toast and, in `check`, instead of the created result line).
- * - `add`: "Add a job link" (Home and `/postings`), its help line under the field.
+ * - `add`: "Add a job link" in its `/postings` dialog, whose description is the
+ *   help line (passed as `describedBy`). A created visible posting closes it,
+ *   and a failed request shows C-ERR-2 in place of a toast, which would sit
+ *   behind the overlay.
  * - `check`: Check this job (Hiring view, EPIC-0007 design-spec r1 H4, H5). It
  *   adds the linkedin.com warning (D7), the created result line, a read-only
  *   field while sending, and clears its result lines when the field is edited.
- *   Its help is the section description, linked by `describedBy`.
+ *   Its help is the Check dialog's description, linked by `describedBy`. Inside
+ *   the Check dialog (`dialog`) a failed request shows C-ERR-2 in place of a toast.
  *
  * EPIC-0010 design r1 B1: every placement also offers "Add the job description"
  * (closed on load). Open, the panel adds the description, Job title and Company,
@@ -66,7 +70,21 @@ export type PasteJobLinkFormProps = {
    */
   openLabel?: string
 } & (
-  | { kind: "add"; help: string }
+  | {
+      kind: "add"
+      /**
+       * `/postings` dialog only (`AddJobLinkDialog`): a visible created posting closes
+       * the dialog and leaves the C-LINK-1 toast as the one message, a failed request
+       * shows C-ERR-2 in place of a toast, the dialog is told when one is in flight so
+       * it cannot close on top of it, and `describedBy` is the dialog's description id
+       * (the help line), which the form does not repeat.
+       */
+      dialog: {
+        onSaved: () => void
+        onPendingChange: (isPasting: boolean) => void
+        describedBy: string
+      }
+    }
   | {
       kind: "check"
       describedBy: string
@@ -77,6 +95,14 @@ export type PasteJobLinkFormProps = {
        */
       submitVariant?: "default" | "outline"
       autoFocus?: boolean
+      /**
+       * Inside a dialog (Check this job): a failed request reports C-ERR-2 to
+       * the form instead of a toast, which would sit behind the overlay, and
+       * the dialog is told when one is in flight so it cannot close on top of it.
+       */
+      dialog?: {
+        onPendingChange: (isPasting: boolean) => void
+      }
     }
 )
 
@@ -116,12 +142,16 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
   }, [exiting])
   const [errors, setErrors] = useState<PasteFieldMessages>({})
   const [formAlert, setFormAlert] = useState<PasteFormAlert | null>(null)
+  /** In a dialog: the last request failed; the string is C-ERR-2, shown in place of a toast. */
+  const [failed, setFailed] = useState<string | null>(null)
   const [result, setResult] = useState<Result | null>(null)
   /** The trimmed linkedin.com value the warning was shown for; sending it again goes ahead (H5 step 3). */
   const [warnedFor, setWarnedFor] = useState<string | null>(null)
   /** Where focus goes after the next render (the element exists only once the panel opened or closed). */
   const focusNext = useRef<"description" | "toggle" | "link" | null>(null)
   const isCheck = props.kind === "check"
+  const addDialog = props.kind === "add" ? props.dialog : undefined
+  const dialogPendingChange = props.dialog?.onPendingChange
   const overLimit = open && isDescriptionOverLimit(fields.description)
 
   useEffect(() => {
@@ -165,6 +195,7 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
   }
 
   const { paste, isPasting } = usePasteJobLink({
+    reportFailure: props.dialog !== undefined,
     onOutcome: (outcome: PasteOutcome) => {
       if (outcome.kind === "description" || outcome.kind === "fields" || outcome.kind === "alert")
         return onDescriptionOutcome(outcome)
@@ -172,6 +203,8 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
         if (open) closePanel("link")
         else setFields(EMPTY)
         const { posting } = outcome
+        // `/postings` dialog (add only): a visible posting closes it; the C-LINK-1 toast is the one message.
+        if (props.kind === "add" && posting.hiddenReason === null) return props.dialog.onSaved()
         if (posting.hiddenReason)
           setResult({
             kind: "status",
@@ -190,10 +223,22 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
           created: false,
           hiddenReason: outcome.posting.hiddenReason,
         })
+      if (outcome.kind === "failed") {
+        setFailed(outcome.message)
+        inputRef.current?.focus()
+        return
+      }
       setErrors({ link: outcome.message })
       inputRef.current?.focus()
     },
   })
+
+  // Any dialog holding the form stays open while a request is in flight (Esc, overlay and
+  // close do nothing). The cleanup releases the guard, so a close on save cannot leave it stuck.
+  useEffect(() => {
+    dialogPendingChange?.(isPasting)
+    return () => dialogPendingChange?.(false)
+  }, [dialogPendingChange, isPasting])
 
   const focusFirstInvalid = (messages: PasteFieldMessages) => {
     if (messages.link) return inputRef.current?.focus()
@@ -214,6 +259,7 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
     if (overLimit) return
     setResult(null)
     setFormAlert(null)
+    setFailed(null)
     const request = open ? pasteRequestOf(fields) : { url: fields.link.trim() }
     if (open) {
       const problems = pasteFieldProblems(fields)
@@ -265,8 +311,9 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
 
   const linkError = errors.link
   const describedBy = [
-    props.kind === "add" ? `${id}-help` : props.describedBy,
+    props.kind === "add" ? props.dialog.describedBy : props.describedBy,
     linkError && `${id}-error`,
+    failed && `${id}-failure`,
     warnedFor && `${id}-warning`,
     result && `${id}-result`,
   ]
@@ -282,7 +329,7 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
       aria-busy={isCheck || open ? isPasting : undefined}
       className="flex flex-col gap-1.5"
     >
-      <FieldLabel htmlFor={id} className={open ? undefined : "sr-only"}>
+      <FieldLabel htmlFor={id} className={open ? "block" : "sr-only"}>
         {open ? (
           <>
             {props.openLabel ? (
@@ -314,7 +361,7 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
           readOnly={readOnly}
           aria-invalid={linkError ? true : undefined}
           aria-describedby={describedBy}
-          autoFocus={props.kind === "check" && props.autoFocus}
+          autoFocus={(props.kind === "check" && props.autoFocus) || addDialog !== undefined}
           onChange={(event) => edit("link", event.target.value)}
         />
         {!open && (
@@ -334,6 +381,43 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
         )}
       </InputGroup>
       {linkError && <FieldError id={`${id}-error`}>{linkError}</FieldError>}
+      {failed && (
+        // In a dialog: C-ERR-2 in place, because a toast would sit behind the overlay.
+        <Alert id={`${id}-failure`} variant="destructive" role="alert" className="mt-1">
+          <CircleX aria-hidden="true" />
+          <AlertTitle className="font-normal">{failed}</AlertTitle>
+        </Alert>
+      )}
+      {result?.kind === "description" && (
+        <p
+          id={`${id}-result`}
+          role="status"
+          className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-sm [overflow-wrap:anywhere] ${FADE_IN}`}
+        >
+          <span>{result.line.text}</span>
+          {result.line.badgePosting && <PostingStatusBadge posting={result.line.badgePosting} />}
+          <Link to={result.line.link.to} className="underline underline-offset-4">
+            {result.line.link.label}
+          </Link>
+        </p>
+      )}
+      {result?.kind === "status" && (
+        <p
+          id={`${id}-result`}
+          role="status"
+          className={`text-sm [overflow-wrap:anywhere] ${FADE_IN}`}
+        >
+          {result.hiddenReason
+            ? pastedHiddenLine(result.created, result.hiddenReason)
+            : ALREADY_SAVED}{" "}
+          <Link
+            to={`/postings/${result.postingId}`}
+            className="underline underline-offset-4"
+          >
+            {relevanceCopy.addJobLink.hidden.view}
+          </Link>
+        </p>
+      )}
       {open ? (
         <div className="mt-3 flex flex-col gap-4">
           <DescriptionPanel
@@ -437,39 +521,6 @@ export function PasteJobLinkForm(props: PasteJobLinkFormProps) {
             {h.checkView}
           </Link>
         </p>
-      )}
-      {result?.kind === "description" && (
-        <p
-          id={`${id}-result`}
-          role="status"
-          className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-sm [overflow-wrap:anywhere] ${FADE_IN}`}
-        >
-          <span>{result.line.text}</span>
-          {result.line.badgePosting && <PostingStatusBadge posting={result.line.badgePosting} />}
-          <Link to={result.line.link.to} className="underline underline-offset-4">
-            {result.line.link.label}
-          </Link>
-        </p>
-      )}
-      {result?.kind === "status" && (
-        <p
-          id={`${id}-result`}
-          role="status"
-          className="text-sm [overflow-wrap:anywhere]"
-        >
-          {result.hiddenReason
-            ? pastedHiddenLine(result.created, result.hiddenReason)
-            : ALREADY_SAVED}{" "}
-          <Link
-            to={`/postings/${result.postingId}`}
-            className="underline underline-offset-4"
-          >
-            {relevanceCopy.addJobLink.hidden.view}
-          </Link>
-        </p>
-      )}
-      {props.kind === "add" && (
-        <FieldDescription id={`${id}-help`}>{props.help}</FieldDescription>
       )}
     </form>
   )

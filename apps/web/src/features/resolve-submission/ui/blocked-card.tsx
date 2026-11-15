@@ -50,6 +50,9 @@ export function BlockedCard({ row, onAddAnswer }: BlockedCardProps) {
   const answerTarget = missingAnswerTarget(blocked)
   const hasDocs = application.state === "documents_ready"
   const isSeventh = blocked.reason === "automation_incomplete"
+  // What the fence recorded, whichever source it came from: the ClickHouse block of 13 Nov 2026 stored
+  // "couldn't find exactly one submit button" with no sub-reason, and this card used to hide it.
+  const seventhDetail = blocked.detail ?? (blocked.subReason ? subReasonFallback[blocked.subReason] : null)
   const name = applicationName(application)
 
   return (
@@ -76,7 +79,7 @@ export function BlockedCard({ row, onAddAnswer }: BlockedCardProps) {
       <CardContent className="flex flex-col gap-2 text-sm text-pretty">
         {isSeventh ? (
           <>
-            {blocked.subReason && <p>{blocked.detail ?? subReasonFallback[blocked.subReason]}</p>}
+            {seventhDetail && <p className="[overflow-wrap:anywhere]">{seventhDetail}</p>}
             <p>{c.automationIncomplete}</p>
           </>
         ) : (

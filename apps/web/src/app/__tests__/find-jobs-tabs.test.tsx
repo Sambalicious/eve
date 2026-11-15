@@ -58,6 +58,7 @@ describe("Find jobs tablist (EPIC-0015 design note sections 1 and 4)", () => {
 
   it.each([
     ["#hiring-search-links", "Search"],
+    ["#broad-hiring-search", "Search"],
     ["#check-this-job", "Search"],
     ["#search-links", "Search"],
     ["#hiring-posts", "Hiring posts"],
@@ -81,6 +82,12 @@ describe("Find jobs tablist (EPIC-0015 design note sections 1 and 4)", () => {
   ])("FJ:AC-5.6 first load at %s opens %s", async (path, selected) => {
     openHiring({ path })
     await waitFor(() => expect(tab(selected)).toHaveAttribute("aria-selected", "true"))
+  })
+
+  it("FJ:AC-5.6 the hash #broad-hiring-search selects Search and focuses the Broad hiring search heading", async () => {
+    openHiring({ path: "/find-jobs#broad-hiring-search", criteria: { frameworks: ["React"] } })
+    const heading = await screen.findByRole("heading", { level: 2, name: "Broad hiring search" })
+    await waitFor(() => expect(heading).toHaveFocus())
   })
 
   it("FJ:AC-5.6 the hash #search-links selects Search and focuses the Search links heading", async () => {
