@@ -1,0 +1,109 @@
+# Claude Opus 5.5 reviews every non-draft pull request into main from a branch of this
+# repository as soon as it opens or is pushed to. The result is a PR comment and an
+# `opus-review` commit status on the exact commit reviewed.
+#
+# The PR is merged (a plain merge commit, never the admin bypass) only when ALL hold:
+#   - Opus reported no high or medium finding;
+#   - it touches no auth, session, money, database, config, CI, deploy or dependency file
+#     (see .github/scripts/review-gate.mjs) and is at most 400 changed lines;
+#   - the status is on the PR's current head, and every check the branch ruleset requires
+#     has finished green on that same commit.
+# Anything else keeps its comment and waits for a person. A new push has no status, so it
+# cannot inherit an approval.
+#
+# Setup: add the ANTHROPIC_API_KEY repository secret. Without it nothing is reviewed or
+# merged. Do not make `opus-review` a required status check: PRs that need a person would
+# then never be mergeable.
+#
+# Both triggers run THIS file and the scripts from the base branch, never the PR's, and
+# neither checks out or runs PR code; the diff is read through the API. A PR that edits
+# anything under .github/ always waits for a person.
+name: Opus review
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review, edited]
+  # The review can finish before CI does; the merge is retried when CI completes.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  review:
+    name: opus review
+    # Forks and Dependabot get no secrets here; Dependabot has its own workflow.
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: opus-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+      checks: read
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Review, then merge if nothing needs a person
+        run: |
+          if [ ! -f .github/scripts/opus-review.mjs ]; then
+            echo "The review script is not on the base branch yet: nothing to run."
+            exit 0
+          fi
+          node .github/scripts/opus-review.mjs
+        env:
+          MODE: review
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+
+  merge:
+    name: merge when CI is green
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.pull_requests[0].number != null
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: opus-merge-${{ github.event.workflow_run.pull_requests[0].number }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: read
+      checks: read
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Merge the PR if its current head has a passing review and passing checks
+        run: |
+          if [ ! -f .github/scripts/opus-review.mjs ]; then
+            echo "The review script is not on the base branch yet: nothing to run."
+            exit 0
+          fi
+          node .github/scripts/opus-review.mjs
+        env:
+          MODE: merge
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          REPO: ${{ github.repository }}
