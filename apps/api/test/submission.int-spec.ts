@@ -2112,13 +2112,24 @@ describe("work authorization from the ATS schema or an Approved Answer only (sco
     expect(filledWorkAuth()).toEqual(["Yes"])
   })
 
+  it("an apply_url on a different host than the application_url is refused with no browser opened, for submit and sample read", async () => {
+    await passGate()
+    const { id } = await queued()
+    const jobPostingId = (await row(id)).job_posting_id
+    await database.db.updateTable("job_posting").set({ application_system: "lever", application_url: `https://jobs.lever.co/acme/${id}`, apply_url: `https://evil.example/acme/${id}` }).where("id", "=", jobPostingId).execute()
+
+    expect(await service().submit(id, "automatic")).toEqual({ result: "refused", refusal: "not_ready" })
+    expect(await service().readForm(id)).toBe("not_ready")
+    expect(forms.opened).toBe(0)
+  })
+
   it("SEC-514: a work question that was blocked-free (Approved Answer) loses its match after the read: aborted", async () => {
     await passGate()
     await database.db.insertInto("approved_answer").values({ candidate_id: database.operatorId, id: randomUUID(), answer_group: "custom", topic: null, skill: null, question: NIGERIA, answer_key: `custom:${NIGERIA.toLowerCase()}`, value: "Yes", created_at: new Date(), updated_at: new Date() }).execute()
     const before = workAuth(NIGERIA, { fieldName: "x", fieldId: "x" })
     forms.use({ host: "jobs.lever.co", controls: [...STANDARD_FORM, before], controlsAfterFill: [...STANDARD_FORM, { ...before, label: TOGO }], schema: null })
     const { id } = await queued()
-    await database.db.updateTable("job_posting").set({ application_system: "lever", apply_url: `https://jobs.lever.co/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
+    await database.db.updateTable("job_posting").set({ application_system: "lever", apply_url: `https://jobs.lever.co/acme/${id}`, application_url: `https://jobs.lever.co/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
     expect(await service().submit(id, "automatic")).toEqual({ result: "blocked" })
     expect(forms.clicks).toEqual([])
   })
@@ -2130,7 +2141,7 @@ describe("work authorization from the ATS schema or an Approved Answer only (sco
     await passGate()
     forms.use({ host, controls: [...STANDARD_FORM, workAuth(NIGERIA, { fieldName: "q", fieldId: "q" })] })
     const { id } = await queued()
-    await database.db.updateTable("job_posting").set({ application_system: system, apply_url: `https://${host}/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
+    await database.db.updateTable("job_posting").set({ application_system: system, apply_url: `https://${host}/acme/${id}`, application_url: `https://${host}/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
     expect(await service().submit(id, "automatic")).toEqual({ result: "blocked" })
     // The standard sponsorship question comes first and is page text too on Lever/Ashby.
     // CR5D-01: a page-read work question is manual-only, so no question is stored and no "Add Approved Answer" is offered.
@@ -2154,7 +2165,7 @@ describe("work authorization from the ATS schema or an Approved Answer only (sco
     await saveAnswer(sponsorship, "Yes")
     forms.use({ host, controls: [...STANDARD_FORM, workAuth(` ${NIGERIA.toUpperCase()} `, { fieldName: "q", fieldId: "q" })] })
     const { id } = await queued()
-    await database.db.updateTable("job_posting").set({ application_system: system, apply_url: `https://${host}/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
+    await database.db.updateTable("job_posting").set({ application_system: system, apply_url: `https://${host}/acme/${id}`, application_url: `https://${host}/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
     expect(await service().submit(id, "automatic")).toEqual({ result: "blocked" })
     expect(forms.clicks).toEqual([])
     expect(forms.filled.filter((item) => item.ref === "wa" || item.ref === "sponsor")).toEqual([])
@@ -2173,7 +2184,7 @@ describe("work authorization from the ATS schema or an Approved Answer only (sco
     await saveAnswer("Will you now or in the future require visa sponsorship?", "Yes")
     forms.use({ host, text: TOGO, controls: [...STANDARD_FORM, control] })
     const { id } = await queued()
-    if (system !== "greenhouse") await database.db.updateTable("job_posting").set({ application_system: system, apply_url: `https://${host}/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
+    if (system !== "greenhouse") await database.db.updateTable("job_posting").set({ application_system: system, apply_url: `https://${host}/acme/${id}`, application_url: `https://${host}/acme/${id}` }).where("id", "=", (await row(id)).job_posting_id).execute()
     expect(await service().submit(id, "automatic")).toEqual({ result: "blocked" })
     expect(forms.clicks).toEqual([])
     expect(filledWorkAuth()).toEqual([])

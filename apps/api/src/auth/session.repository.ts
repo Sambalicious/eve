@@ -36,14 +36,19 @@ export class SessionRepository {
   /**
    * Records activity on a session still active after `cutoff`, in one statement,
    * so a concurrent request cannot revive a session that has already expired.
+   * A session also stops resolving once its Candidate is no longer `active`
+   * (revoked or deleting): revoking someone ends their access on the next request.
    */
   async touchIfActive(idHash: string, now: Date, cutoff: Date): Promise<StoredSession | undefined> {
     const row = await this.db
       .updateTable("dashboard_session")
+      .from("candidate")
       .set({ last_active_at: now })
-      .where("id_hash", "=", idHash)
-      .where("last_active_at", ">", cutoff)
-      .returning(["csrf_token", "google_sub", "candidate_id"])
+      .whereRef("candidate.id", "=", "dashboard_session.candidate_id")
+      .where("candidate.state", "=", "active")
+      .where("dashboard_session.id_hash", "=", idHash)
+      .where("dashboard_session.last_active_at", ">", cutoff)
+      .returning(["dashboard_session.csrf_token", "dashboard_session.google_sub", "dashboard_session.candidate_id"])
       .executeTakeFirst()
     return row && { csrfToken: row.csrf_token, googleSub: row.google_sub, candidateId: row.candidate_id }
   }

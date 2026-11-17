@@ -17,6 +17,7 @@ import { type CandidateTx, TenantDatabase } from "../db/tenant-database.js"
 import { refreshAtsFit } from "../ats/ats-fit-refresh.js"
 import { ApiException } from "../http/api-exception.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 import { EXTRACTION_SYSTEM_PROMPT, buildVerifiedSections, extractedProfileSchema } from "./career-profile-draft.js"
 import { toProfileResponse, toVersion } from "./career-profile-view.js"
 import { CareerProfileRepository, type VersionRow } from "./career-profile.repository.js"
@@ -236,7 +237,7 @@ export class CareerProfileService implements OnApplicationBootstrap, OnApplicati
       this.logger.error(`Drafting ${uploadId} failed: ${error instanceof Error ? error.name : "unknown"}`)
       await this.repository
         .finishUpload(uploadId, { status: "failed", reason: "provider_error" }, this.clock.now())
-        .catch(() => undefined)
+        .catch(swallowAndLog(this.logger, "finishUpload"))
     }
   }
 }

@@ -34,6 +34,8 @@ if grep -qE 'replace-with|change-me' "$ENV_FILE"; then
   exit 2
 fi
 
+bash "$ROOT/scripts/ops/preflight.sh" "$ENV_FILE" || exit 2
+
 for key in PUBLIC_ORIGIN GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET ANTHROPIC_API_KEY BACKUP_AGE_RECIPIENT; do
   grep -qE "^${key}=.+" "$ENV_FILE" || { echo "Refusing: $key is empty in $ENV_FILE" >&2; exit 2; }
 done

@@ -137,6 +137,7 @@ test.describe("Check this job from a row (AC 8.1, 8.2; CTJ row scenarios)", () =
     await expect(field).toHaveValue("")
     await expect(field).toBeFocused()
     await expect(hiring.postsSection().getByText(P3.rowHelp, { exact: true })).toBeVisible()
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(pasteRequests(browserRequests)).toHaveLength(0)
     expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])

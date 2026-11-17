@@ -15,7 +15,7 @@
     "test:file": "node scripts/test-file.mjs"
   },
   "devDependencies": {
-    "turbo": "^2.11.8"
+    "turbo": "^2.11.11"
   },
   "files": [
     ".agents/",

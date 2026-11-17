@@ -22,6 +22,7 @@ if grep -qE 'replace-with|change-me' .env; then
   grep -nE 'replace-with|change-me' .env | sed 's/=.*/=<hidden>/' >&2
   exit 2
 fi
+bash "$ROOT/scripts/ops/preflight.sh" "$ROOT/.env" || exit 2
 command -v apt-get >/dev/null || { echo "This script expects Debian or Ubuntu." >&2; exit 2; }
 
 say "Base packages"
@@ -30,7 +31,14 @@ sudo apt-get install -y -qq ca-certificates curl rsync >/dev/null
 
 say "Docker"
 if ! command -v docker >/dev/null; then
-  curl -fsSL https://get.docker.com | sudo sh
+  # Docker's signed apt repository, not `curl get.docker.com | sh`. Debian and Ubuntu only.
+  # shellcheck source=scripts/ops/apt-repo.sh
+  . "$ROOT/scripts/ops/apt-repo.sh"
+  DOCKER_OS="$(apt_os_id)"
+  DOCKER_CODENAME="$(apt_os_codename)"
+  apt_add_repo docker "https://download.docker.com/linux/$DOCKER_OS/gpg" docker.asc \
+    "https://download.docker.com/linux/$DOCKER_OS" "$DOCKER_CODENAME" stable
+  sudo apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null
 fi
 sudo usermod -aG docker "$USER" || true
 

@@ -5,6 +5,7 @@ import type { StoredSection } from "../db/schema.js"
 import { atsFit, atsKeywords } from "../ats/ats-score.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
 import { Semaphore } from "../shared/semaphore.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 import { DiscoveryRepository } from "./discovery.repository.js"
 import { FX_RATES } from "./fx-rates.js"
 import {
@@ -195,7 +196,7 @@ export class PostingEvaluator {
       return "evaluated"
     } catch (error) {
       this.logger.error(`Evaluating posting ${postingId} failed: ${error instanceof Error ? error.name : "unknown"}`)
-      await this.repository.markFailed(postingId, "provider_error", this.clock.now()).catch(() => undefined)
+      await this.repository.markFailed(postingId, "provider_error", this.clock.now()).catch(swallowAndLog(this.logger, "markFailed"))
       return "failed"
     }
   }

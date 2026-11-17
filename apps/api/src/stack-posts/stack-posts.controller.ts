@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Headers, Param, Post, Put, Query } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Header, HttpCode, Headers, Post, Put, Query } from "@nestjs/common"
 import {
   type AlertFeedsResponse,
   type HiringSearchInputsResponse,
@@ -7,14 +7,12 @@ import {
   alertFeedVerificationRequestSchema,
   registerAlertFeedRequestSchema,
 } from "@eve/contracts"
-import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
+import { UuidParam } from "../http/uuid-param.js"
 import { parsePage, registrationFieldErrors, verificationFieldErrors } from "./field-errors.js"
 import { requireJson } from "./require-json.js"
 import { StackPostsService } from "./stack-posts.service.js"
-
-const uuid = z.uuid()
 
 /**
  * EPIC-0005 routes (contract v1.15.1) and EPIC-0007 Phase 1's hiring search inputs (v1.19.0). v1.22.0 (EPIC-0008):
@@ -73,8 +71,7 @@ export class StackPostsController {
 
   @Delete("alert-feeds/:id")
   @HttpCode(204)
-  async remove(@Param("id") id: string): Promise<void> {
-    if (!uuid.safeParse(id).success) throw new ApiException("bad_request")
+  async remove(@UuidParam("id", "bad_request") id: string): Promise<void> {
     await this.service.remove(id)
   }
 }

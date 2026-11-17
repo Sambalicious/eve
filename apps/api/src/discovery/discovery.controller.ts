@@ -1,11 +1,10 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Param, Post, Put, Res, type PipeTransform } from "@nestjs/common"
 import {
   type CheckAgainResponse,
   type EligibilitySettings,
   type JobPostingDetail,
   type JobPostingsResponse,
   type JobSourcesResponse,
-  type PasteJobLinkRequest,
   type PasteJobLinkResponse,
   checkAgainRequestSchema,
   jobPostingsQuerySchema,
@@ -18,9 +17,21 @@ import type { FastifyReply } from "fastify"
 import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
-import { parseRequest } from "../http/parse-body.js"
+import { UuidParam } from "../http/uuid-param.js"
+import { ZodBody, ZodQuery } from "../http/zod-request.js"
 import { DiscoveryService } from "./discovery.service.js"
 import { OperatorOnly } from "../auth/operator-only.guard.js"
+
+/** An unknown board key is `404 not_found`, checked before the body like the path ids. */
+const boardKeyPipe: PipeTransform<string, string> = {
+  transform(key) {
+    if (!remoteBoardKeySchema.safeParse(key).success) throw new ApiException("not_found")
+    return key
+  },
+}
+
+/** `null`, `[]` and `"x"` are bodies and are refused; only an absent body counts as `{}`. */
+const checkAgainBodySchema = checkAgainRequestSchema.default({})
 
 /** Every route is guarded by the global session and CSRF guard (Candidate only). */
 @Controller("v1/job-sources")
@@ -44,15 +55,15 @@ export class JobSourcesController {
   @OperatorOnly()
   @Put("remote-boards/:key/verification")
   @Header("cache-control", "no-store")
-  verify(@Param("key") key: string, @Body() body: unknown): Promise<JobSourcesResponse> {
-    return this.service.verifyRemoteBoard(boardKey(key), parseRequest(verifyJobSourceRequestSchema, body))
+  verify(@Param("key", boardKeyPipe) key: string, @ZodBody(verifyJobSourceRequestSchema) body: z.output<typeof verifyJobSourceRequestSchema>): Promise<JobSourcesResponse> {
+    return this.service.verifyRemoteBoard(key, body)
   }
 
   @OperatorOnly()
   @Put("remote-boards/:key/enabled")
   @Header("cache-control", "no-store")
-  setEnabled(@Param("key") key: string, @Body() body: unknown): Promise<JobSourcesResponse> {
-    return this.service.setRemoteBoardEnabled(boardKey(key), parseRequest(setJobSourceEnabledRequestSchema, body).enabled)
+  setEnabled(@Param("key", boardKeyPipe) key: string, @ZodBody(setJobSourceEnabledRequestSchema) body: z.output<typeof setJobSourceEnabledRequestSchema>): Promise<JobSourcesResponse> {
+    return this.service.setRemoteBoardEnabled(key, body.enabled)
   }
 }
 
@@ -62,8 +73,8 @@ export class JobPostingsController {
 
   @Get()
   @Header("cache-control", "no-store")
-  list(@Query() query: unknown): Promise<JobPostingsResponse> {
-    return this.service.listPostings(parseRequest(jobPostingsQuerySchema, query))
+  list(@ZodQuery(jobPostingsQuerySchema) query: z.output<typeof jobPostingsQuerySchema>): Promise<JobPostingsResponse> {
+    return this.service.listPostings(query)
   }
 
   /**
@@ -74,16 +85,14 @@ export class JobPostingsController {
   @Post("check-again")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  checkAgain(@Body() body: unknown): Promise<CheckAgainResponse> {
-    // `null`, `[]` and `"x"` are bodies and are refused; only an absent body counts as `{}`.
-    parseRequest(checkAgainRequestSchema, body === undefined ? {} : body)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  checkAgain(@ZodBody(checkAgainBodySchema) _body: unknown): Promise<CheckAgainResponse> {
     return this.service.checkAgain()
   }
 
   @Get(":id")
   @Header("cache-control", "no-store")
-  read(@Param("id") id: string): Promise<JobPostingDetail> {
-    if (!z.uuid().safeParse(id).success) throw new ApiException("not_found")
+  read(@UuidParam("id", "not_found") id: string): Promise<JobPostingDetail> {
     return this.service.posting(id)
   }
 
@@ -93,8 +102,8 @@ export class JobPostingsController {
    */
   @Post("links")
   @Header("cache-control", "no-store")
-  async paste(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply): Promise<PasteJobLinkResponse> {
-    const result = await this.service.paste(parsePaste(body))
+  async paste(@ZodBody(pasteJobLinkRequestSchema) body: z.output<typeof pasteJobLinkRequestSchema>, @Res({ passthrough: true }) reply: FastifyReply): Promise<PasteJobLinkResponse> {
+    const result = await this.service.paste(body)
     reply.status(result.created ? 201 : 200)
     return result
   }
@@ -116,12 +125,3 @@ export class EligibilitySettingsController {
   }
 }
 
-function boardKey(key: string): string {
-  if (!remoteBoardKeySchema.safeParse(key).success) throw new ApiException("not_found")
-  return key
-}
-
-/** A body that does not fit the schema (no `url` or `description` key, unknown keys, non-strings, over the raw caps) is a 400. */
-function parsePaste(body: unknown): PasteJobLinkRequest {
-  return parseRequest(pasteJobLinkRequestSchema, body)
-}

@@ -1,9 +1,13 @@
 # One image, two processes (ADR 0004). Build from the repository root:
 #   docker build -f apps/api/Dockerfile .
 # Run with command ["node", "dist/main.api.js"] or ["node", "dist/main.worker.js"].
-# node:22 tracks the latest 22.x, which satisfies engines ">=22.15" (CR2-04; module.registerHooks).
-FROM node:22-bookworm-slim AS base
-RUN npm install --global pnpm@10.14.0
+# node:22 satisfies engines ">=22.15" (CR2-04; module.registerHooks). The base image is pinned by
+# digest (multi-arch index of node:22-bookworm-slim); Dependabot (docker) proposes digest bumps within node 22; a new node major is
+# ignored in .github/dependabot.yml and is a deliberate upgrade (node 26 has no corepack).
+# pnpm comes from corepack with the tarball's sha512, which corepack verifies, not `npm install -g`.
+FROM node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS base
+RUN corepack enable \
+ && corepack prepare pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748 --activate
 WORKDIR /repo
 
 FROM base AS build
@@ -17,7 +21,7 @@ RUN pnpm --filter @eve/contracts build \
  && pnpm --filter @eve/api build \
  && pnpm --filter @eve/api deploy --legacy --prod /out
 
-FROM node:22-bookworm-slim AS runtime
+FROM node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /out/node_modules ./node_modules

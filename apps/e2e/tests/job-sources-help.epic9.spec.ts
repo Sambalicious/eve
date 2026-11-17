@@ -91,6 +91,7 @@ test.describe("Revised C-SRC-3 refusal (AC-7)", () => {
     await expect(help.refusalMarkVerified(WWR)).toBeVisible()
     await expect(help.rowSwitch(WWR)).not.toBeChecked()
     await expect(help.rowSwitch(WWR)).toHaveAccessibleDescription(`${EH.enableRefused} ${SRC.markVerified}`)
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(apiWrites(requests)).toHaveLength(0)
   })
@@ -180,6 +181,7 @@ test.describe("Revised C-SRC-3 refusal (AC-7)", () => {
     await help.rowSwitch(WWR).click()
     await expect(help.refusal(WWR)).toHaveCount(1)
     await expect(help.refusal(WWR)).toContainText(EH.enableRefused)
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(apiWrites(requests)).toHaveLength(0)
   })

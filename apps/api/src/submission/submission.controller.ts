@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Post, Put, Res } from "@nestjs/common"
 import {
   type ExistingApplicationsResponse,
   type SampleResult,
@@ -13,10 +13,13 @@ import {
 import type { FastifyReply } from "fastify"
 import { z } from "zod"
 
-import { ApiException } from "../http/api-exception.js"
-import { parseRequest } from "../http/parse-body.js"
+import { UuidParam } from "../http/uuid-param.js"
+import { ZodBody, ZodQuery } from "../http/zod-request.js"
 import { SubmissionStateService } from "./submission-state.service.js"
 import { ConvertedFeature } from "../auth/converted-feature.guard.js"
+
+/** The body is absent or exactly `{}`. */
+const emptyBodySchema = z.object({}).strict().nullish()
 
 /** Every route is guarded by the global session and CSRF guard (single Candidate: being signed in is ownership). */
 @Controller("v1")
@@ -33,94 +36,94 @@ export class SubmissionController {
   @ConvertedFeature("submission")
   @Put("submission/automatic")
   @Header("cache-control", "no-store")
-  setAutomatic(@Body() body: unknown): Promise<SubmissionStatus> {
-    return this.service.setAutomatic(parseRequest(setAutomaticRequestSchema, body).enabled)
+  setAutomatic(@ZodBody(setAutomaticRequestSchema) body: z.output<typeof setAutomaticRequestSchema>): Promise<SubmissionStatus> {
+    return this.service.setAutomatic(body.enabled)
   }
 
   @ConvertedFeature("submission")
   @Get("submissions")
   @Header("cache-control", "no-store")
-  list(@Query("view") view: unknown): Promise<SubmissionListResponse> {
-    return this.service.list(parseRequest(submissionListViewSchema, view))
+  list(@ZodQuery("view", submissionListViewSchema) view: z.output<typeof submissionListViewSchema>): Promise<SubmissionListResponse> {
+    return this.service.list(view)
   }
 
   @ConvertedFeature("submission")
   @Get("applications/:id/submission")
   @Header("cache-control", "no-store")
-  submission(@Param("id") id: string): Promise<Submission> {
-    return this.service.submission(uuid(id))
+  submission(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.submission(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/sample")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  makeSample(@Param("id") id: string): Promise<Submission> {
-    return this.service.makeSample(uuid(id))
+  makeSample(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.makeSample(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/sample/approve")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  approveSample(@Param("id") id: string): Promise<SampleResult> {
-    return this.service.approveSample(uuid(id))
+  approveSample(@UuidParam("id", "not_found") id: string): Promise<SampleResult> {
+    return this.service.approveSample(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/sample/reject")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  rejectSample(@Param("id") id: string, @Body() body: unknown): Promise<Submission> {
-    return this.service.rejectSample(uuid(id), parseRequest(reasonRequestSchema, body).reason)
+  rejectSample(@UuidParam("id", "not_found") id: string, @ZodBody(reasonRequestSchema) body: z.output<typeof reasonRequestSchema>): Promise<Submission> {
+    return this.service.rejectSample(id, body.reason)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/queue")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  queue(@Param("id") id: string): Promise<Submission> {
-    return this.service.queue(uuid(id))
+  queue(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.queue(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/mark-confirmed")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  markConfirmed(@Param("id") id: string): Promise<Submission> {
-    return this.service.markConfirmed(uuid(id))
+  markConfirmed(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.markConfirmed(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/mark-not-submitted")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  markNotSubmitted(@Param("id") id: string): Promise<Submission> {
-    return this.service.markNotSubmitted(uuid(id))
+  markNotSubmitted(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.markNotSubmitted(id)
   }
 
   // EPIC-0011 C3: no @ConvertedFeature. The Draft path is open to every Candidate; the service checks the capability on the blocked path.
   @Post("applications/:id/manual-complete")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  manualComplete(@Param("id") id: string): Promise<Submission> {
-    return this.service.manualComplete(uuid(id))
+  manualComplete(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.manualComplete(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/same-company/approve")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  approveSameCompany(@Param("id") id: string): Promise<Submission> {
-    return this.service.approveSameCompany(uuid(id))
+  approveSameCompany(@UuidParam("id", "not_found") id: string): Promise<Submission> {
+    return this.service.approveSameCompany(id)
   }
 
   @ConvertedFeature("submission")
   @Post("applications/:id/same-company/decline")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  declineSameCompany(@Param("id") id: string, @Body() body: unknown): Promise<Submission> {
-    return this.service.declineSameCompany(uuid(id), parseRequest(reasonRequestSchema, body).reason)
+  declineSameCompany(@UuidParam("id", "not_found") id: string, @ZodBody(reasonRequestSchema) body: z.output<typeof reasonRequestSchema>): Promise<Submission> {
+    return this.service.declineSameCompany(id, body.reason)
   }
 
   /**
@@ -131,9 +134,9 @@ export class SubmissionController {
   @Post("applications/:id/remove-from-queue")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  removeFromQueue(@Param("id") id: string, @Body() body: unknown): Promise<Submission> {
-    if (body !== undefined && body !== null) parseRequest(z.object({}).strict(), body)
-    return this.service.removeFromQueue(uuid(id))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  removeFromQueue(@UuidParam("id", "not_found") id: string, @ZodBody(emptyBodySchema) _body: unknown): Promise<Submission> {
+    return this.service.removeFromQueue(id)
   }
 
   @Get("existing-applications")
@@ -145,8 +148,8 @@ export class SubmissionController {
   /** 201 when recorded; 200 with `created: false` when the same URL and requisition is already recorded (C-EXIST-3). */
   @Post("existing-applications")
   @Header("cache-control", "no-store")
-  async addExistingApplication(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
-    const result = await this.service.addExistingApplication(parseRequest(createExistingApplicationRequestSchema, body))
+  async addExistingApplication(@ZodBody(createExistingApplicationRequestSchema) body: z.output<typeof createExistingApplicationRequestSchema>, @Res({ passthrough: true }) reply: FastifyReply) {
+    const result = await this.service.addExistingApplication(body)
     reply.status(result.created ? 201 : 200)
     return result
   }
@@ -157,9 +160,4 @@ export class SubmissionController {
   completeExistingApplications(): Promise<ExistingApplicationsResponse> {
     return this.service.completeExistingApplications()
   }
-}
-
-function uuid(value: string): string {
-  if (!z.uuid().safeParse(value).success) throw new ApiException("not_found")
-  return value
 }

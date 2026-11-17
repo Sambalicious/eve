@@ -94,6 +94,8 @@ const envSchema = z.object({
   DOCUMENT_DIRECTION_ENABLED: z.string().optional(),
   /** EPIC-0003: HMAC root for the access-request IP hash and fill-time proof. At least 32 bytes. */
   ACCESS_REQUEST_SECRET: z.string().refine((value) => Buffer.byteLength(value, "utf8") >= 32),
+  /** Access log (method, path, status, time, request id; never headers, query or bodies). On unless "0"; always off in NODE_ENV=test. */
+  ACCESS_LOG: z.string().optional(),
   /** Reverse-proxy hops to trust for the client address. Production behind Caddy: 1. */
   TRUST_PROXY: wholeNumber(0, 0),
   ACCESS_REQUEST_LIMIT_IP_HOUR: wholeNumber(1, 3),
@@ -122,6 +124,8 @@ export type AppConfig = Readonly<{
   spend?: SpendConfig
   /** EPIC-0003: the public request-access endpoint. */
   accessRequest: AccessRequestConfig
+  /** Fastify request logging: one line per request, no headers, query strings or bodies (`ACCESS_LOG=0` turns it off). */
+  accessLog: boolean
   /** Slice 8d (8d.9): the api pool's `statement_timeout`, `API_STATEMENT_TIMEOUT_MS`. Not configurable from the environment. */
   statementTimeoutMs: number
 }>
@@ -198,6 +202,7 @@ export function parseConfig(env: Readonly<Record<string, string | undefined>>): 
     documentBridgesEnabled: parsed.DOCUMENT_BRIDGES_ENABLED === "1",
     documentDirectionEnabled: parsed.DOCUMENT_DIRECTION_ENABLED === "1",
     spend,
+    accessLog: parsed.NODE_ENV !== "test" && parsed.ACCESS_LOG !== "0",
     accessRequest: {
       trustProxy: parsed.TRUST_PROXY,
       limits: {

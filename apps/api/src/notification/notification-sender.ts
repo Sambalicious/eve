@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common"
 
 import { CLOCK, type Clock } from "../shared/clock.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 import { overrideReasonShort, storedDecision } from "../documents/override.js"
 import type { StoredRule } from "../db/schema.js"
 import { SpendLedger } from "../spend/spend-ledger.js"
@@ -95,7 +96,7 @@ export class NotificationSender {
       if (email) await this.mailer.send(email)
       await this.outboxFor(row).markSent(row.id, this.clock.now())
       // AC 10.2 "email" category: tracked, never refused, so the cost-pause email itself goes out.
-      if (email) await this.ledger.recordEmail().catch(() => undefined)
+      if (email) await this.ledger.recordEmail().catch(swallowAndLog(this.logger, "recordEmail"))
       return "sent"
     } catch (error) {
       const code = error instanceof MailerError ? error.code : "unknown"

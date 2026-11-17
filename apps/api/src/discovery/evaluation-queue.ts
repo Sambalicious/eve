@@ -6,6 +6,7 @@ import { APP_CONFIG } from "../config/config.module.js"
 import type { SharedRuntimeConfig } from "../config/env.js"
 import { CandidateScope } from "../db/candidate-scope.js"
 import type { Database } from "../db/schema.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 
 /**
  * EPIC-0006 (architecture.r1 "Check again"): the api's send-only producer for
@@ -34,8 +35,8 @@ export class EvaluationQueue implements OnApplicationShutdown {
 
   async onApplicationShutdown(): Promise<void> {
     if (!this.started) return
-    await this.started.catch(() => undefined)
-    await this.boss.stop({ graceful: true }).catch(() => undefined)
+    await this.started.catch(swallowAndLog(this.logger, "queue start"))
+    await this.boss.stop({ graceful: true }).catch(swallowAndLog(this.logger, "queue stop"))
   }
 
   /** One job `{ postingId, candidateId }` per id, written in `trx`. Job data carries ids only. */

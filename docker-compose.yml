@@ -97,6 +97,8 @@ services:
       ACCESS_REQUEST_SECRET: ${ACCESS_REQUEST_SECRET:?set in .env}
       # Reverse-proxy hops in front of the api (1 behind Caddy). 0: global cap only.
       TRUST_PROXY: ${TRUST_PROXY:-0}
+      # Access log: method, path, status, time, request id. Never headers, query strings or bodies. 0 turns it off.
+      ACCESS_LOG: ${ACCESS_LOG:-1}
       ACCESS_REQUEST_LIMIT_IP_HOUR: ${ACCESS_REQUEST_LIMIT_IP_HOUR:-3}
       ACCESS_REQUEST_LIMIT_IP_DAY: ${ACCESS_REQUEST_LIMIT_IP_DAY:-10}
       ACCESS_REQUEST_LIMIT_GLOBAL_DAY: ${ACCESS_REQUEST_LIMIT_GLOBAL_DAY:-50}
@@ -218,7 +220,7 @@ services:
   # Pinned by digest (@playwright/mcp 0.0.83). Upgrade only after the wrapper
   # contract tests pass on the fixture forms.
   browser:
-    image: mcr.microsoft.com/playwright/mcp@sha256:690763cbb437ee7233f538a953bb5390bf03791eb5c965b471e59d17a6132fcb
+    image: mcr.microsoft.com/playwright/mcp@sha256:8ca417ff2a3660b770d7dd4a293bd179d0f3c29d0d5fb5bc43d3be617b1566a2
     # Appended to the image entrypoint (tini -- node cli.js --headless --browser chromium --no-sandbox).
     command:
       - --isolated
@@ -262,6 +264,7 @@ services:
     volumes:
       - ./docker/egress/squid.conf:/etc/squid/squid.conf:ro
       - ./docker/egress/allowlist-helper.pl:/etc/squid/allowlist-helper.pl:ro
+      - ./docker/egress/deny-private-dst.txt:/etc/squid/deny-private-dst.txt:ro
       - egress-allowlist:/etc/squid/allow:ro
     # SEC-505: the entrypoint starts as root and Squid drops to `proxy` (uid 13),
     # which needs SETUID/SETGID; nothing else. Writable paths are tmpfs only.

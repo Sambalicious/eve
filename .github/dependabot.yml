@@ -1,0 +1,52 @@
+# Weekly update PRs. Minor and patch bumps are grouped into one PR per ecosystem
+# so they are reviewed together; major bumps arrive as their own PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  # pnpm workspace (one root lockfile covers every package).
+  # Dependabot's "npm" ecosystem reads pnpm-lock.yaml.
+  - package-ecosystem: npm
+    # One pnpm lockfile at the root: scanning each workspace as well only opened a
+    # duplicate PR per package for the same bump.
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # @types/node tracks the Node the code runs on (engines >=22.15, .nvmrc 24), not the latest.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+
+  # apps/api/Dockerfile (node base image, pinned by digest).
+  - package-ecosystem: docker
+    directory: /apps/api
+    schedule:
+      interval: weekly
+    groups:
+      docker-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # The shipped image stays on node 22 (see apps/api/Dockerfile); a new major is a deliberate upgrade.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
+
+  # Image references in the compose files (postgres, browser and egress digests).
+  # docker/* holds no Dockerfiles; its compose files are covered here.
+  - package-ecosystem: docker-compose
+    directories:
+      - /
+      - /docker/*
+    schedule:
+      interval: weekly
+    groups:
+      compose-minor-patch:
+        update-types: [minor, patch]

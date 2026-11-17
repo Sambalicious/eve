@@ -18,6 +18,15 @@ describe("parseConfig", () => {
     expect(config).not.toHaveProperty("candidateGoogleSub")
   })
 
+  it("turns the access log on by default and off with ACCESS_LOG=0 or in test", () => {
+    expect(parseConfig(validEnv).accessLog).toBe(true)
+    expect(parseConfig({ ...validEnv, NODE_ENV: "production" }).accessLog).toBe(true)
+    expect(parseConfig({ ...validEnv, ACCESS_LOG: "0" }).accessLog).toBe(false)
+    expect(parseConfig({ ...validEnv, ACCESS_LOG: "1" }).accessLog).toBe(true)
+    expect(parseConfig({ ...validEnv, NODE_ENV: "test" }).accessLog).toBe(false)
+    expect(parseConfig({ ...validEnv, NODE_ENV: "test", ACCESS_LOG: "1" }).accessLog).toBe(false)
+  })
+
   // EPIC-0002 A1 (architecture r2 "CANDIDATE_GOOGLE_SUB retirement"): the api boots
   // only after the multi-candidate marker exists, and then the key must be gone.
   it("refuses CANDIDATE_GOOGLE_SUB, which is retired after the multi-candidate migration", () => {

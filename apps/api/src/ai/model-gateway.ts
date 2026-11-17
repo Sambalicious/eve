@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto"
 
-import { Inject, Injectable } from "@nestjs/common"
+import { Inject, Injectable, Logger } from "@nestjs/common"
 import type { z } from "zod"
 
 import { APP_CONFIG } from "../config/config.module.js"
@@ -8,6 +8,7 @@ import type { SharedRuntimeConfig } from "../config/env.js"
 
 import { TenantDatabase } from "../db/tenant-database.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 import { SPEND_CONFIG } from "../spend/spend-config.js"
 import { type CostAction, SpendLedger } from "../spend/spend-ledger.js"
 import { type AiPrices, DEFAULT_DOCUMENTS_AI_PRICES, type SpendConfig, aiActualMicros, aiEstimateMicros, aiInputMicros, pricesForModel } from "../spend/spend-math.js"
@@ -65,6 +66,8 @@ export type GatewayResult<T> =
  */
 @Injectable()
 export class ModelGateway {
+  private readonly logger = new Logger(ModelGateway.name)
+
   constructor(
     private readonly approvals: AiProviderRepository,
     private readonly calls: AiCallRepository,
@@ -123,7 +126,7 @@ export class ModelGateway {
     // The client may settle (or reject) after the deadline; that late result is
     // ignored on purpose so it can neither surface as an unhandled rejection nor
     // be used after the call was recorded as timed out.
-    call.catch(() => undefined)
+    call.catch(swallowAndLog(this.logger, "late model call"))
     const paused = request.cost?.haltOnGlobalPause === true ? this.watchGlobalPause() : undefined
     const outcome = await settleWithin(call, request.timeoutMs, paused?.promise).finally(() => paused?.stop())
     if (outcome.kind === "timed_out" || outcome.kind === "paused") {
@@ -167,7 +170,7 @@ export class ModelGateway {
       const check = async () => {
         if (stopped) return
         // control_state is shared: a shared transaction, no Candidate setting.
-        const control = await this.tenant.forShared((tx) => tx.selectFrom("control_state").select("global_paused").executeTakeFirst()).catch(() => undefined)
+        const control = await this.tenant.forShared((tx) => tx.selectFrom("control_state").select("global_paused").executeTakeFirst()).catch(swallowAndLog(this.logger, "global pause poll"))
         if (control?.global_paused === true) return resolve()
         if (!stopped) timer = setTimeout(() => void check(), PAUSE_POLL_MS)
       }

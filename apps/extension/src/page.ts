@@ -653,6 +653,5 @@ void (() => {
     return { filled, attached, unanswered: finish().unanswered, mismatched }
   }
 
-  const host = globalThis as unknown as { __evePage?: EvePageApi }
-  host.__evePage = { read, begin, fillValue, attachFile, finish, fill }
+  globalThis.__evePage = { read, begin, fillValue, attachFile, finish, fill }
 })()

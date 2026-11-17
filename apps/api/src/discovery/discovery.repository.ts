@@ -10,14 +10,10 @@ import { CandidateScope } from "../db/candidate-scope.js"
 import { type CandidateTx, TenantDatabase } from "../db/tenant-database.js"
 import { applyTransactionTimeouts, isLockTimeout, transactionTimeouts } from "../db/transaction-timeouts.js"
 import { type ListAggregate, type PageFilter, type PageRow, countMatching, listAggregate, ranksOf, readPage } from "./job-postings-query.js"
-import { type VisibilityContext, type VisibilityFacts, hiddenReason, visibilityContext, visibleSql } from "./visibility.js"
+import { type VisibilityContext, type VisibilityFacts, hiddenReason, visibilityContext } from "./visibility.js"
 import { type PostingKey, tierMapHash } from "./posting-cursor.js"
 import { tierMapIn } from "./tier-map.js"
 
-/** v1.28.1: a transient failure the worker retries once, and the minimum age before it does (migration 0036). */
-export const RETRYABLE_FAILURES = ["not_configured", "provider_error", "invalid_output", "timed_out"] as const
-export const RETRY_ATTEMPTS_LIMIT = 2
-export const RETRY_BACKOFF_MINUTES = 10
 import { sharePreferences } from "../preferences/preferences-lock.js"
 import { readPreferences } from "../preferences/preferences-read.js"
 import { type PreferenceSkipReason, decidePreferenceSkip } from "./rules/preference-rules.js"
@@ -25,11 +21,20 @@ import { type EligibilityPreferences, eligibilityPreferencesOf } from "./rules/e
 import type { StructuredFields } from "./rules/eligibility.js"
 import { type PreFilterResult, type SharedPostingFacts, type StartingState, startingState } from "./pre-filters.js"
 import { evaluationAllowed } from "./evaluation-allowed.js"
-import { stuckSql } from "./stuck.js"
 import { type PastedDescriptionInput, type PastedDescriptionResult, storePastedDescription } from "./pasted-description-store.js"
 import { classifyTitle, reconcileRoleFamily } from "./rules/ranking.js"
 import { foldForKeywords } from "./rules/rule-result.js"
 import { seniorityMarker } from "./rules/seniority.js"
+import { DiscoveryBoardsRepository } from "./discovery-boards.repository.js"
+import { DiscoveryEvaluationRepository, identityIn, visibilityFactsOf } from "./discovery-evaluation.repository.js"
+
+/**
+ * The board catalog and the evaluation lifecycle live beside this file (split by
+ * role); this class keeps every entry point and delegates. The constants and the
+ * visibility helper moved with the evaluation code and are re-exported here, so
+ * every import path that used this module keeps working.
+ */
+export { RETRYABLE_FAILURES, RETRY_ATTEMPTS_LIMIT, RETRY_BACKOFF_MINUTES, visibilityFactsOf } from "./discovery-evaluation.repository.js"
 
 export type NewPosting = Readonly<{
   applicationUrl: string
@@ -63,20 +68,6 @@ export class TierMapChangedError extends Error {
 }
 
 export type ListPage = Readonly<{ rows: PageRow[]; totalCount: number; aggregate: ListAggregate; criteria: StoredJobCriteria; operator: boolean; tierHash: string }>
-
-/** The visibility facts of a row read with POSTING_LIST_COLUMNS. */
-export function visibilityFactsOf(
-  row: Readonly<{ title_folded: string | null; prefilter_skip: string | null; role_family: string | null; seniority_marker: string | null; posted_at: Date | null; origin: string }>
-): VisibilityFacts {
-  return {
-    titled: row.title_folded !== null,
-    prefilterSkip: row.prefilter_skip,
-    roleFamily: row.role_family,
-    seniorityMarker: row.seniority_marker,
-    postedAt: row.posted_at,
-    pastedDescription: row.origin === "pasted_description",
-  }
-}
 
 /**
  * `storeOnce`'s result: `evaluate` is true when this Candidate's row waits for
@@ -196,7 +187,15 @@ export const VERDICT_TIMEOUTS = transactionTimeouts(5_000, 10_000)
  */
 @Injectable()
 export class DiscoveryRepository {
-  constructor(private readonly tenant: TenantDatabase) {}
+  /** The board catalog (`discovery-boards.repository.ts`). */
+  private readonly boards: DiscoveryBoardsRepository
+  /** The evaluation lifecycle (`discovery-evaluation.repository.ts`). */
+  private readonly evaluation: DiscoveryEvaluationRepository
+
+  constructor(private readonly tenant: TenantDatabase) {
+    this.boards = new DiscoveryBoardsRepository(tenant)
+    this.evaluation = new DiscoveryEvaluationRepository(tenant)
+  }
 
   /**
    * Stores a posting once per (application URL, requisition ID) (AC 3.2), then
@@ -257,7 +256,7 @@ export class DiscoveryRepository {
 
   /** EPIC-0002 D13: whether the scope Candidate's postings may be evaluated now (the waiting reason of a paste). */
   evaluationAllowedNow(): Promise<boolean> {
-    return this.tenant.run(async (tx, candidateId) => evaluationAllowed(await identityIn(tx, candidateId)))
+    return this.evaluation.evaluationAllowedNow()
   }
 
   findByKey(applicationUrl: string, requisitionId: string) {
@@ -346,20 +345,8 @@ export class DiscoveryRepository {
    * same transaction. `evaluation_failure` is left as stored. Any failure
    * rolls back the claim and the jobs.
    */
-  async checkAgain(now: Date, enqueue: (trx: CandidateTx, candidateId: string, ids: readonly string[]) => Promise<void>): Promise<{ queued: number; movedTo: "checking" | "waiting_to_be_checked" }> {
-    return this.tenant.run(async (tx, candidateId) => {
-      const ctx = await visibilityContext(tx, candidateId, now, "share")
-      const movedTo = evaluationAllowed(await identityIn(tx, candidateId)) ? "checking" : "waiting_to_be_checked"
-      const claimed = await sql<{ id: string }>`
-        update candidate_posting cp set status = ${movedTo}, checking_since = ${now}
-        from job_posting p
-        where cp.candidate_id = ${candidateId}::uuid and p.id = cp.job_posting_id
-          and (cp.status in ('evaluation_failed', 'not_checked') or ${stuckSql("cp", now)}) and ${visibleSql("p", ctx)}
-        returning cp.job_posting_id::text as id`.execute(tx)
-      const ids = claimed.rows.map((row) => row.id)
-      if (movedTo === "checking") await enqueue(tx, candidateId, ids)
-      return { queued: ids.length, movedTo }
-    })
+  checkAgain(now: Date, enqueue: (trx: CandidateTx, candidateId: string, ids: readonly string[]) => Promise<void>): Promise<{ queued: number; movedTo: "checking" | "waiting_to_be_checked" }> {
+    return this.evaluation.checkAgain(now, enqueue)
   }
 
   /**
@@ -372,22 +359,8 @@ export class DiscoveryRepository {
    * Candidate whose postings are not evaluated yet (D13) gets nothing claimed
    * or returned: only their own Check again recovers them.
    */
-  async requeueStuck(now: Date): Promise<{ requeued: string[]; returnedHidden: number }> {
-    return this.tenant.run(async (tx, candidateId) => {
-      if (!evaluationAllowed(await identityIn(tx, candidateId))) return { requeued: [], returnedHidden: 0 }
-      const ctx = await visibilityContext(tx, candidateId, now, "share")
-      const hidden = await sql<{ id: string }>`
-        update candidate_posting cp set status = case when cp.evaluation_failure is null then 'not_checked' else 'evaluation_failed' end
-        from job_posting p
-        where cp.candidate_id = ${candidateId}::uuid and p.id = cp.job_posting_id and ${stuckSql("cp", now)} and not ${visibleSql("p", ctx)}
-        returning cp.job_posting_id::text as id`.execute(tx)
-      const claimed = await sql<{ id: string }>`
-        update candidate_posting cp set checking_since = ${now}
-        from job_posting p
-        where cp.candidate_id = ${candidateId}::uuid and p.id = cp.job_posting_id and ${stuckSql("cp", now)} and ${visibleSql("p", ctx)}
-        returning cp.job_posting_id::text as id`.execute(tx)
-      return { requeued: claimed.rows.map((row) => row.id), returnedHidden: hidden.rows.length }
-    })
+  requeueStuck(now: Date): Promise<{ requeued: string[]; returnedHidden: number }> {
+    return this.evaluation.requeueStuck(now)
   }
 
   /** Role and state of a Candidate from the identity table (no RLS), for the worker's job check (TM-01). Not scoped. */
@@ -409,22 +382,8 @@ export class DiscoveryRepository {
    * EPIC-0006 (AC-7.1, AC-7.4): only the scope Candidate's visible ones; a
    * hidden waiting posting stays waiting.
    */
-  async waitingIds(limit: number, now: Date): Promise<string[]> {
-    const rows = await this.tenant.run(async (tx, candidateId) => {
-      const ctx = await visibilityContext(tx, candidateId, now)
-      return tx
-        .selectFrom("candidate_posting as cp")
-        .innerJoin("job_posting as p", "p.id", "cp.job_posting_id")
-        .select("cp.job_posting_id")
-        .where("cp.candidate_id", "=", candidateId)
-        .where("cp.status", "=", "waiting_to_be_checked")
-        .where(visibleSql("p", ctx))
-        .orderBy("cp.discovered_at")
-        .orderBy("cp.job_posting_id")
-        .limit(limit)
-        .execute()
-    })
-    return rows.map((row) => row.job_posting_id)
+  waitingIds(limit: number, now: Date): Promise<string[]> {
+    return this.evaluation.waitingIds(limit, now)
   }
 
   /**
@@ -492,24 +451,8 @@ export class DiscoveryRepository {
    * `evaluation_failed` are left as they are. Undefined: the Candidate holds
    * no such posting.
    */
-  async hideIfHidden(id: string, now: Date): Promise<HiddenReason | null | undefined> {
-    return this.tenant.run(async (tx, candidateId) => {
-      const ctx = await visibilityContext(tx, candidateId, now)
-      const row = await tx
-        .selectFrom("job_posting as p")
-        .innerJoin("candidate_posting as cp", (join) => join.onRef("cp.job_posting_id", "=", "p.id").on("cp.candidate_id", "=", candidateId))
-        .select(["p.title_folded", "p.prefilter_skip", "p.role_family", "p.seniority_marker", "p.posted_at", "p.origin", "cp.status"])
-        .where("p.id", "=", id)
-        .forUpdate("cp")
-        .executeTakeFirst()
-      if (!row) return undefined
-      const reason = hiddenReason(visibilityFactsOf(row), ctx)
-      if (reason !== null && row.status === "checking") {
-        await sql`update candidate_posting set status = case when evaluation_failure is null then 'not_checked' else 'evaluation_failed' end
-          where candidate_id = ${candidateId}::uuid and job_posting_id = ${id}::uuid and status = 'checking'`.execute(tx)
-      }
-      return reason
-    })
+  hideIfHidden(id: string, now: Date): Promise<HiddenReason | null | undefined> {
+    return this.evaluation.hideIfHidden(id, now)
   }
 
   /**
@@ -517,46 +460,20 @@ export class DiscoveryRepository {
    * evaluated yet, moves their `checking` row to `waiting_to_be_checked` and
    * returns true; the caller stops before any reservation.
    */
-  async deferIfNotAllowed(id: string): Promise<boolean> {
-    return this.tenant.run(async (tx, candidateId) => {
-      if (evaluationAllowed(await identityIn(tx, candidateId))) return false
-      await tx
-        .updateTable("candidate_posting")
-        .set({ status: "waiting_to_be_checked" })
-        .where("candidate_id", "=", candidateId)
-        .where("job_posting_id", "=", id)
-        .where("status", "=", "checking")
-        .execute()
-      return true
-    })
+  deferIfNotAllowed(id: string): Promise<boolean> {
+    return this.evaluation.deferIfNotAllowed(id)
   }
 
   /**
    * Moves this Candidate's posting to "checking" from one of `from`; false when it is in any other state.
    * AC-7.12: restarts the 15 minutes (`checking_since = at`); the caller holds the evaluation lock.
    */
-  async moveToChecking(id: string, from: readonly JobPostingStatus[], at: Date): Promise<boolean> {
-    const result = await this.tenant.run((tx, candidateId) =>
-      tx
-        .updateTable("candidate_posting")
-        .set({ status: "checking", evaluation_failure: null, checking_since: at })
-        .where("candidate_id", "=", candidateId)
-        .where("job_posting_id", "=", id)
-        .where("status", "in", from)
-        .executeTakeFirst()
-    )
-    return Number(result.numUpdatedRows) > 0
+  moveToChecking(id: string, from: readonly JobPostingStatus[], at: Date): Promise<boolean> {
+    return this.evaluation.moveToChecking(id, from, at)
   }
 
-  async markFailed(id: string, failure: string, at: Date): Promise<void> {
-    await this.tenant.run((tx, candidateId) =>
-      tx
-        .updateTable("candidate_posting")
-        .set({ status: "evaluation_failed", evaluation_failure: failure, evaluated_at: at, evaluation_attempts: sql<number>`evaluation_attempts + 1` })
-        .where("candidate_id", "=", candidateId)
-        .where("job_posting_id", "=", id)
-        .execute()
-    )
+  markFailed(id: string, failure: string, at: Date): Promise<void> {
+    return this.evaluation.markFailed(id, failure, at)
   }
 
   /**
@@ -565,32 +482,12 @@ export class DiscoveryRepository {
    * retried. Oldest first. The row stays `evaluation_failed` until the retry claims it, so a lost
    * job is picked up by the next tick.
    */
-  async retryFailedIds(limit: number, now: Date): Promise<string[]> {
-    const rows = await this.tenant.run(async (tx, candidateId) => {
-      const ctx = await visibilityContext(tx, candidateId, now, "share")
-      return tx
-        .selectFrom("candidate_posting as cp")
-        .innerJoin("job_posting as p", "p.id", "cp.job_posting_id")
-        .select("cp.job_posting_id")
-        .where("cp.candidate_id", "=", candidateId)
-        .where("cp.status", "=", "evaluation_failed")
-        .where("cp.evaluation_attempts", "<", RETRY_ATTEMPTS_LIMIT)
-        .where("cp.evaluation_failure", "in", [...RETRYABLE_FAILURES])
-        .where("cp.evaluated_at", "is not", null)
-        .where("cp.evaluated_at", "<=", new Date(now.getTime() - RETRY_BACKOFF_MINUTES * 60_000))
-        .where(visibleSql("p", ctx))
-        .orderBy("cp.evaluated_at")
-        .orderBy("cp.job_posting_id")
-        .limit(limit)
-        .execute()
-    })
-    return rows.map((row) => row.job_posting_id)
+  retryFailedIds(limit: number, now: Date): Promise<string[]> {
+    return this.evaluation.retryFailedIds(limit, now)
   }
 
-  async markWaiting(id: string): Promise<void> {
-    await this.tenant.run((tx, candidateId) =>
-      tx.updateTable("candidate_posting").set({ status: "waiting_to_be_checked" }).where("candidate_id", "=", candidateId).where("job_posting_id", "=", id).execute()
-    )
+  markWaiting(id: string): Promise<void> {
+    return this.evaluation.markWaiting(id)
   }
 
   /**
@@ -599,16 +496,8 @@ export class DiscoveryRepository {
    * (AC-7.16): a duplicate job (stuck re-queues send no singletonKey) for a posting that already has a verdict
    * changes nothing, even during the cost pause.
    */
-  async markWaitingIfClaimable(id: string): Promise<void> {
-    await this.tenant.run((tx, candidateId) =>
-      tx
-        .updateTable("candidate_posting")
-        .set({ status: "waiting_to_be_checked" })
-        .where("candidate_id", "=", candidateId)
-        .where("job_posting_id", "=", id)
-        .where("status", "in", ["checking", "waiting_to_be_checked", "evaluation_failed"])
-        .execute()
-    )
+  markWaitingIfClaimable(id: string): Promise<void> {
+    return this.evaluation.markWaitingIfClaimable(id)
   }
 
   /**
@@ -720,23 +609,8 @@ export class DiscoveryRepository {
    * reason. Only a row this attempt holds in `checking` is written. Returns
    * null (writes nothing) when both rules pass or there is no record.
    */
-  async skipByPreferences(id: string, at: Date): Promise<PreferenceSkipReason | null> {
-    return this.tenant.run(async (trx, candidateId) => {
-      const preferences = await readPreferences(trx, candidateId)
-      if (preferences === null) return null
-      const facts = await trx.selectFrom("job_posting").select(["role_family", "title_folded"]).where("id", "=", id).executeTakeFirst()
-      if (!facts) return null
-      const reason = decidePreferenceSkip(preferences.values, { roleFamily: facts.role_family, titleFolded: facts.title_folded })
-      if (reason === null) return null
-      const updated = await trx
-        .updateTable("candidate_posting")
-        .set({ status: "skipped", skip_reason: reason, skip_detail: null, evaluation_failure: null, evaluated_at: at, preferences_version: preferences.version })
-        .where("candidate_id", "=", candidateId)
-        .where("job_posting_id", "=", id)
-        .where("status", "=", "checking")
-        .executeTakeFirst()
-      return Number(updated.numUpdatedRows) > 0 ? reason : null
-    })
+  skipByPreferences(id: string, at: Date): Promise<PreferenceSkipReason | null> {
+    return this.evaluation.skipByPreferences(id, at)
   }
 
   /**
@@ -782,72 +656,40 @@ export class DiscoveryRepository {
   }
 
   readEmployerListState() {
-    return this.tenant.run((tx) => tx.selectFrom("employer_list_state").selectAll().executeTakeFirstOrThrow())
+    return this.boards.readEmployerListState()
   }
 
   /** Idempotent: the first approval time is kept. */
-  async approveEmployerList(at: Date): Promise<void> {
-    await this.tenant.run((tx) => tx.updateTable("employer_list_state").set({ approved_at: sql`coalesce(approved_at, ${at})` }).execute())
+  approveEmployerList(at: Date): Promise<void> {
+    return this.boards.approveEmployerList(at)
   }
 
   listEmployerBoards() {
-    return this.tenant.run((tx) => tx.selectFrom("employer_board").selectAll().orderBy("position").execute())
+    return this.boards.listEmployerBoards()
   }
 
   listRemoteBoards() {
-    return this.tenant.run((tx) =>
-      tx
-        .selectFrom("remote_board")
-        .selectAll()
-        .select((eb) => eb.cast<string | null>("verified_on", "text").as("verified_on"))
-        .orderBy("position")
-        .execute()
-    )
+    return this.boards.listRemoteBoards()
   }
 
   findRemoteBoard(key: string) {
-    return this.tenant.run((tx) =>
-      tx
-        .selectFrom("remote_board")
-        .selectAll()
-        .select((eb) => eb.cast<string | null>("verified_on", "text").as("verified_on"))
-        .where("key", "=", key as RemoteBoardKey)
-        .executeTakeFirst()
-    )
+    return this.boards.findRemoteBoard(key)
   }
 
-  async verifyRemoteBoard(key: RemoteBoardKey, verifiedOn: string, basis: string): Promise<void> {
-    await this.tenant.run((tx) => tx.updateTable("remote_board").set({ verified_on: verifiedOn, verification_basis: basis }).where("key", "=", key).execute())
+  verifyRemoteBoard(key: RemoteBoardKey, verifiedOn: string, basis: string): Promise<void> {
+    return this.boards.verifyRemoteBoard(key, verifiedOn, basis)
   }
 
-  async setRemoteBoardEnabled(key: RemoteBoardKey, enabled: boolean): Promise<void> {
-    await this.tenant.run((tx) => tx.updateTable("remote_board").set({ enabled }).where("key", "=", key).execute())
+  setRemoteBoardEnabled(key: RemoteBoardKey, enabled: boolean): Promise<void> {
+    return this.boards.setRemoteBoardEnabled(key, enabled)
   }
 
   /**
    * Claims today's read of a board: true only if it was not read since `since`
    * (start of today in Africa/Lagos). Enforces "at most once a day per board".
    */
-  async claimBoardRead(table: "employer_board" | "remote_board", id: string, since: Date, at: Date): Promise<boolean> {
-    const result =
-      table === "employer_board"
-        ? await this.tenant.run((tx) =>
-          tx
-              .updateTable("employer_board")
-              .set({ last_read_at: at })
-              .where("id", "=", id)
-              .where((eb) => eb.or([eb("last_read_at", "is", null), eb("last_read_at", "<", since)]))
-              .executeTakeFirst()
-          )
-        : await this.tenant.run((tx) =>
-          tx
-              .updateTable("remote_board")
-              .set({ last_read_at: at })
-              .where("key", "=", id as RemoteBoardKey)
-              .where((eb) => eb.or([eb("last_read_at", "is", null), eb("last_read_at", "<", since)]))
-              .executeTakeFirst()
-          )
-    return Number(result.numUpdatedRows) > 0
+  claimBoardRead(table: "employer_board" | "remote_board", id: string, since: Date, at: Date): Promise<boolean> {
+    return this.boards.claimBoardRead(table, id, since, at)
   }
 
   approvedFacts() {
@@ -974,11 +816,6 @@ function storedFamily(value: string | null): RoleFamilyValue | null {
 export function evaluationLockKey(candidateId: string, postingId: string): number {
   const digest = createHash("sha256").update(`eve/evaluate/${candidateId}/${postingId}`).digest()
   return digest.readUIntBE(0, 6) % 2 ** 52
-}
-
-/** Role and state of the scope Candidate, inside their transaction (the identity table has no RLS). */
-function identityIn(tx: CandidateTx, candidateId: string) {
-  return tx.selectFrom("candidate").select(["role", "state"]).where("id", "=", candidateId).executeTakeFirst()
 }
 
 /** The Operator check, from the identity table inside the session's scope. */

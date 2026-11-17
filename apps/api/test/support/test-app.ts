@@ -85,6 +85,8 @@ export function testConfig(
     documentBridgesEnabled: false,
     documentDirectionEnabled: false,
     accessRequest: testAccessRequestConfig(),
+    // Off in tests: no log noise, and no x-request-id header on responses.
+    accessLog: false,
     ...overrides,
     nodeEnv: "test",
     host: "127.0.0.1",

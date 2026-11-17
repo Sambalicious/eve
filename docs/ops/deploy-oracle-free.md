@@ -100,13 +100,24 @@ sudo tailscale up
 TS_AUTHKEY=tskey-auth-... scripts/ops/enable-funnel.sh
 ```
 
-The script installs Tailscale if missing, joins the tailnet, runs `tailscale funnel --bg 3000`, writes
-`PUBLIC_ORIGIN=https://<host>.<tailnet>.ts.net` into `.env`, restarts the api, and prints the exact
-OAuth redirect to add. `--status` shows the current Funnel, `--off` turns it off.
+The script installs Tailscale from Tailscale's signed apt repository (Debian and Ubuntu only; it
+stops with an error on other distros), joins the tailnet, runs `tailscale funnel --bg 3000`, writes
+`PUBLIC_ORIGIN=https://<host>.<tailnet>.ts.net` and `TRUST_PROXY=1` into `.env`, restarts the api,
+and prints the exact OAuth redirect to add. `--status` shows the current Funnel, `--off` turns it off.
 
 The URL survives restarts, so the OAuth redirect stays valid. Funnel publishes on 443 only; the
 container ports stay bound to `127.0.0.1`. Anyone with the link can load the landing and sign-in
 pages, and the dashboard still requires the one Google account named in `CANDIDATE_GOOGLE_SUB`.
+
+**`TRUST_PROXY=1` matters.** Funnel is one proxy hop in front of the api. With the default
+`TRUST_PROXY=0` every public visitor shares one address, so the per-IP request-access limits are off
+and only the global daily cap protects the form. The script sets it to 1. Basis: Tailscale's serve
+proxy (`ipn/ipnlocal/serve.go`, `addProxyForwardedHeaders`) overwrites `X-Forwarded-For` with the
+connection's source address and drops any client-supplied value, which is what the api's one-hop
+trust needs. This was read from Tailscale's `main` branch, not tested against your installed
+version: after enabling Funnel, submit the request-access form from two networks and confirm the api
+logs no "TRUST_PROXY is 0" warning. If you put Caddy or another proxy in front of Funnel, the hop
+count is 2, not 1.
 
 ## 4. Google OAuth
 

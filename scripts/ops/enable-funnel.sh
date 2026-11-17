@@ -31,7 +31,14 @@ fi
 
 say "Tailscale"
 if ! command -v tailscale >/dev/null; then
-  curl -fsSL https://tailscale.com/install.sh | sh
+  # Tailscale's signed apt repository, not `curl install.sh | sh`. Debian and Ubuntu only.
+  # shellcheck source=scripts/ops/apt-repo.sh
+  . "$ROOT/scripts/ops/apt-repo.sh"
+  TS_OS="$(apt_os_id)"
+  TS_CODENAME="$(apt_os_codename)"
+  apt_add_repo tailscale "https://pkgs.tailscale.com/stable/$TS_OS/$TS_CODENAME.noarmor.gpg" tailscale.gpg \
+    "https://pkgs.tailscale.com/stable/$TS_OS" "$TS_CODENAME" main
+  sudo apt-get install -y -qq tailscale >/dev/null
 fi
 
 if ! sudo tailscale status >/dev/null 2>&1; then
@@ -67,6 +74,14 @@ if grep -q '^PUBLIC_ORIGIN=' .env; then
   sed -i "s|^PUBLIC_ORIGIN=.*|PUBLIC_ORIGIN=$URL|" .env
 else
   printf '\nPUBLIC_ORIGIN=%s\n' "$URL" >> .env
+fi
+# Funnel is one reverse-proxy hop in front of the api. Without TRUST_PROXY=1 every public visitor
+# shares the proxy's address and the per-IP access-request limits are off (global cap only).
+# Tailscale replaces any client-sent X-Forwarded-For with the real source address.
+if grep -q '^TRUST_PROXY=' .env; then
+  sed -i "s|^TRUST_PROXY=.*|TRUST_PROXY=1|" .env
+else
+  printf 'TRUST_PROXY=1\n' >> .env
 fi
 chmod 600 .env
 sudo docker compose up -d api

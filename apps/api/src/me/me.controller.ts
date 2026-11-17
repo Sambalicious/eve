@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put } from "@nestjs/common"
-import { type MeResponse, meNoteSchema, setAdvancedRequestSchema } from "@eve/contracts"
+import { Controller, Get, Header, HttpCode, Param, Post, Put } from "@nestjs/common"
+import { type MeResponse, type SetAdvancedRequest, meNoteSchema, setAdvancedRequestSchema } from "@eve/contracts"
 
 import { CurrentSession } from "../auth/current-session.decorator.js"
 import type { ActiveSession } from "../auth/session.service.js"
 import { ApiException } from "../http/api-exception.js"
+import { ZodBody } from "../http/zod-request.js"
 import { MeService } from "./me.service.js"
 
 /**
@@ -23,10 +24,8 @@ export class MeController {
 
   @Put("advanced")
   @Header("cache-control", "no-store")
-  setAdvanced(@CurrentSession() session: ActiveSession, @Body() body: unknown): Promise<MeResponse> {
-    const parsed = setAdvancedRequestSchema.safeParse(body)
-    if (!parsed.success) throw new ApiException("bad_request")
-    return this.service.setAdvanced(session.candidateId, parsed.data.enabled)
+  setAdvanced(@CurrentSession() session: ActiveSession, @ZodBody(setAdvancedRequestSchema) body: SetAdvancedRequest): Promise<MeResponse> {
+    return this.service.setAdvanced(session.candidateId, body.enabled)
   }
 
   /** Any body is ignored. An unknown note is 404 before anything is written. */

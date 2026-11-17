@@ -1,17 +1,18 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Post } from "@nestjs/common"
+import { Controller, Delete, Get, Header, HttpCode, Patch, Post } from "@nestjs/common"
 import {
+  type DeleteDetailsRequest,
   type DeleteDetailsResponse,
   type MinimalRecordsResponse,
   type Outcome,
+  type OutcomeRequest,
   type OutcomesResponse,
   type RetentionResponse,
   deleteDetailsRequestSchema,
   outcomeRequestSchema,
 } from "@eve/contracts"
-import { z } from "zod"
 
-import { ApiException } from "../http/api-exception.js"
-import { parseRequest } from "../http/parse-body.js"
+import { UuidParam } from "../http/uuid-param.js"
+import { ZodBody } from "../http/zod-request.js"
 import { RecordsService } from "./records.service.js"
 import { RetentionService } from "./retention.service.js"
 
@@ -32,28 +33,28 @@ export class RecordsController {
 
   @Get("applications/:id/outcomes")
   @Header("cache-control", "no-store")
-  outcomes(@Param("id") id: string): Promise<OutcomesResponse> {
-    return this.service.outcomes(uuid(id))
+  outcomes(@UuidParam("id", "not_found") id: string): Promise<OutcomesResponse> {
+    return this.service.outcomes(id)
   }
 
   @Post("applications/:id/outcomes")
   @HttpCode(201)
   @Header("cache-control", "no-store")
-  record(@Param("id") id: string, @Body() body: unknown): Promise<Outcome> {
-    return this.service.recordOutcome(uuid(id), parseRequest(outcomeRequestSchema, body).type)
+  record(@UuidParam("id", "not_found") id: string, @ZodBody(outcomeRequestSchema) body: OutcomeRequest): Promise<Outcome> {
+    return this.service.recordOutcome(id, body.type)
   }
 
   @Patch("outcomes/:id")
   @Header("cache-control", "no-store")
-  edit(@Param("id") id: string, @Body() body: unknown): Promise<Outcome> {
-    return this.service.editOutcome(uuid(id), parseRequest(outcomeRequestSchema, body).type)
+  edit(@UuidParam("id", "not_found") id: string, @ZodBody(outcomeRequestSchema) body: OutcomeRequest): Promise<Outcome> {
+    return this.service.editOutcome(id, body.type)
   }
 
   @Post("applications/delete-details")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  deleteDetails(@Body() body: unknown): Promise<DeleteDetailsResponse> {
-    return this.service.deleteDetails(parseRequest(deleteDetailsRequestSchema, body).applicationIds)
+  deleteDetails(@ZodBody(deleteDetailsRequestSchema) body: DeleteDetailsRequest): Promise<DeleteDetailsResponse> {
+    return this.service.deleteDetails(body.applicationIds)
   }
 
   @Get("minimal-records")
@@ -64,12 +65,7 @@ export class RecordsController {
 
   @Delete("minimal-records/:id")
   @HttpCode(204)
-  async clear(@Param("id") id: string): Promise<void> {
-    await this.service.clearMinimalRecord(uuid(id))
+  async clear(@UuidParam("id", "not_found") id: string): Promise<void> {
+    await this.service.clearMinimalRecord(id)
   }
-}
-
-function uuid(value: string): string {
-  if (!z.uuid().safeParse(value).success) throw new ApiException("not_found")
-  return value
 }
