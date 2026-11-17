@@ -566,7 +566,7 @@ export class DocumentsService implements OnApplicationBootstrap {
   private async sweepOrphans(): Promise<number> {
     // EPIC-0002 A2: one directory per Candidate, compared with that Candidate's own rows.
     const counts = await this.tenant.eachCandidate(async (candidateId) => {
-      const names = await this.files.list(candidateId, "documents").catch(() => [] as string[])
+      const names = await this.swallowFailure("Listing Tailored Document files", this.files.list(candidateId, "documents"), [] as string[])
       const referenced = await this.repository.referencedStorageNames()
       const orphans = names.filter((name) => STORAGE_NAME.test(name) && !referenced.has(name))
       await this.removeFiles(orphans)
@@ -583,7 +583,20 @@ export class DocumentsService implements OnApplicationBootstrap {
   /** Removes the scope Candidate's document files by the names the server chose. */
   private async removeFiles(names: readonly string[]): Promise<void> {
     const candidateId = CandidateScope.require()
-    await Promise.all(names.map((name) => this.files.remove(candidateId, "documents", name).catch(() => undefined)))
+    await Promise.all(names.map((name) => this.swallowFailure("Removing a Tailored Document file", this.files.remove(candidateId, "documents", name), undefined)))
+  }
+
+  /**
+   * Best-effort work whose failure must not stop the caller: the failure is swallowed and `fallback` returned,
+   * but logged at warn level with the label and the error's class name only (no message, path or file name).
+   */
+  private async swallowFailure<T>(label: string, work: Promise<T>, fallback: T): Promise<T> {
+    try {
+      return await work
+    } catch (error) {
+      this.logger.warn(`${label} failed: ${error instanceof Error ? error.name : "unknown"}`)
+      return fallback
+    }
   }
 
   async download(id: string, kind: DocumentKindValue, format: DocumentFormatValue): Promise<{ bytes: Buffer; filename: string }> {
