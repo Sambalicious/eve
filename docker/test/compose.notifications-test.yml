@@ -22,7 +22,7 @@ services:
     networks: [default, notify-db]
 
   mailpit:
-    image: axllent/mailpit:v1.27
+    image: axllent/mailpit:v1.33
     command:
       - --smtp=0.0.0.0:465
       - --smtp-require-tls
