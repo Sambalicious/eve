@@ -34,6 +34,8 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await database.truncateAll()
+  // truncateAll keeps the identity rows; undo any state a test gave the Candidate.
+  await database.db.updateTable("candidate").set({ state: "active", revoked_at: null }).execute()
   google.reset()
 })
 
@@ -98,6 +100,19 @@ describe("Private dashboard: session idle expiry", () => {
     // The web app sends the Candidate to /sign-in?next=/blocked&reason=expired; sign-in returns there.
     const { location } = await browser.signIn(candidate, "/blocked")
     expect(location).toBe(`${PUBLIC_ORIGIN}/blocked`)
+  })
+
+  // A revoked or deleting Candidate must lose access on the next request, not at idle expiry.
+  it.each(["revoked", "deleting"] as const)("a session whose Candidate is %s stops resolving and is deleted", async (state) => {
+    const sessionCookie = await signInLastActiveAt(LAST_ACTIVE)
+    await browser.getSession(sessionCookie).expect(200)
+
+    const session = await database.db.selectFrom("dashboard_session").select("candidate_id").executeTakeFirstOrThrow()
+    await database.db.updateTable("candidate").set({ state }).where("id", "=", session.candidate_id).execute()
+
+    const response = await browser.getSession(sessionCookie).expect(401)
+    expect(response.body.error.code).toBe("session_expired")
+    expect(await database.db.selectFrom("dashboard_session").selectAll().execute()).toHaveLength(0)
   })
 
   it("reports session_expired for any session cookie the server no longer holds", async () => {
