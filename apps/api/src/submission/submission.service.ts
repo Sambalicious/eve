@@ -5,6 +5,7 @@ import type { BlockedReason, BlockedSubReason } from "../db/schema.js"
 import { CandidateScope } from "../db/candidate-scope.js"
 import { TenantDatabase } from "../db/tenant-database.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 import { isLockTimeout } from "../discovery/discovery.repository.js"
 import { SPEND_CONFIG } from "../spend/spend-config.js"
 import { SpendLedger } from "../spend/spend-ledger.js"
@@ -216,7 +217,7 @@ export class SubmissionService {
     try {
       session = await this.sessions.create(previousAttemptId ?? applicationId)
     } catch {
-      await this.ledger.release(browserReservation).catch(() => undefined)
+      await this.ledger.release(browserReservation).catch(swallowAndLog(this.logger, "ledger.release"))
       await this.repository.logEvent(applicationId, "browser_unavailable", null, this.clock.now())
       return { result: "refused", refusal: "browser_unavailable" }
     }
@@ -326,9 +327,9 @@ export class SubmissionService {
       }
       throw error
     } finally {
-      await session.close().catch(() => undefined)
+      await session.close().catch(swallowAndLog(this.logger, "session.close"))
       // The browser ran, so its reservation stands as the actual cost.
-      await this.ledger.settle(browserReservation, this.spend.browserAttemptMicros).catch(() => undefined)
+      await this.ledger.settle(browserReservation, this.spend.browserAttemptMicros).catch(swallowAndLog(this.logger, "ledger.settle"))
     }
   }
 
@@ -376,7 +377,7 @@ export class SubmissionService {
     try {
       session = await this.sessions.create(applicationId)
     } catch {
-      await this.ledger.release(browserReservation).catch(() => undefined)
+      await this.ledger.release(browserReservation).catch(swallowAndLog(this.logger, "ledger.release"))
       return "browser_unavailable"
     }
     try {
@@ -389,8 +390,8 @@ export class SubmissionService {
       if (error instanceof OffOriginError) return "off_origin"
       throw error
     } finally {
-      await session.close().catch(() => undefined)
-      await this.ledger.settle(browserReservation, this.spend.browserAttemptMicros).catch(() => undefined)
+      await session.close().catch(swallowAndLog(this.logger, "session.close"))
+      await this.ledger.settle(browserReservation, this.spend.browserAttemptMicros).catch(swallowAndLog(this.logger, "ledger.settle"))
     }
   }
 
