@@ -43,13 +43,13 @@ jobs:
       turbo_filter: ${{ steps.plan.outputs.turbo_filter }}
       test_filter: ${{ steps.plan.outputs.test_filter }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           # History to find the merge base; blobs are fetched only as needed.
           fetch-depth: 0
           filter: blob:none
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .nvmrc
       - id: plan
@@ -68,12 +68,12 @@ jobs:
       TURBO_FILTER: ${{ needs.changes.outputs.turbo_filter }}
       TEST_FILTER: ${{ needs.changes.outputs.test_filter }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       # No version input: the action reads "packageManager" from package.json.
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
           node-version-file: .nvmrc
@@ -95,11 +95,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
           node-version-file: .nvmrc
@@ -119,11 +119,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
           node-version-file: .nvmrc
@@ -136,7 +136,7 @@ jobs:
       - run: pnpm turbo run e2e
       - name: Upload the Playwright report and traces
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: playwright-report-${{ github.run_attempt }}
           path: |
@@ -155,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - run: scripts/ci/api-image-smoke.sh
