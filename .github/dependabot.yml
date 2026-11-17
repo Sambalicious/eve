@@ -25,6 +25,10 @@ updates:
       # @types/node tracks the Node the code runs on (engines >=22.15, .nvmrc 24), not the latest.
       - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
+      # 4.0.105 makes the Anthropic model unassignable to Mastra (api tsc and image build fail).
+      # Drop this entry once a release newer than 4.0.105 builds against @mastra/core.
+      - dependency-name: "@ai-sdk/anthropic"
+        versions: ["4.0.105"]
 
   # apps/api/Dockerfile (node base image, pinned by digest).
   - package-ecosystem: docker
