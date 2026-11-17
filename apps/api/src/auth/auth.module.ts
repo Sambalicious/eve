@@ -13,6 +13,7 @@ import { SessionRepository } from "./session.repository.js"
 import { SessionService } from "./session.service.js"
 import { SignInAttemptRepository } from "./sign-in-attempt.repository.js"
 import { SignInService } from "./sign-in.service.js"
+import { SignInStartThrottle } from "./sign-in-start-throttle.js"
 import { MeController } from "../me/me.controller.js"
 import { MeService } from "../me/me.service.js"
 
@@ -26,6 +27,7 @@ import { MeService } from "../me/me.service.js"
     SessionService,
     MeService,
     SignInService,
+    SignInStartThrottle,
     // Registration order is run order: the session first, then the conversion check.
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: OperatorOnlyGuard },
