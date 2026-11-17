@@ -8,6 +8,7 @@ import { evaluationAllowed } from "../discovery/evaluation-allowed.js"
 import { EVALUATE_POSTING_QUEUE, EVALUATE_POSTING_QUEUE_OPTIONS } from "../discovery/evaluation-queue.js"
 import { PostingEvaluator } from "../discovery/posting-evaluator.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 import { SpendLedger } from "../spend/spend-ledger.js"
 import { type CandidateJobResult, CandidateJobRunner } from "./candidate-job-runner.js"
 import { JobQueue, candidateQueue, sharedQueue } from "./job-queue.js"
@@ -115,6 +116,11 @@ export class DiscoveryJobs implements OnApplicationBootstrap {
 
   private async releaseWaiting(): Promise<number> {
     if (await this.ledger.rollover()) this.logger.log("Cost pause cleared: a new month started")
+    // A reservation whose release failed stays 'reserved' and keeps counting against
+    // the ceiling, so each tick releases the ones older than any attempt. A failure
+    // here must not abort the tick: the next tick tries again.
+    const reaped = (await this.ledger.reapStale().catch(swallowAndLog(this.logger, "ledger.reapStale"))) ?? 0
+    if (reaped > 0) this.logger.warn(`Released ${reaped} stale spend reservation(s)`)
     const control = await this.repository.readControl()
     if (control.cost_paused) return 0
     const candidates = await this.repository.waitingIds(WAITING_BATCH, this.clock.now())
