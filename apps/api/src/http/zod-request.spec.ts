@@ -108,13 +108,8 @@ describe("ParseRequestPipe", () => {
 const SRC = fileURLToPath(new URL("../", import.meta.url))
 
 const RAW_INPUT_ALLOWED: Record<string, string> = {
-  "access-request/access-request.controller.ts#AccessRequestController.create": "the service maps a bad body to access_request_invalid field codes, on a public route",
   "auth/auth.controller.ts#AuthController.start": "`next` is an opaque redirect target the sign-in service sanitises; a bad one falls back, never a 400",
   "documents/documents.controller.ts#ApplicationsController.list": "an unknown or repeated `retention` value is ignored (full list), by design (D-E11)",
-  "job-criteria/job-criteria.controller.ts#JobCriteriaController.update": "a 400 carries per-field errors built from the raw body",
-  "preferences/preferences.controller.ts#PreferencesController.read": "this GET takes no query parameter; any one is refused",
-  "preferences/preferences.controller.ts#PreferencesController.save": "bounds, shape and per-field errors come from parseSaveBody",
-  "preferences/preferences.controller.ts#PreferencesController.versions": "the query is defaulted from an absent object before parsing",
   "outreach/outreach.controller.ts#OutreachController.setReaderName": "the kind (a slug, not a UUID) is checked before the body, and a body pipe would run first",
 }
 

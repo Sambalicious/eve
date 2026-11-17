@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common"
-import { normalizeAccessRequest } from "@eve/contracts"
 
 import { APP_CONFIG } from "../config/config.module.js"
 import type { AppConfig } from "../config/env.js"
 import { ApiException } from "../http/api-exception.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
 import { AccessRequestRepository, type SubmissionOutcome } from "./access-request.repository.js"
+import type { AcceptedAccessRequest } from "./access-request-request.js"
 import { hashClientIp } from "./client-ip.js"
 import { issueProof, verifyProof } from "./fill-proof.js"
 
@@ -15,10 +15,10 @@ export const ACCESS_REQUEST_CONCURRENCY = 2
 const LOCK_NOT_AVAILABLE = "55P03"
 
 /**
- * Order of checks (architecture.r1 7.4). The transport gate already ran.
- * Validation comes before the limits and stores nothing; the limits come before
- * the silent checks, so a bot learns nothing from a drop. The mailer state is
- * never read here.
+ * Order of checks (architecture.r1 7.4). The transport gate already ran, and the body pipe
+ * validated the request (`accessRequestOrRefuse`) before this runs: validation stores nothing.
+ * The limits come before the silent checks, so a bot learns nothing from a drop.
+ * The mailer state is never read here.
  */
 @Injectable()
 export class AccessRequestService implements OnModuleInit {
@@ -41,9 +41,7 @@ export class AccessRequestService implements OnModuleInit {
     return { proof: issueProof(this.clock.now().getTime(), this.config.accessRequest.keys.proofKey()) }
   }
 
-  async submit(body: unknown, clientIp: string): Promise<void> {
-    const request = normalizeAccessRequest(body)
-    if (!request.ok) throw ApiException.accessRequestInvalid(request.fields)
+  async submit(request: AcceptedAccessRequest, clientIp: string): Promise<void> {
     if (this.inFlight >= ACCESS_REQUEST_CONCURRENCY) throw new ApiException("service_unavailable")
 
     const { keys, limits, trustProxy } = this.config.accessRequest
