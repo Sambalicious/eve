@@ -35,7 +35,13 @@ import { meaningKey } from "./line-text.js"
 import { atsKeywords, containsKeyword, normaliseForAts, scoreAts } from "../ats/ats-score.js"
 import { sentencesOf, storedDirectionQuotes } from "./company-direction.js"
 import { storedTerms } from "./blocked-claim.js"
-import { type LetterTarget, type LineKind, type PostingGuard, directionParagraphCount, dropOrphanDirection, dropUnsupportedSentences, fallBackToFactWording, hardFailCounts, isWholeParagraph, letterBlocksOnlyOnUnjudged, namesTarget, needsMeaningCheck, postingGuard, postingTerms, refusedSentence, sentencesOfLine, settleCappedLetter, validateDocument } from "./document-claims.js"
+import { type ClaimContext, type LineKind } from "./claim-types.js"
+import { namesTarget, postingTerms } from "./claim-line.js"
+import { dropUnsupportedSentences, fallBackToFactWording, settleCappedLetter } from "./claim-repair.js"
+import { directionParagraphCount, dropOrphanDirection, isWholeParagraph, sentencesOfLine } from "./direction-sentences.js"
+import { hardFailCounts, letterBlocksOnlyOnUnjudged, needsMeaningCheck, refusedSentence, validateDocument } from "./document-validation.js"
+import { postingGuard } from "./posting-guard.js"
+import { type Draft, type GenerationRun, type Repaired, type Verdicts, atsTargetsOf } from "./generation-run.js"
 import { MEANING_CHECK_EFFORT, MEANING_CHECK_MAX_OUTPUT_TOKENS, MEANING_CHECK_PURPOSE, MEANING_CHECK_TIMEOUT_MS, type MeaningCheckItem, buildMeaningCheckPrompt, meaningCheckSchema, meaningCheckSystemPrompt, supportedTexts } from "./meaning-check.js"
 import {
   GENERATION_EFFORT,
@@ -237,42 +243,330 @@ export class DocumentsService implements OnApplicationBootstrap {
     return this.summary(started ?? row)
   }
 
+  /** One structured log line: `{"event": name, ...fields}`. Fields are counts and ids only, never line text. */
+  private logEvent(event: DocumentsEvent, fields: Readonly<Record<string, unknown>>): void {
+    this.logger.log(JSON.stringify({ event, ...fields }))
+  }
+
+  /** Waits for generations started by this process. Used by tests. */
+  async settled(): Promise<void> {
+    await Promise.allSettled([...this.inFlight])
+  }
+
+  /**
+   * The generation itself. Assumes the Application is in "generating". Each stage reads the shared
+   * `GenerationRun`; a stage that ends the run (failure, pause, block) has already recorded why.
+   */
+  async generate(id: string): Promise<GenerationOutcome> {
+    const run = await this.prepare(id)
+    if (run === null) return "failed"
+    const draft = await this.draft(run)
+    if (draft === null) return "failed"
+    const verdicts = await this.judge(run, draft)
+    const repaired = this.repair(run, draft, verdicts)
+    const refusal = await this.validate(run, repaired, verdicts)
+    if (refusal !== null) return refusal
+    const stored = await this.render(run, repaired)
+    if (stored === null) return "failed"
+    return this.persist(run, stored)
+  }
+
+  /** Reads the Application, the approved profile, the posting and the contact header, and builds the run. Null when the run cannot start. */
+  private async prepare(id: string): Promise<GenerationRun | null> {
+    const application = await this.repository.findApplication(id)
+    if (!application) return null
+    const profile = await this.repository.approvedProfile()
+    if (!profile) {
+      await this.repository.markFailed(id, "no_career_profile", this.clock.now())
+      return null
+    }
+    const posting = await this.repository.findPosting(application.job_posting_id)
+    const contact = await this.contactHeader()
+    const sections = withoutContactFacts(profile.sections as StoredSection[], contact)
+    const promptTarget = { company: application.company, roleTitle: application.role_title, text: posting?.posting_text ?? "" }
+    const aliased = aliasFacts(sections)
+    // ATS: the posting's keywords, and those the profile states with the (aliased) facts that state them.
+    const keywords = atsKeywords(posting?.technologies ?? null, posting?.ats_skills ?? null, application.company)
+    const profileText = sections.flatMap((section) => [section.title, ...section.facts.map((fact) => fact.text)]).join("\n")
+    // EPIC-0012 rule 2: the posting lends lower-case domain wording, never evidence. Gaps are keywords the
+    // posting asks for and the profile does not state; a pasted posting has none until evaluated (risk R2).
+    const normalisedProfile = normaliseForAts(profileText)
+    // Direction off: no quotes reach the prompt or the guard, so a quoted span fails on its own words. The
+    // forward statements stay stored on the posting row either way. Only a stored list of quotes is used:
+    // the column is jsonb, and a value in another shape lends nothing (a letter must never quote non-quotes).
+    const direction = this.flags.direction ? storedDirectionQuotes(posting?.forward_statements) : []
+    const postingTermsGuard = postingGuard(
+      posting?.posting_text ?? "",
+      application.role_title,
+      keywords.filter(({ keyword }) => !containsKeyword(normalisedProfile, keyword)).map(({ keyword }) => keyword),
+      // Bridges off: the posting lends no terms (empty text), so the posting-terms path never runs. Gap skills,
+      // borrowed names and role nouns are hard fails and still run.
+      keywords.length > 0 && this.flags.bridges,
+      // EPIC-0012 rule 4: the posting's verified forward-looking quotes, as stored. Only the generation prompt
+      // drops the ones that name the target (design 2b); the guard gets them all, because a stored quote is
+      // still a source. A letter that quotes one naming the employer is blocked by namesTarget, which reads
+      // the full line before the span is stripped.
+      direction
+    )
+    const letterTarget = { employer: application.company ?? "", roleTitle: application.role_title ?? "" }
+    const wording = new Map(sections.flatMap((section) => section.facts.map((fact) => [fact.id, fact.text] as const)))
+    return {
+      applicationId: id,
+      profileVersion: profile.version,
+      roleTitle: application.role_title,
+      contact,
+      sections,
+      promptTarget,
+      aliased,
+      keywords,
+      atsTargets: atsTargetsOf(keywords, aliased),
+      profileText,
+      direction,
+      sectionOfFact: new Map(sections.flatMap((section) => section.facts.map((fact) => [fact.id, section.id] as const))),
+      letterTarget,
+      wording,
+      claims: {
+        facts: new Map(sections.flatMap((section) => factsOf(section))),
+        target: letterTarget,
+        contact,
+        meaningChecked: new Set(),
+        posting: postingTermsGuard,
+        wording,
+      },
+    }
+  }
+
+  /** Asks the model for the documents. Null when it paused or failed, after recording that. */
+  private async draft(run: GenerationRun): Promise<Draft | null> {
+    const result = await this.gateway.generateObject({
+      purpose: GENERATION_PURPOSE,
+      system: generationSystemPrompt(this.flags),
+      prompt: buildGenerationPrompt(run.aliased.sections, run.promptTarget, emphasisThemes(run.aliased.sections), run.atsTargets, run.direction),
+      schema: generatedDocumentsSchema,
+      maxOutputTokens: GENERATION_MAX_OUTPUT_TOKENS,
+      tier: "documents",
+      effort: GENERATION_EFFORT,
+      timeoutMs: GENERATION_TIMEOUT_MS,
+      applicationId: run.applicationId,
+      cost: { action: "document generation", haltOnGlobalPause: true },
+    })
+    if (!result.ok && (result.failure === "paused" || result.failure === "cost_paused")) {
+      // AC 10.1, 10.2: a pause is not an Anthropic failure and nothing was generated. The Application goes
+      // back to `documents_ready` when its earlier documents are still stored, else to `prepared`, so
+      // "Generate" works again once the pause ends. The dashboard shows the pause from GET /v1/controls.
+      await this.repository.markPaused(run.applicationId, this.clock.now())
+      return null
+    }
+    if (!result.ok) {
+      await this.repository.markFailed(run.applicationId, result.failure, this.clock.now())
+      return null
+    }
+    const generated = resolveFactIds(result.object, run.aliased.realId)
+    return {
+      resume: withRoleHeadings(toResumeContent(generated.resume, (factId) => run.sectionOfFact.get(factId)), run.sections, run.contact),
+      letter: toCoverLetterContent(generated.coverLetter, run.promptTarget),
+    }
+  }
+
+  /** Counts the draft's hard fails, then asks the judge about its reworded lines and, for refused paragraphs, their sentences. */
+  private async judge(run: GenerationRun, draft: Draft): Promise<Verdicts> {
+    // EPIC-0012 Revision 2, 2.3: count-only monitoring of the hard fails on the model's draft. Reasons and
+    // counts only, never line text, facts or posting words.
+    const hardFails = hardFailCounts(draft.resume, draft.letter, run.claims)
+    const hardFailTotal = Object.values(hardFails).reduce((sum, count) => sum + count, 0)
+    if (hardFailTotal > 0) this.logEvent("documents.hard_fail", { applicationId: run.applicationId, total: hardFailTotal, reasons: hardFails })
+    const meaning = await this.checkMeaning(run.applicationId, draft, run.claims)
+    // A refused paragraph is asked about sentence by sentence, so one unsupported sentence no longer takes its
+    // neighbours down with it. Null (nothing to ask, or that call failed) leaves the paragraph verdicts alone.
+    const sentenceVerdicts = meaning.failed ? null : await this.checkRefusedSentences(run.applicationId, draft.letter, meaning.supported, run.claims)
+    return { failed: meaning.failed, supported: meaning.supported, checked: sentenceVerdicts ?? meaning.supported }
+  }
+
+  /** Repairs the draft with the verdicts held, then scores the resume on exactly what will be stored and printed. */
+  private repair(run: GenerationRun, draft: Draft, verdicts: Verdicts): Repaired {
+    const id = run.applicationId
+    const tailoredResume = fallBackToFactWording(draft.resume, { ...run.claims, meaningChecked: verdicts.supported })
+    const tailoredLetter = dropUnsupportedSentences(draft.letter, { ...run.claims, meaningChecked: verdicts.checked })
+    // EPIC-0012 Revision 2 addendum, A6: a paragraph left holding only the quoted direction sentence says
+    // nothing about the Candidate, so it is dropped unless it is the letter's last body paragraph.
+    const orphaned = dropOrphanDirection(tailoredLetter.letter, run.claims.posting)
+    const letterSentencesDropped = tailoredLetter.dropped + orphaned.dropped
+    if (letterSentencesDropped > 0) this.logEvent("documents.letter_sentences_dropped", { applicationId: id, count: letterSentencesDropped })
+    if (tailoredResume.replaced > 0) this.logEvent("documents.lines_fell_back", { applicationId: id, count: tailoredResume.replaced })
+    this.logDirectionUse(run, draft.letter, orphaned)
+    // The letter's verdicts after the trim: the judged sentences plus one carved verdict per kept subset.
+    const settledLetter = this.capLetter(run, orphaned.letter, tailoredLetter.checked)
+    const resume = this.repairResumeKeywords(run, tailoredResume.resume)
+    // Scored on exactly what will be stored and printed, after every check.
+    const ats = scoreAts(run.keywords, plainTextOf(resume, run.contact).join("\n"), run.profileText)
+    this.logEvent("documents.ats_scored", { applicationId: id, score: ats.score, total: ats.total, missing: ats.missing.length, gaps: ats.gaps.length })
+    return {
+      documents: [
+        ["resume", { ...resume, ats }],
+        ["cover_letter", settledLetter.letter],
+      ],
+      letter: settledLetter.letter,
+      // A paragraph the cap trimmed keeps the verdict of the paragraph it came from: the remaining sentences
+      // are a subset of judged sentences. Hard fails still run on the trimmed text in the validation below.
+      checked: settledLetter.checked,
+    }
+  }
+
+  /**
+   * EPIC-0012 Revision 2, 2.3: one direction-use record per letter, only when the flag is on and the prompt
+   * offered at least one quote (the quotes not naming the employer or role). Flags and counts only.
+   */
+  private logDirectionUse(run: GenerationRun, draftLetter: CoverLetterContent, orphaned: ReturnType<typeof dropOrphanDirection>): void {
+    if (!this.flags.direction || run.direction.length === 0) return
+    const offered = run.direction.filter((quote) => !namesTarget(quote, run.letterTarget)).length
+    if (offered === 0) return
+    const draftUsed = directionParagraphCount(draftLetter, run.claims.posting) > 0
+    const used = directionParagraphCount(orphaned.letter, run.claims.posting) > 0 ? 1 : 0
+    this.logEvent("documents.direction_used", { applicationId: run.applicationId, offered, used, judgedSupported: draftUsed ? used === 1 : null, orphan: orphaned.orphan ? 1 : 0 })
+  }
+
+  /**
+   * EPIC-0012 rule 3 (Revision 2, R14): the letter holds at most three mentions of one keyword. From the
+   * fourth on, the sentence holding it is dropped and a paragraph left empty is dropped while another
+   * remains. The letter's last body sentence is never dropped. Revision 3 (R17): a trimmed paragraph that
+   * fails its own claim check is dropped, or takes its untrimmed form back when it is all that is left, so
+   * the cap never blocks and never waves text through.
+   */
+  private capLetter(run: GenerationRun, letter: CoverLetterContent, judged: ReadonlySet<string>): ReturnType<typeof settleCappedLetter> {
+    const cappedLetter = capLetterKeywords(letter, run.keywords)
+    const settledLetter = settleCappedLetter(cappedLetter, { ...run.claims, meaningChecked: judged })
+    if (cappedLetter.dropped > 0 || settledLetter.paragraphsDropped > 0 || cappedLetter.overCap || settledLetter.restored > 0) {
+      this.logEvent("documents.letter_keyword_cap", {
+        applicationId: run.applicationId,
+        mentions: cappedLetter.mentions,
+        dropped: cappedLetter.dropped,
+        paragraphsDropped: settledLetter.paragraphsDropped,
+        overCap: cappedLetter.overCap || settledLetter.restored > 0,
+      })
+    }
+    return settledLetter
+  }
+
+  /**
+   * EPIC-0012 rule 3: a repeated keyword, or a line packed with keywords, falls back to its plain fact
+   * wording. Stuffing never blocks. Rule 1: the headline is backend text, set here and never written by the
+   * model. It prints the posting's role title only when one approved experience title holds every meaningful
+   * word of it. Partial overlap prints nothing; only the count of words the profile does not support is logged.
+   */
+  private repairResumeKeywords(run: GenerationRun, tailored: ResumeContent): ResumeContent {
+    const density = keywordDensity(resumeLineRefs(tailored), run.keywords)
+    let resume = tailored
+    if (density.lineIds.length > 0) {
+      const repaired = repairDenseLines(resume, density.lineIds, run.wording)
+      resume = repaired.resume
+      this.logEvent("documents.keyword_density", { applicationId: run.applicationId, flagged: density.lineIds.length, repeated: density.repeated.length, crowded: density.crowdedLineIds.length, repaired: repaired.replaced })
+    }
+    const headline = headlineDecision(run.roleTitle, run.sections.filter((section) => section.kind === "experience").map((section) => section.title))
+    if (headline.headline === null && headline.missing > 0) {
+      this.logEvent("documents.headline_unsupported", { applicationId: run.applicationId, missing: headline.missing })
+    }
+    return { ...resume, headline: headline.headline }
+  }
+
+  /**
+   * Validates each document against the approved facts. Null when both pass; otherwise the run ends here as
+   * "blocked" (the failing claim is stored) or, when only a failed judge call is to blame, "failed".
+   */
+  private async validate(run: GenerationRun, repaired: Repaired, verdicts: Verdicts): Promise<"blocked" | "failed" | null> {
+    const id = run.applicationId
+    const letterClaims: ClaimContext = { ...run.claims, meaningChecked: repaired.checked }
+    for (const [kind, content] of repaired.documents) {
+      const validation = validateDocument(content, kind === "cover_letter" ? letterClaims : { ...letterClaims, target: null })
+      if (validation.ok) continue
+      // EPIC-0012 Revision 2, R16: a failed judge call must not become a claim block when the letter
+      // blocks only on reworded lines it never judged. That is a retryable provider error.
+      if (kind === "cover_letter" && verdicts.failed && letterBlocksOnlyOnUnjudged(repaired.letter, letterClaims)) {
+        await this.repository.markFailed(id, "provider_error", this.clock.now())
+        return "failed"
+      }
+      // The claim a Candidate sees is the sentence that failed, not the paragraph that held it: a
+      // paragraph of three sentences with one unsupported line names that line alone.
+      const sentence = kind === "cover_letter" ? refusedSentence(repaired.letter, letterClaims) : null
+      const blocked = sentence === null ? validation : { ...validation, claim: sentence }
+      await this.removeFiles(await this.repository.markBlocked(id, run.profileVersion, kind, blocked, this.clock.now()))
+      return "blocked"
+    }
+    return null
+  }
+
+  /** Renders and checks each document as PDF and DOCX and stores the files. Null when a check or the file system fails, after recording that. */
+  private async render(run: GenerationRun, repaired: Repaired): Promise<StoredDocument[] | null> {
+    const id = run.applicationId
+    const contact = run.contact
+    const stored: StoredDocument[] = []
+    for (const [kind, content] of repaired.documents) {
+      const pdf = await renderPdf(content, contact)
+      const check = await verifyPdfText(pdf, content, contact)
+      // Second check (F-QA4-03): the same layout, uncompressed, has no word split by a positioning offset.
+      const words = wordIntegrity(await renderPdf(content, contact, { compress: false }), content, contact)
+      if (!check.ok || !words.ok) {
+        await this.repository.markFailed(id, "render_check_failed", this.clock.now())
+        return null
+      }
+      const docx = await renderDocx(content, contact)
+      const fileId = randomUUID()
+      const candidateId = CandidateScope.require()
+      try {
+        stored.push({
+          kind,
+          content,
+          pdfStorageName: await this.storeFile(candidateId, `${fileId}.pdf`, pdf),
+          docxStorageName: await this.storeFile(candidateId, `${fileId}.docx`, docx),
+          pdfSha256: sha256(pdf),
+          docxSha256: sha256(docx),
+        })
+      } catch (error) {
+        // F-QA4-01: a file-system failure (EACCES, ENOSPC, EROFS) is not a provider error.
+        this.logger.error(`Storing a Tailored Document failed: ${error instanceof Error && "code" in error ? String(error.code) : "unknown"}`)
+        await this.removeFiles([...stored.flatMap((done) => [done.pdfStorageName, done.docxStorageName]), `${fileId}.pdf`])
+        await this.repository.markFailed(id, "storage_error", this.clock.now())
+        return null
+      }
+    }
+    return stored
+  }
+
+  /** Records the stored documents in one transaction and removes the files they replace. */
+  private async persist(run: GenerationRun, stored: readonly StoredDocument[]): Promise<GenerationOutcome> {
+    const id = run.applicationId
+    const written = stored.flatMap((done) => [done.pdfStorageName, done.docxStorageName])
+    let outcome: { recorded: boolean; remove: string[] }
+    try {
+      outcome = await this.repository.recordDocuments(id, run.profileVersion, stored, this.clock.now())
+    } catch (error) {
+      // SEC-408: the transaction rolled back, so nothing references the new files.
+      await this.removeFiles(written)
+      throw error
+    }
+    await this.removeFiles(outcome.remove)
+    // An automatic submission held below the ATS minimum goes back to the queue once its new resume reaches it.
+    if (outcome.recorded) await this.repository.requeueAtsHeld(this.clock.now(), id)
+    return outcome.recorded ? "ready" : "failed"
+  }
+
   /**
    * The meaning check: lines that fail the word check only on lower-case wording go to one model call.
    * Returns the memo keys it explicitly marked supported, and whether the call itself failed. Any failure
    * returns none, so nothing extra passes.
    */
-  private async checkMeaning(
-    applicationId: string,
-    resume: ResumeContent,
-    letter: CoverLetterContent,
-    facts: ReadonlyMap<string, string>,
-    wording: ReadonlyMap<string, string>,
-    letterTarget: LetterTarget,
-    contact: ContactHeader,
-    posting: PostingGuard
-  ): Promise<Readonly<{ supported: Set<string>; failed: boolean }>> {
+  private async checkMeaning(applicationId: string, draft: Draft, ctx: ClaimContext): Promise<Readonly<{ supported: Set<string>; failed: boolean }>> {
+    const resumeCtx: ClaimContext = { ...ctx, target: null }
     const resumeLines: ReadonlyArray<Readonly<{ line: DocumentLine; kind: LineKind }>> = [
-      ...resume.summary.map((line) => ({ line, kind: "summary" as const })),
-      ...resume.experience.flatMap((entry) => entry.bullets.map((line) => ({ line, kind: "experience_bullet" as const }))),
-      ...resume.skills.map((line) => ({ line, kind: "skills" as const })),
+      ...draft.resume.summary.map((line) => ({ line, kind: "summary" as const })),
+      ...draft.resume.experience.flatMap((entry) => entry.bullets.map((line) => ({ line, kind: "experience_bullet" as const }))),
+      ...draft.resume.skills.map((line) => ({ line, kind: "skills" as const })),
     ]
-    const items: MeaningCheckItem[] = [
-      ...resumeLines.filter(({ line, kind }) => needsMeaningCheck(line, facts, null, contact, kind, posting, wording)),
-      ...letter.paragraphs.map((line) => ({ line, kind: "letter_paragraph" as const })).filter(({ line, kind }) => needsMeaningCheck(line, facts, letterTarget, contact, kind, posting, wording)),
-    ].map(({ line }) => ({ line, facts: line.factIds.map((factId) => facts.get(factId) ?? ""), postingTerms: postingTerms(line, facts, posting) }))
+    const items = [
+      ...resumeLines.filter(({ line, kind }) => needsMeaningCheck(line, resumeCtx, kind)),
+      ...draft.letter.paragraphs.map((line) => ({ line, kind: "letter_paragraph" as const })).filter(({ line, kind }) => needsMeaningCheck(line, ctx, kind)),
+    ].map(({ line }) => meaningItemOf(line, ctx))
     if (items.length === 0) return { supported: new Set(), failed: false }
-    const result = await this.gateway.generateObject({
-      purpose: MEANING_CHECK_PURPOSE,
-      system: meaningCheckSystemPrompt(this.flags),
-      prompt: buildMeaningCheckPrompt(items, { bridges: this.flags.bridges }),
-      schema: meaningCheckSchema,
-      maxOutputTokens: MEANING_CHECK_MAX_OUTPUT_TOKENS,
-      effort: MEANING_CHECK_EFFORT,
-      timeoutMs: MEANING_CHECK_TIMEOUT_MS,
-      applicationId,
-      cost: { action: "document generation", haltOnGlobalPause: true },
-    })
+    const result = await this.askJudge(applicationId, items)
     if (!result.ok) {
       this.logEvent("documents.meaning_check_failed", { applicationId, failure: result.failure })
       return { supported: new Set(), failed: true }
@@ -300,28 +594,31 @@ export class DocumentsService implements OnApplicationBootstrap {
    * Null when there is nothing to ask about or the call fails: the caller then keeps the paragraph verdicts
    * alone and the letter blocks as it did before.
    */
-  private async checkRefusedSentences(
-    applicationId: string,
-    letter: CoverLetterContent,
-    judged: ReadonlySet<string>,
-    facts: ReadonlyMap<string, string>,
-    wording: ReadonlyMap<string, string>,
-    letterTarget: LetterTarget,
-    contact: ContactHeader,
-    posting: PostingGuard
-  ): Promise<Set<string> | null> {
+  private async checkRefusedSentences(applicationId: string, letter: CoverLetterContent, judged: ReadonlySet<string>, ctx: ClaimContext): Promise<Set<string> | null> {
     const refused = letter.paragraphs.filter(
       (paragraph) =>
         sentencesOf(paragraph.text).length > 1 &&
         !judged.has(meaningKey(paragraph.text, paragraph.factIds)) &&
-        !isWholeParagraph(paragraph, posting) &&
-        needsMeaningCheck(paragraph, facts, letterTarget, contact, "letter_paragraph", posting, wording)
+        !isWholeParagraph(paragraph, ctx.posting) &&
+        needsMeaningCheck(paragraph, ctx, "letter_paragraph")
     )
     if (refused.length === 0) return null
-    const sentences = refused.flatMap((paragraph) => sentencesOfLine(paragraph)).filter((line) => needsMeaningCheck(line, facts, letterTarget, contact, "letter_paragraph", posting, wording))
+    const sentences = refused.flatMap((paragraph) => sentencesOfLine(paragraph)).filter((line) => needsMeaningCheck(line, ctx, "letter_paragraph"))
     if (sentences.length === 0) return null
-    const items: MeaningCheckItem[] = sentences.map((line) => ({ line, facts: line.factIds.map((factId) => facts.get(factId) ?? ""), postingTerms: postingTerms(line, facts, posting) }))
-    const result = await this.gateway.generateObject({
+    const items = sentences.map((line) => meaningItemOf(line, ctx))
+    const result = await this.askJudge(applicationId, items)
+    if (!result.ok) {
+      this.logEvent("documents.sentence_check_failed", { applicationId, failure: result.failure })
+      return null
+    }
+    const supported = supportedTexts(items, result.object)
+    this.logEvent("documents.sentences_checked", { applicationId, checked: items.length, supported: supported.size, refused: items.length - supported.size })
+    return new Set([...judged, ...supported])
+  }
+
+  /** The one model call of the meaning check, for lines or for sentences. */
+  private askJudge(applicationId: string, items: readonly MeaningCheckItem[]) {
+    return this.gateway.generateObject({
       purpose: MEANING_CHECK_PURPOSE,
       system: meaningCheckSystemPrompt(this.flags),
       prompt: buildMeaningCheckPrompt(items, { bridges: this.flags.bridges }),
@@ -332,230 +629,6 @@ export class DocumentsService implements OnApplicationBootstrap {
       applicationId,
       cost: { action: "document generation", haltOnGlobalPause: true },
     })
-    if (!result.ok) {
-      this.logEvent("documents.sentence_check_failed", { applicationId, failure: result.failure })
-      return null
-    }
-    const supported = supportedTexts(items, result.object)
-    this.logEvent("documents.sentences_checked", { applicationId, checked: items.length, supported: supported.size, refused: items.length - supported.size })
-    return new Set([...judged, ...supported])
-  }
-
-  /** One structured log line: `{"event": name, ...fields}`. Fields are counts and ids only, never line text. */
-  private logEvent(event: DocumentsEvent, fields: Readonly<Record<string, unknown>>): void {
-    this.logger.log(JSON.stringify({ event, ...fields }))
-  }
-
-  /** Waits for generations started by this process. Used by tests. */
-  async settled(): Promise<void> {
-    await Promise.allSettled([...this.inFlight])
-  }
-
-  /** The generation itself. Assumes the Application is in "generating". */
-  async generate(id: string): Promise<GenerationOutcome> {
-    const now = () => this.clock.now()
-    const application = await this.repository.findApplication(id)
-    if (!application) return "failed"
-    const profile = await this.repository.approvedProfile()
-    if (!profile) {
-      await this.repository.markFailed(id, "no_career_profile", now())
-      return "failed"
-    }
-    const posting = await this.repository.findPosting(application.job_posting_id)
-    const contact = await this.contactHeader()
-    const sections = withoutContactFacts(profile.sections as StoredSection[], contact)
-    const target = { company: application.company, roleTitle: application.role_title, text: posting?.posting_text ?? "" }
-    const aliased = aliasFacts(sections)
-    // ATS: the posting's keywords, and those the profile states with the (aliased) facts that state them.
-    const keywords = atsKeywords(posting?.technologies ?? null, posting?.ats_skills ?? null, application.company)
-    const profileText = sections.flatMap((section) => [section.title, ...section.facts.map((fact) => fact.text)]).join("\n")
-    const atsTargets = keywords.flatMap(({ keyword }) => {
-      const stating = aliased.sections.flatMap((section) => section.facts.filter((fact) => containsKeyword(normaliseForAts(fact.text), keyword)).map((fact) => fact.id))
-      return stating.length > 0 ? [{ keyword, factIds: stating.slice(0, 3) }] : []
-    })
-    // EPIC-0012 rule 2: the posting lends lower-case domain wording, never evidence. Gaps are keywords the
-    // posting asks for and the profile does not state; a pasted posting has none until evaluated (risk R2).
-    const normalisedProfile = normaliseForAts(profileText)
-    // Direction off: no quotes reach the prompt or the guard, so a quoted span fails on its own words. The
-    // forward statements stay stored on the posting row either way. Only a stored list of quotes is used:
-    // the column is jsonb, and a value in another shape lends nothing (a letter must never quote non-quotes).
-    const direction = this.flags.direction ? storedDirectionQuotes(posting?.forward_statements) : []
-    const postingTermsGuard = postingGuard(
-      posting?.posting_text ?? "",
-      application.role_title,
-      keywords.filter(({ keyword }) => !containsKeyword(normalisedProfile, keyword)).map(({ keyword }) => keyword),
-      // Bridges off: the posting lends no terms (empty text), so the posting-terms path never runs. Gap skills,
-      // borrowed names and role nouns are hard fails and still run.
-      keywords.length > 0 && this.flags.bridges,
-      // EPIC-0012 rule 4: the posting's verified forward-looking quotes, as stored. Only the generation prompt
-      // drops the ones that name the target (design 2b); the guard gets them all, because a stored quote is
-      // still a source. A letter that quotes one naming the employer is blocked by namesTarget, which reads
-      // the full line before the span is stripped.
-      direction
-    )
-    const result = await this.gateway.generateObject({
-      purpose: GENERATION_PURPOSE,
-      system: generationSystemPrompt(this.flags),
-      prompt: buildGenerationPrompt(aliased.sections, target, emphasisThemes(aliased.sections), atsTargets, direction),
-      schema: generatedDocumentsSchema,
-      maxOutputTokens: GENERATION_MAX_OUTPUT_TOKENS,
-      tier: "documents",
-      effort: GENERATION_EFFORT,
-      timeoutMs: GENERATION_TIMEOUT_MS,
-      applicationId: id,
-      cost: { action: "document generation", haltOnGlobalPause: true },
-    })
-    if (!result.ok && (result.failure === "paused" || result.failure === "cost_paused")) {
-      // AC 10.1, 10.2: a pause is not an Anthropic failure and nothing was generated. The Application goes
-      // back to `documents_ready` when its earlier documents are still stored, else to `prepared`, so
-      // "Generate" works again once the pause ends. The dashboard shows the pause from GET /v1/controls.
-      await this.repository.markPaused(id, now())
-      return "failed"
-    }
-    if (!result.ok) {
-      await this.repository.markFailed(id, result.failure, now())
-      return "failed"
-    }
-    const generated = resolveFactIds(result.object, aliased.realId)
-    const facts = new Map(sections.flatMap((section) => factsOf(section)))
-    const letterTarget = { employer: application.company ?? "", roleTitle: application.role_title ?? "" }
-    const sectionOfFact = new Map(sections.flatMap((section) => section.facts.map((fact) => [fact.id, section.id] as const)))
-    const wording = new Map(sections.flatMap((section) => section.facts.map((fact) => [fact.id, fact.text] as const)))
-    const draftResume = withRoleHeadings(toResumeContent(generated.resume, (factId) => sectionOfFact.get(factId)), sections, contact)
-    const draftLetter = toCoverLetterContent(generated.coverLetter, target)
-    // EPIC-0012 Revision 2, 2.3: count-only monitoring of the hard fails on the model's draft. Reasons and
-    // counts only, never line text, facts or posting words.
-    const hardFails = hardFailCounts(draftResume, draftLetter, facts, letterTarget, contact, postingTermsGuard, wording)
-    const hardFailTotal = Object.values(hardFails).reduce((sum, count) => sum + count, 0)
-    if (hardFailTotal > 0) this.logEvent("documents.hard_fail", { applicationId: id, total: hardFailTotal, reasons: hardFails })
-    const meaning = await this.checkMeaning(id, draftResume, draftLetter, facts, wording, letterTarget, contact, postingTermsGuard)
-    // A refused paragraph is asked about sentence by sentence, so one unsupported sentence no longer takes its
-    // neighbours down with it. Null (nothing to ask, or that call failed) leaves the paragraph verdicts alone.
-    const sentenceVerdicts = meaning.failed ? null : await this.checkRefusedSentences(id, draftLetter, meaning.supported, facts, wording, letterTarget, contact, postingTermsGuard)
-    const meaningChecked = sentenceVerdicts ?? meaning.supported
-    const tailoredResume = fallBackToFactWording(draftResume, facts, wording, contact, meaning.supported, postingTermsGuard)
-    const tailoredLetter = dropUnsupportedSentences(draftLetter, facts, letterTarget, contact, meaningChecked, postingTermsGuard, wording)
-    // The letter's verdicts after the trim: the judged sentences plus one carved verdict per kept subset.
-    const judgedLetter = tailoredLetter.checked
-    // EPIC-0012 Revision 2 addendum, A6: a paragraph left holding only the quoted direction sentence says
-    // nothing about the Candidate, so it is dropped unless it is the letter's last body paragraph.
-    const orphaned = dropOrphanDirection(tailoredLetter.letter, postingTermsGuard)
-    const letterSentencesDropped = tailoredLetter.dropped + orphaned.dropped
-    if (letterSentencesDropped > 0) this.logEvent("documents.letter_sentences_dropped", { applicationId: id, count: letterSentencesDropped })
-    if (tailoredResume.replaced > 0) this.logEvent("documents.lines_fell_back", { applicationId: id, count: tailoredResume.replaced })
-    // EPIC-0012 Revision 2, 2.3: one direction-use record per letter, only when the flag is on and the prompt
-    // offered at least one quote (the quotes not naming the employer or role). Flags and counts only.
-    if (this.flags.direction && direction.length > 0) {
-      const offered = direction.filter((quote) => !namesTarget(quote, letterTarget)).length
-      if (offered > 0) {
-        const draftUsed = directionParagraphCount(draftLetter, postingTermsGuard) > 0
-        const used = directionParagraphCount(orphaned.letter, postingTermsGuard) > 0 ? 1 : 0
-        this.logEvent("documents.direction_used", { applicationId: id, offered, used, judgedSupported: draftUsed ? used === 1 : null, orphan: orphaned.orphan ? 1 : 0 })
-      }
-    }
-    // EPIC-0012 rule 3 (Revision 2, R14): the letter holds at most three mentions of one keyword. From the
-    // fourth on, the sentence holding it is dropped and a paragraph left empty is dropped while another
-    // remains. The letter's last body sentence is never dropped. Revision 3 (R17): a trimmed paragraph that
-    // fails its own claim check is dropped, or takes its untrimmed form back when it is all that is left, so
-    // the cap never blocks and never waves text through.
-    const cappedLetter = capLetterKeywords(orphaned.letter, keywords)
-    const settledLetter = settleCappedLetter(cappedLetter, facts, letterTarget, contact, judgedLetter, postingTermsGuard, wording)
-    if (cappedLetter.dropped > 0 || settledLetter.paragraphsDropped > 0 || cappedLetter.overCap || settledLetter.restored > 0) {
-      this.logEvent("documents.letter_keyword_cap", {
-        applicationId: id,
-        mentions: cappedLetter.mentions,
-        dropped: cappedLetter.dropped,
-        paragraphsDropped: settledLetter.paragraphsDropped,
-        overCap: cappedLetter.overCap || settledLetter.restored > 0,
-      })
-    }
-    // A paragraph the cap trimmed keeps the verdict of the paragraph it came from: the remaining sentences
-    // are a subset of judged sentences. Hard fails still run on the trimmed text in the validation below.
-    const finalChecked = settledLetter.checked
-    // EPIC-0012 rule 3: a repeated keyword, or a line packed with keywords, falls back to its plain fact
-    // wording. Stuffing never blocks; the score below is taken on the repaired text.
-    const density = keywordDensity(resumeLineRefs(tailoredResume.resume), keywords)
-    let finalResume = tailoredResume.resume
-    if (density.lineIds.length > 0) {
-      const repaired = repairDenseLines(finalResume, density.lineIds, wording)
-      finalResume = repaired.resume
-      this.logEvent("documents.keyword_density", { applicationId: id, flagged: density.lineIds.length, repeated: density.repeated.length, crowded: density.crowdedLineIds.length, repaired: repaired.replaced })
-    }
-    // EPIC-0012 rule 1: the headline is backend text, set here and never written by the model. It prints the
-    // posting's role title only when one approved experience title holds every meaningful word of it. Partial
-    // overlap prints nothing; only the count of words the profile does not support is logged.
-    const headline = headlineDecision(application.role_title, sections.filter((section) => section.kind === "experience").map((section) => section.title))
-    if (headline.headline === null && headline.missing > 0) {
-      this.logEvent("documents.headline_unsupported", { applicationId: id, missing: headline.missing })
-    }
-    finalResume = { ...finalResume, headline: headline.headline }
-    // Scored on exactly what will be stored and printed, after every check.
-    const ats = scoreAts(keywords, plainTextOf(finalResume, contact).join("\n"), profileText)
-    this.logEvent("documents.ats_scored", { applicationId: id, score: ats.score, total: ats.total, missing: ats.missing.length, gaps: ats.gaps.length })
-    const documents: Array<[DocumentKind, DocumentContent]> = [
-      ["resume", { ...finalResume, ats }],
-      ["cover_letter", settledLetter.letter],
-    ]
-    for (const [kind, content] of documents) {
-      const validation = validateDocument(content, facts, kind === "cover_letter" ? letterTarget : null, contact, finalChecked, postingTermsGuard, wording)
-      if (!validation.ok) {
-        // EPIC-0012 Revision 2, R16: a failed judge call must not become a claim block when the letter
-        // blocks only on reworded lines it never judged. That is a retryable provider error.
-        if (kind === "cover_letter" && meaning.failed && letterBlocksOnlyOnUnjudged(settledLetter.letter, facts, letterTarget, contact, finalChecked, postingTermsGuard, wording)) {
-          await this.repository.markFailed(id, "provider_error", now())
-          return "failed"
-        }
-        // The claim a Candidate sees is the sentence that failed, not the paragraph that held it: a
-        // paragraph of three sentences with one unsupported line names that line alone.
-        const sentence = kind === "cover_letter" ? refusedSentence(settledLetter.letter, facts, letterTarget, contact, finalChecked, postingTermsGuard, wording) : null
-        const blocked = sentence === null ? validation : { ...validation, claim: sentence }
-        await this.removeFiles(await this.repository.markBlocked(id, profile.version, kind, blocked, now()))
-        return "blocked"
-      }
-    }
-    const stored: StoredDocument[] = []
-    for (const [kind, content] of documents) {
-      const pdf = await renderPdf(content, contact)
-      const check = await verifyPdfText(pdf, content, contact)
-      // Second check (F-QA4-03): the same layout, uncompressed, has no word split by a positioning offset.
-      const words = wordIntegrity(await renderPdf(content, contact, { compress: false }), content, contact)
-      if (!check.ok || !words.ok) {
-        await this.repository.markFailed(id, "render_check_failed", now())
-        return "failed"
-      }
-      const docx = await renderDocx(content, contact)
-      const fileId = randomUUID()
-      const candidateId = CandidateScope.require()
-      try {
-        stored.push({
-          kind,
-          content,
-          pdfStorageName: await this.storeFile(candidateId, `${fileId}.pdf`, pdf),
-          docxStorageName: await this.storeFile(candidateId, `${fileId}.docx`, docx),
-          pdfSha256: sha256(pdf),
-          docxSha256: sha256(docx),
-        })
-      } catch (error) {
-        // F-QA4-01: a file-system failure (EACCES, ENOSPC, EROFS) is not a provider error.
-        this.logger.error(`Storing a Tailored Document failed: ${error instanceof Error && "code" in error ? String(error.code) : "unknown"}`)
-        await this.removeFiles([...stored.flatMap((done) => [done.pdfStorageName, done.docxStorageName]), `${fileId}.pdf`])
-        await this.repository.markFailed(id, "storage_error", now())
-        return "failed"
-      }
-    }
-    const written = stored.flatMap((done) => [done.pdfStorageName, done.docxStorageName])
-    let outcome: { recorded: boolean; remove: string[] }
-    try {
-      outcome = await this.repository.recordDocuments(id, profile.version, stored, now())
-    } catch (error) {
-      // SEC-408: the transaction rolled back, so nothing references the new files.
-      await this.removeFiles(written)
-      throw error
-    }
-    await this.removeFiles(outcome.remove)
-    // An automatic submission held below the ATS minimum goes back to the queue once its new resume reaches it.
-    if (outcome.recorded) await this.repository.requeueAtsHeld(now(), id)
-    return outcome.recorded ? "ready" : "failed"
   }
 
   /**
@@ -750,6 +823,11 @@ function documentView(row: Selectable<TailoredDocumentTable>, contact: ContactHe
 
 function sortKinds<Row extends Selectable<TailoredDocumentTable>>(rows: readonly Row[]): Row[] {
   return [...rows].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "resume" ? -1 : 1))
+}
+
+/** One line for the meaning check: its text, the facts it cites and the posting terms it would borrow. */
+function meaningItemOf(line: DocumentLine, ctx: ClaimContext): MeaningCheckItem {
+  return { line, facts: line.factIds.map((factId) => ctx.facts.get(factId) ?? ""), postingTerms: postingTerms(line, ctx.facts, ctx.posting) }
 }
 
 function sha256(bytes: Buffer): string {
