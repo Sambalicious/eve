@@ -17,9 +17,8 @@ export class HiringPage {
   }
 
   /**
-   * Opens Find jobs. The `view` argument is kept so older call sites read the same: since EPIC-0011 both
-   * values open the same page, and it is ignored (the legacy `/stack-posts?view=` redirect is tested in
-   * hiring-view.phase2.spec.ts).
+   * Opens Find jobs. `view` is ignored: both values open the same page (the legacy `/stack-posts?view=`
+   * redirect is tested in hiring-view.phase2.spec.ts).
    */
   async open(view: string | null = "hiring"): Promise<void> {
     void view

@@ -307,7 +307,7 @@ describe("D1, D9 and D11: the stylesheet keeps one outline shape, a forced-colou
       .filter((rule) => /(^|[;{\s])(background|border|color)\s*:/.test(rule.body))
       .map((rule) => rule.selector)
     expect(offenders).toEqual([])
-    // The old outline override and its hover are gone, not layered under the class.
+    // No outline override or hover rule layers under the class.
     expect(fillRules.map((rule) => rule.selector)).toEqual(["#fill"])
     expect(CSS).not.toContain("#fill.is-outline")
     expect(CSS).not.toContain("#fill:hover")

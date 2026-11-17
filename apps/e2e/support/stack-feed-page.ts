@@ -61,7 +61,7 @@ export class StackFeedPage {
     return this.confirmStep().getByRole("button", { name: SP8.confirmButton, exact: true })
   }
 
-  /** TD-RW1: what used to be this section's own "Record permitted use" button is now the shared confirm step. */
+  /** TD-RW1: permitted use is recorded through the shared confirm step. */
   recordButton(): Locator {
     return this.confirmButton()
   }

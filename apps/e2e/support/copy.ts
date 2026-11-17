@@ -6,7 +6,7 @@
  * the product fails the test instead of passing with it.
  */
 export const COPY = {
-  // EPIC-0011 R5: the Stack posts / Hiring view frame (tablist, two tabs) is gone. Both lists are sections of Find jobs.
+  // EPIC-0011 R5: both lists are sections of Find jobs.
   findTitle: "Find jobs", // find.title (EXACT); also the document title
   findPath: "/find-jobs", // architecture route table
   searchTab: "Search", // find.tabs.search (PROPOSAL, EPIC-0015): the first Find jobs tab
@@ -20,7 +20,6 @@ export const COPY = {
   hiringFeedsTitle: "Hiring alert feeds", // C-HP-FEEDS-SEC-TITLE (Phase 3, must be absent)
   hiringPostsTitle: "Hiring posts", // C-HP-POSTS-TITLE (Phase 3, must be absent)
 
-  // Check this job
   checkHelp:
     "Paste the employer's application link from the post, not the LinkedIn post link. No link? Add the job description. Eve checks that job with your usual rules.", // C-HP-CHECK-HELP
   checkHelpSolo:
@@ -35,7 +34,6 @@ export const COPY = {
     "Eve can't read LinkedIn, so this link will be saved as not supported. Paste the employer's application link if the post has one, or add the job description.", // C-HP-LI-WARN
   liWarnSend: "Save it anyway", // C-HP-LI-WARN-SEND
 
-  // Reused, built
   linkEmpty: "Paste a job link.", // C-VAL-LINK-1 = job_link_empty
   linkInvalid: "Enter a full link that starts with https:// or http://.", // C-VAL-LINK-2 = job_link_invalid
   linkAccepted:
@@ -60,7 +58,6 @@ export const COPY = {
   // Sign-in (EPIC-0001 design-spec.r4.md copy catalogue)
   sessionEnded: "Your session ended. Sign in with Google again to continue where you left off.", // C-AUTH-2
 
-  // API messages
   unauthenticated: "Sign in to continue.",
   csrfInvalid: "The request is missing a valid CSRF token.",
   badRequest: "The request is not valid.",

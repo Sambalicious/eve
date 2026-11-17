@@ -46,7 +46,7 @@ export class HiringPhase3Page extends HiringPage {
     return this.confirmStep().getByRole("button", { name: P3.confirmButton, exact: true })
   }
 
-  /** TD-RW1: what used to be this section's own "Record permitted use" button is now the shared confirm step. */
+  /** TD-RW1: permitted use is recorded through the shared confirm step. */
   verifyMissingButton(): Locator {
     return this.confirmButton()
   }

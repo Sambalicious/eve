@@ -24,8 +24,6 @@ export class HelpPage {
     this.page = page
   }
 
-  // ── Generic help parts ────────────────────────────────────────
-
   trigger(surface: Surface, scope: Locator | Page = this.page): Locator {
     return scope.getByRole("button", { name: SURFACES[surface].trigger, exact: true })
   }
@@ -61,8 +59,6 @@ export class HelpPage {
     await expect(this.popover(surface)).toBeVisible()
     return this.popover(surface)
   }
-
-  // ── Job Sources (S1, S2) ──────────────────────────────────────
 
   /**
    * EPIC-0011 R5: Job Sources is "Job boards" inside Find jobs > Set up alerts, for the Operator only. The
@@ -134,13 +130,10 @@ export class HelpPage {
     return this.page.getByRole("region", { name: "Messages" })
   }
 
-  // ── Hiring view (S3) ──────────────────────────────────────────
-
   hiring(): HiringLinksPage {
     return new HiringLinksPage(this.page)
   }
 
-  /** The Find jobs page heading: the anchor the lead line and (i) used to follow in the Hiring view frame. */
   pageHeading(): Locator {
     return this.page.getByRole("heading", { level: 1, name: COPY.findTitle })
   }
@@ -153,8 +146,6 @@ export class HelpPage {
     return this.popover("hiring").getByRole("link", { name, exact: true })
   }
 
-  // ── Reach a surface, as the Examples tables do ────────────────
-
   /** Navigates to the surface's page and, for "verify", opens the Mark verified dialog for We Work Remotely. */
   async reach(surface: Surface): Promise<void> {
     if (surface === "hiring") {
@@ -166,8 +157,6 @@ export class HelpPage {
     if (surface === "verify") await this.openVerifyDialog("We Work Remotely")
   }
 }
-
-// ── Geometry and accessibility helpers ──────────────────────────
 
 /** True when `later` comes after `earlier` in document (reading) order. */
 export async function follows(earlier: Locator, later: Locator): Promise<boolean> {

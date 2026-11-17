@@ -48,10 +48,8 @@ export const B1 = {
   saveWizard: "Save and continue", // 103 prefs.save.primary.wizard
   wizardTitle: "Job preferences", // 60 C-WIZ-S3-T
 
-  // Jobs: four tabs since the manual-apply lane (AC-4.5; Manual apply added after EPIC-0011 R4), copy deck jobs.*
-  // (PROPOSAL except where noted). The old four tabs (Ranked, Skipped by rules, Excluded families, All) are now
-  // Good matches, Manual apply, Not a match (two stacked lists: the old Skipped by rules, then the old Excluded
-  // families) and All.
+  // Jobs: four tabs (AC-4.5), copy deck jobs.* (PROPOSAL except where noted). Not a match holds two stacked
+  // lists: the rules, then the excluded families.
   tabs: ["Good matches", "Manual apply", "Not a match", "All"], // jobs.tab.good / .manual / .notMatch / .all (EXACT)
   retiredTabs: ["Ranked", "Skipped by rules", "Excluded families"],
   retiredSkippedTab: "Skipped and excluded",
@@ -71,7 +69,7 @@ export const B1 = {
   countPartial: (loaded: number, n: number) => `Showing ${loaded} of ${n} postings`, // 79
   filterEmptyTitle: "No postings match these filters", // 83
   filterEmptyText: "Try fewer words in the title search or more role families.", // 84
-  // EPIC-0011 R4 reworded the reason lines to drop "Skipped:" (the five posting words; copy deck status.reason.*).
+  // The reason lines carry no "Skipped:" prefix (EPIC-0011 R4; copy deck status.reason.*).
   rowSkipFamily: (family: string) => `${family} is outside the role families you picked.`, // 86
   rowSkipKeyword: "The title doesn't contain your saved keyword.", // 87
   detailSkipFamily: (family: string) => `${family} is outside the role families you picked, so Eve won't apply to it.`, // 88

@@ -71,7 +71,7 @@ test.describe("Record and update her own Stack posts permitted use (own-record:3
   for (const who of [ADA, BOLA]) {
     test(`E8-01 ${who.email} (${who.role}) records her own record: toast, recorded line, Update, form appears; no 404 text`, async ({ page }) => {
       const stack = await openAs(page, who.email)
-      // TD-RW1: the not-recorded panel is now the shared "Confirm you may use these feeds" step plus a hint in the section.
+      // TD-RW1: permitted use is the shared "Confirm you may use these feeds" step, plus a hint in the section.
       await expect(stack.confirmStep()).toBeVisible()
       await expect(stack.feedsSection().getByText(SP8.feedsEmpty, { exact: true })).toBeVisible()
       await expect(stack.feedUrlField()).toHaveCount(0)

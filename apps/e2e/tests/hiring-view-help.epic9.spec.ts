@@ -271,7 +271,7 @@ test.describe("Find jobs keeps the Hiring lead line and (i) in one place (AC-12 
     const help = await signedIn(page)
     await page.goto("/stack-posts")
     await expect(page).toHaveURL(/\/find-jobs/)
-    // EPIC-0015: the old link's hash selects Posts from your field.
+    // EPIC-0015: the /stack-posts hash selects Posts from your field.
     await expect(help.hiring().tab(COPY.stackSectionTitle)).toHaveAttribute("aria-selected", "true")
     await expect(page.getByRole("region", { name: COPY.stackSectionTitle, exact: true })).toBeVisible()
     await expect(page.getByText(EH.hiringLine, { exact: true })).toHaveCount(1)
