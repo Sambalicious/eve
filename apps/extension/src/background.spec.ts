@@ -52,6 +52,7 @@ function stubChrome(options: StubOptions = {}) {
   const unanswered = options.unanswered ?? 0
 
   const sentUrls: string[] = []
+  const sentBodies: EveFillBody[] = []
   const injectedTabs: number[] = []
   const downloadCalls: Array<{ applicationId: string; document: EveDocumentKind }> = []
   const sessionStore = new Map<string, unknown>()
@@ -104,6 +105,7 @@ function stubChrome(options: StubOptions = {}) {
     fill: async (body) => {
       if (options.hangOn === "bridgeFill") return new Promise(() => {})
       sentUrls.push(body.url)
+      sentBodies.push(body)
       return bridge
     },
     download: async (applicationId, document) => {
@@ -184,6 +186,7 @@ function stubChrome(options: StubOptions = {}) {
     fields,
     page,
     sentUrls,
+    sentBodies,
     injectedTabs,
     downloadCalls,
     runWrites,
@@ -1038,3 +1041,34 @@ function aRun(): EveFillRun {
     updatedAt: 1,
   }
 }
+
+/**
+ * The wire contract. `@eve/contracts` pins this same fixture against the zod
+ * schemas, so the API, the contract and this worker all fail a test when the
+ * fill-plan shape changes, instead of drifting.
+ */
+describe("the fill-plan contract fixture", () => {
+  const fixture = JSON.parse(
+    readFileSync(join(process.cwd(), "../../packages/contracts/src/fixtures/extension-fill-plan.json"), "utf8"),
+  ) as { request: EveFillBody; response: EveFillResponseBody }
+
+  it("is what the worker sends and consumes: fields go out as read, labels are joined onto the plan", async () => {
+    const stub = stubChrome({ pageFields: fixture.request.fields, bridge: { ok: true, status: 200, body: fixture.response } })
+    const summary = await plan(stub)
+
+    expect(stub.sentBodies).toEqual([{ url: "https://employer.example/apply?job=1", fields: fixture.request.fields }])
+    expect(summary).toEqual({
+      ok: true,
+      application: fixture.response.application,
+      fields: fixture.request.fields.length,
+      values: [
+        { ref: "f0", value: "Ada", kind: "text", label: "First name" },
+        { ref: "f2", value: "Lagos", kind: "select", label: "Office" },
+        { ref: "r0", value: "Yes", kind: "radio", label: "Work authorization" },
+        { ref: "f3", value: "true", kind: "checkbox", label: "I agree to the privacy notice" },
+      ],
+      documents: [{ ref: "f5", document: "resume", label: "Resume" }],
+      unanswered: fixture.response.unanswered,
+    })
+  })
+})
