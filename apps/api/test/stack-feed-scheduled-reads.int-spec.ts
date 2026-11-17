@@ -14,6 +14,7 @@ import { type AlertFeedGetOptions, type AlertFeedHttp, createAlertFeedHttp } fro
 import { HiringPostsReader } from "../src/stack-posts/hiring-posts-reader.js"
 import { StackPostsReader } from "../src/stack-posts/stack-posts-reader.js"
 import { StackPostsRepository } from "../src/stack-posts/stack-posts.repository.js"
+import { JobQueue, sharedQueue } from "../src/worker/job-queue.js"
 import { STACK_POSTS_READ_QUEUE, StackPostsJobs } from "../src/worker/stack-posts-jobs.js"
 import { WorkerHeartbeat } from "../src/worker/worker-heartbeat.js"
 import { WorkerModule } from "../src/worker/worker.module.js"
@@ -109,6 +110,12 @@ beforeAll(async () => {
   Logger.overrideLogger(capture)
   await worker.init()
   jobs = worker.get(StackPostsJobs)
+  // The real worker starts pg-boss here, cron pass included. A due occurrence of this
+  // queue's schedule would file a job and run runScheduled() in the background, on top of
+  // the run() each test below calls, so the same feeds would be read twice. The file
+  // never exercises the cron registration (stack-posts.int-spec.ts does), so the schedule
+  // is removed and only direct calls run the handler.
+  await worker.get(JobQueue).unschedule(sharedQueue(STACK_POSTS_READ_QUEUE))
 })
 
 beforeEach(async () => {
@@ -665,10 +672,12 @@ describe("removal mid-run, comments, duplicate firing, legacy row (SFS:296, :270
     feeds.on(SFEED_B, { kind: "body", body: feedOf() })
     // The pg-boss cron pass files each occurrence with the same singletonKey and a slot from the occurrence time
     // (job_i4: name, singleton_on, singleton_key). Two passes over the same 08:00 occurrence: the second insert is dropped.
+    // `blocked` keeps this file's live worker poller from fetching a row this test filed: a runnable row would run
+    // runScheduled() a second time, beside the run() below. The index this proves is the same either way.
     const slot = "2026-10-28 07:00:00"
     const key = `${STACK_POSTS_READ_QUEUE}__`
     for (let pass = 0; pass < 2; pass++) {
-      await sql`insert into pgboss.job (id, name, data, singleton_key, singleton_on, policy) values (gen_random_uuid(), ${STACK_POSTS_READ_QUEUE}, '{}'::jsonb, ${key}, ${slot}::timestamp, 'singleton')
+      await sql`insert into pgboss.job (id, name, data, singleton_key, singleton_on, policy, blocked) values (gen_random_uuid(), ${STACK_POSTS_READ_QUEUE}, '{}'::jsonb, ${key}, ${slot}::timestamp, 'singleton', true)
         on conflict do nothing`.execute(database.db)
     }
     const filed = await sql<{ n: number }>`select count(*)::int as n from pgboss.job where name = ${STACK_POSTS_READ_QUEUE} and singleton_on = ${slot}::timestamp`.execute(database.db)
