@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs"
+
 import { describe, expect, it } from "vitest"
 
 import {
@@ -9,6 +11,7 @@ import {
   EXTENSION_FILL_MAX_URL_LENGTH,
   extensionFillDocumentKindSchema,
   extensionFillDocumentSchema,
+  extensionFillFieldKindSchema,
   extensionFillFieldSchema,
   extensionFillRequestSchema,
   extensionFillResponseSchema,
@@ -147,5 +150,48 @@ describe("extensionFillResponseSchema (ADR 0016)", () => {
     expect(extensionFillDocumentSchema.safeParse({ ref: "f0", document: "resume", label: "Resume" }).success).toBe(false)
     expect(extensionFillDocumentSchema.safeParse({ ref: "f0", document: "resume", base64: "JVBERi0=" }).success).toBe(false)
     expect(extensionFillDocumentSchema.safeParse({ ref: "r".repeat(EXTENSION_FILL_MAX_REF_LENGTH + 1), document: "resume" }).success).toBe(false)
+  })
+})
+
+/**
+ * The fill-plan wire shape, pinned. `fixtures/extension-fill-plan.json` is the
+ * request the extension sends and the response Eve returns; the extension's own
+ * tests load the same file, so a change to either side fails a test on both.
+ */
+describe("the shared fill-plan fixture", () => {
+  const fixture = JSON.parse(readFileSync(new URL("./fixtures/extension-fill-plan.json", import.meta.url), "utf8")) as {
+    request: Record<string, unknown>
+    response: Record<string, unknown>
+  }
+
+  it("parses unchanged with the request and response schemas", () => {
+    expect(extensionFillRequestSchema.parse(fixture.request)).toEqual(fixture.request)
+    expect(extensionFillResponseSchema.parse(fixture.response)).toEqual(fixture.response)
+  })
+
+  it("pins the exact keys of every object on the wire", () => {
+    const request = extensionFillRequestSchema.parse(fixture.request)
+    const response = extensionFillResponseSchema.parse(fixture.response)
+    expect(Object.keys(request).sort()).toEqual(["fields", "url"])
+    expect(Object.keys(response).sort()).toEqual(["application", "documents", "unanswered", "values"])
+    expect(Object.keys(response.application ?? {}).sort()).toEqual(["company", "id", "roleTitle"])
+    expect(Object.keys(response.values[0] ?? {}).sort()).toEqual(["kind", "ref", "value"])
+    expect(Object.keys(response.documents[0] ?? {}).sort()).toEqual(["document", "ref"])
+    expect(Object.keys(response.unanswered[0] ?? {}).sort()).toEqual(["detail", "label", "ref"])
+    // Every field kind and the optional keys are exercised, so dropping one from the schema fails here.
+    expect(new Set(request.fields.map((f) => f.kind))).toEqual(new Set(extensionFillFieldKindSchema.options))
+    expect(request.fields.some((f) => f.combobox === true)).toBe(true)
+    expect(request.fields.some((f) => f.options !== undefined)).toBe(true)
+  })
+
+  it("refuses an unknown key on any object, so the API cannot add one the extension ignores", () => {
+    const response = fixture.response as { values: object[]; documents: object[]; unanswered: object[]; application: object }
+    const request = fixture.request as { fields: object[] }
+    expect(extensionFillResponseSchema.safeParse({ ...response, extra: 1 }).success).toBe(false)
+    expect(extensionFillResponseSchema.safeParse({ ...response, values: [{ ...response.values[0], extra: 1 }] }).success).toBe(false)
+    expect(extensionFillResponseSchema.safeParse({ ...response, documents: [{ ...response.documents[0], label: "Resume" }] }).success).toBe(false)
+    expect(extensionFillResponseSchema.safeParse({ ...response, unanswered: [{ ...response.unanswered[0], extra: 1 }] }).success).toBe(false)
+    expect(extensionFillResponseSchema.safeParse({ ...response, application: { ...response.application, extra: 1 } }).success).toBe(false)
+    expect(extensionFillRequestSchema.safeParse({ ...request, fields: [{ ...request.fields[0], extra: 1 }] }).success).toBe(false)
   })
 })

@@ -749,7 +749,7 @@ describe("D6 and D7: the result headline, its rows and the plural copy", () => {
         { ref: "f1", label: "Email", value: "ada@example.com", kind: "text" },
       ],
       documents: [{ ref: "f2", label: "Resume", document: "resume" }],
-      unanswered: [{ ref: "f3", label: "Pronouns" }],
+      unanswered: [{ ref: "f3", label: "Pronouns", detail: null }],
     }
     await open({ plan: plural })
     await review()

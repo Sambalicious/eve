@@ -260,7 +260,7 @@ void (() => {
     } catch {
       throw new Error("This page can't be filled. Try an application form in a normal tab.")
     }
-    return (await runInTab<EvePageField[]>(tabId, () => (globalThis as unknown as { __evePage: EvePageApi }).__evePage.read())) ?? []
+    return (await runInTab<EvePageField[]>(tabId, () => globalThis.__evePage!.read())) ?? []
   }
 
   /** Ask Eve what it would type. This is the only step that reads the page; it never fills. */
@@ -317,7 +317,7 @@ void (() => {
     let bridge: EveBridgeResult | null
     try {
       bridge = await withTimeout(
-        runInTab<EveBridgeResult>(eve.tabId, (body: unknown) => (globalThis as unknown as { __eveBridge: EveBridgeApi }).__eveBridge.fill(body as EveFillBody), [
+        runInTab<EveBridgeResult>(eve.tabId, (body: unknown) => globalThis.__eveBridge!.fill(body as EveFillBody), [
           { url: active.url, fields },
         ]),
         BRIDGE_FILL_TIMEOUT_MS,
@@ -520,7 +520,7 @@ void (() => {
       if (finished) return
       finished = true
       try {
-        const result = await runInTab<EvePageFinishResult>(plan.tabId, () => (globalThis as unknown as { __evePage: EvePageApi }).__evePage.finish())
+        const result = await runInTab<EvePageFinishResult>(plan.tabId, () => globalThis.__evePage!.finish())
         unanswered = result?.unanswered ?? 0
       } catch {
         // A page that went away has nothing left to outline; the run's own copy already says so.
@@ -576,7 +576,7 @@ void (() => {
     try {
       // Arm the page for this run: a previous run's outlines go before the first item.
       try {
-        await runInTab(plan.tabId, () => (globalThis as unknown as { __evePage: EvePageApi }).__evePage.begin())
+        await runInTab(plan.tabId, () => globalThis.__evePage!.begin())
       } catch {
         await close("failed", TAB_CLOSED_COPY)
         return
@@ -592,7 +592,7 @@ void (() => {
           kept =
             (await runInTab<boolean>(
               plan.tabId,
-              (item: unknown) => (globalThis as unknown as { __evePage: EvePageApi }).__evePage.fillValue(item as EvePageValue),
+              (item: unknown) => globalThis.__evePage!.fillValue(item as EvePageValue),
               [{ ref: value.ref, value: value.value, kind: value.kind }]
             )) === true
         } catch {
@@ -619,7 +619,7 @@ void (() => {
         const download = runInTab<EveBridgeDownloadResult>(
           bridge.tabId,
           (applicationId: unknown, kind: unknown) =>
-            (globalThis as unknown as { __eveBridge: EveBridgeApi }).__eveBridge.download(applicationId as string, kind as EveDocumentKind),
+            globalThis.__eveBridge!.download(applicationId as string, kind as EveDocumentKind),
           [plan.application.id, planned.document]
         ).catch(() => null)
         // Stop abandons the bytes: the answer is dropped unread, and the page never sees it.
@@ -653,7 +653,7 @@ void (() => {
           landed =
             (await runInTab<boolean>(
               plan.tabId,
-              (document: unknown) => (globalThis as unknown as { __evePage: EvePageApi }).__evePage.attachFile(document as EvePageDocument),
+              (document: unknown) => globalThis.__evePage!.attachFile(document as EvePageDocument),
               [{ ref: planned.ref, name: result.name, type: result.type, base64: result.base64 }]
             )) === true
         } catch {

@@ -1,0 +1,29 @@
+{
+  "request": {
+    "url": "https://boards.greenhouse.io/acme/jobs/1",
+    "fields": [
+      { "ref": "f0", "label": "First name", "kind": "text", "required": true },
+      { "ref": "f1", "label": "Cover note", "kind": "textarea", "required": false },
+      { "ref": "f2", "label": "Office", "kind": "select", "required": true, "options": ["Lagos", "Abuja"] },
+      { "ref": "r0", "label": "Work authorization", "kind": "radio", "required": true, "options": ["Yes", "No"] },
+      { "ref": "f3", "label": "I agree to the privacy notice", "kind": "checkbox", "required": true },
+      { "ref": "f4", "label": "Current role", "kind": "text", "required": false, "combobox": true },
+      { "ref": "f5", "label": "Resume", "kind": "file", "required": true },
+      { "ref": "f6", "label": "Pronouns", "kind": "text", "required": false }
+    ]
+  },
+  "response": {
+    "application": { "id": "6f1c2a4e-0000-4000-8000-000000000001", "company": "Acme Payments", "roleTitle": "Senior Frontend Engineer" },
+    "values": [
+      { "ref": "f0", "value": "Ada", "kind": "text" },
+      { "ref": "f2", "value": "Lagos", "kind": "select" },
+      { "ref": "r0", "value": "Yes", "kind": "radio" },
+      { "ref": "f3", "value": "true", "kind": "checkbox" }
+    ],
+    "documents": [{ "ref": "f5", "document": "resume" }],
+    "unanswered": [
+      { "ref": "f1", "label": "Cover note", "detail": null },
+      { "ref": "f6", "label": "Pronouns", "detail": "Eve does not answer this one for you." }
+    ]
+  }
+}
