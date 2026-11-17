@@ -75,6 +75,14 @@ if grep -q '^PUBLIC_ORIGIN=' .env; then
 else
   printf '\nPUBLIC_ORIGIN=%s\n' "$URL" >> .env
 fi
+# Funnel is one reverse-proxy hop in front of the api. Without TRUST_PROXY=1 every public visitor
+# shares the proxy's address and the per-IP access-request limits are off (global cap only).
+# Tailscale replaces any client-sent X-Forwarded-For with the real source address.
+if grep -q '^TRUST_PROXY=' .env; then
+  sed -i "s|^TRUST_PROXY=.*|TRUST_PROXY=1|" .env
+else
+  printf 'TRUST_PROXY=1\n' >> .env
+fi
 chmod 600 .env
 sudo docker compose up -d api
 
