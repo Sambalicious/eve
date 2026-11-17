@@ -10,7 +10,7 @@ The dashboard must serve no data to unauthenticated requests, hold no credential
 ## Decision
 
 - Sign in with Google through the OIDC authorization code flow with PKCE, requesting only `openid email`. The backend accepts only the ID token `sub` stored for the Candidate at installation, which a one-time setup token captures.
-- After sign-in the backend creates a server-side session in Postgres and sets a random session ID in an `HttpOnly; Secure; SameSite=Lax` cookie on the dashboard's origin. The idle expiry is 14 days. Mutating requests need a CSRF header that matches the session.
+- After sign-in the backend creates a server-side session in Postgres and sets a random session ID in an `HttpOnly; Secure; SameSite=Lax` cookie on the dashboard's origin. The idle expiry is 14 days, and a session also ends 30 days after sign-in however recently it was used (absolute lifetime, `SESSION_ABSOLUTE_LIFETIME_MS`). Mutating requests need a CSRF header that matches the session.
 - Links in emails point to authenticated dashboard routes and carry no tokens.
 - Recovery: re-running the setup command from the host shell re-binds the Candidate's `sub`.
 
