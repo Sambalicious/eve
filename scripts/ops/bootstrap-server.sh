@@ -22,6 +22,7 @@ if grep -qE 'replace-with|change-me' .env; then
   grep -nE 'replace-with|change-me' .env | sed 's/=.*/=<hidden>/' >&2
   exit 2
 fi
+bash "$ROOT/scripts/ops/preflight.sh" "$ROOT/.env" || exit 2
 command -v apt-get >/dev/null || { echo "This script expects Debian or Ubuntu." >&2; exit 2; }
 
 say "Base packages"

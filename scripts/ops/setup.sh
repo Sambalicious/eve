@@ -171,6 +171,8 @@ if grep -qE 'replace-with|change-me' .env; then
   die "The generated .env still held placeholders, so it was removed. Report which keys above."
 fi
 
+bash "$ROOT/scripts/ops/preflight.sh" "$ROOT/.env" || { rm -f .env; die "The generated .env failed the preflight, so it was removed."; }
+
 if [ -z "$GOOGLE_SUB" ]; then
   read -r -p "Your Google subject id (seeds your account, one time only): " GOOGLE_SUB </dev/tty || true
 fi
