@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Post } from "@nestjs/common"
 import {
+  type DeleteDetailsRequest,
   type DeleteDetailsResponse,
   type MinimalRecordsResponse,
   type Outcome,
@@ -12,6 +13,7 @@ import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
 import { parseRequest } from "../http/parse-body.js"
+import { ZodBody } from "../http/zod-request.js"
 import { RecordsService } from "./records.service.js"
 import { RetentionService } from "./retention.service.js"
 
@@ -52,8 +54,8 @@ export class RecordsController {
   @Post("applications/delete-details")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  deleteDetails(@Body() body: unknown): Promise<DeleteDetailsResponse> {
-    return this.service.deleteDetails(parseRequest(deleteDetailsRequestSchema, body).applicationIds)
+  deleteDetails(@ZodBody(deleteDetailsRequestSchema) body: DeleteDetailsRequest): Promise<DeleteDetailsResponse> {
+    return this.service.deleteDetails(body.applicationIds)
   }
 
   @Get("minimal-records")

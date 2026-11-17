@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Inject, Logger, Param, Post, Put, Req } from "@nestjs/common"
+import { Controller, Delete, Get, Header, HttpCode, Inject, Logger, Param, Post, Put, Req } from "@nestjs/common"
 import {
   type CareerProfileResponse,
   type CareerProfileVersion,
@@ -12,6 +12,7 @@ import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
 import { parseRequest } from "../http/parse-body.js"
+import { ZodBody } from "../http/zod-request.js"
 import { CareerProfileService } from "./career-profile.service.js"
 import { sniffResumeType } from "./resume-file-type.js"
 import { displayFilename } from "./resume-storage.js"
@@ -75,15 +76,15 @@ export class CareerProfileController {
   /** Creates the draft from the approved version, or replaces the draft's content. */
   @Put("draft")
   @Header("cache-control", "no-store")
-  saveDraft(@Body() body: unknown): Promise<CareerProfileVersion> {
-    return this.service.saveDraft(parseRequest(saveCareerProfileDraftRequestSchema, body))
+  saveDraft(@ZodBody(saveCareerProfileDraftRequestSchema) body: z.output<typeof saveCareerProfileDraftRequestSchema>): Promise<CareerProfileVersion> {
+    return this.service.saveDraft(body)
   }
 
   @Post("draft/approve")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  approve(@Body() body: unknown): Promise<CareerProfileResponse> {
-    return this.service.approveDraft(parseRequest(approveCareerProfileDraftRequestSchema, body).version)
+  approve(@ZodBody(approveCareerProfileDraftRequestSchema) body: z.output<typeof approveCareerProfileDraftRequestSchema>): Promise<CareerProfileResponse> {
+    return this.service.approveDraft(body.version)
   }
 
   @Delete("draft")

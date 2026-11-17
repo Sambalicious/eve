@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Post } f
 import {
   type ApprovedAnswer,
   type ApprovedAnswersResponse,
+  type CreateApprovedAnswerRequest,
   createApprovedAnswerRequestSchema,
   updateApprovedAnswerRequestSchema,
 } from "@eve/contracts"
@@ -9,6 +10,7 @@ import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
 import { parseRequest } from "../http/parse-body.js"
+import { ZodBody } from "../http/zod-request.js"
 import { ApprovedAnswersService } from "./approved-answers.service.js"
 
 const answerIdSchema = z.uuid()
@@ -25,8 +27,8 @@ export class ApprovedAnswersController {
 
   @Post()
   @Header("cache-control", "no-store")
-  create(@Body() body: unknown): Promise<ApprovedAnswer> {
-    return this.service.create(parseRequest(createApprovedAnswerRequestSchema, body))
+  create(@ZodBody(createApprovedAnswerRequestSchema) body: CreateApprovedAnswerRequest): Promise<ApprovedAnswer> {
+    return this.service.create(body)
   }
 
   @Patch(":id")

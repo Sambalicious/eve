@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Header, HttpCode, Post } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Post } from "@nestjs/common"
 import { type AiProviderResponse, approveAiProviderRequestSchema } from "@eve/contracts"
 
 import { OperatorOnly } from "../auth/operator-only.guard.js"
-import { parseRequest } from "../http/parse-body.js"
+import { ZodBody } from "../http/zod-request.js"
 import { AiProviderService } from "./ai-provider.service.js"
 
 @Controller("v1/ai-provider")
@@ -25,8 +25,9 @@ export class AiProviderController {
   @Post("approval")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  approve(@Body() body: unknown): Promise<AiProviderResponse> {
-    parseRequest(approveAiProviderRequestSchema, body)
+  // The body is only checked (the terms version shown); nothing in it is used.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  approve(@ZodBody(approveAiProviderRequestSchema) _terms: unknown): Promise<AiProviderResponse> {
     return this.service.approve()
   }
 }

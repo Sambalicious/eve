@@ -1,8 +1,9 @@
-import { Controller, Delete, Get, Header, HttpCode, Param, Put, Body } from "@nestjs/common"
-import { type Lead, type LeadStage, leadRequestSchema, type LeadsResponse } from "@eve/contracts"
+import { Controller, Delete, Get, Header, HttpCode, Param, Put } from "@nestjs/common"
+import { type Lead, type LeadRequest, type LeadStage, leadRequestSchema, type LeadsResponse } from "@eve/contracts"
 import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
+import { ZodBody } from "../http/zod-request.js"
 import { LeadsService } from "./leads.service.js"
 
 const uuidSchema = z.uuid()
@@ -25,12 +26,10 @@ export class LeadsController {
 
   @Put(":jobPostingId")
   @Header("cache-control", "no-store")
-  async upsert(@Param("jobPostingId") jobPostingId: string, @Body() body: unknown): Promise<Lead> {
+  async upsert(@Param("jobPostingId") jobPostingId: string, @ZodBody(leadRequestSchema) body: LeadRequest): Promise<Lead> {
     const id = uuidSchema.safeParse(jobPostingId)
     if (!id.success) throw new ApiException("bad_request")
-    const parsed = leadRequestSchema.safeParse(body)
-    if (!parsed.success) throw new ApiException("bad_request")
-    const lead = await this.service.setStage(id.data, parsed.data.stage as LeadStage)
+    const lead = await this.service.setStage(id.data, body.stage as LeadStage)
     if (!lead) throw new ApiException("not_found")
     return lead
   }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
+import { Body, Controller, Get, Header, HttpCode, Param, Post, Put, Res } from "@nestjs/common"
 import {
   type ExistingApplicationsResponse,
   type SampleResult,
@@ -15,6 +15,7 @@ import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
 import { parseRequest } from "../http/parse-body.js"
+import { ZodBody, ZodQuery } from "../http/zod-request.js"
 import { SubmissionStateService } from "./submission-state.service.js"
 import { ConvertedFeature } from "../auth/converted-feature.guard.js"
 
@@ -33,15 +34,15 @@ export class SubmissionController {
   @ConvertedFeature("submission")
   @Put("submission/automatic")
   @Header("cache-control", "no-store")
-  setAutomatic(@Body() body: unknown): Promise<SubmissionStatus> {
-    return this.service.setAutomatic(parseRequest(setAutomaticRequestSchema, body).enabled)
+  setAutomatic(@ZodBody(setAutomaticRequestSchema) body: z.output<typeof setAutomaticRequestSchema>): Promise<SubmissionStatus> {
+    return this.service.setAutomatic(body.enabled)
   }
 
   @ConvertedFeature("submission")
   @Get("submissions")
   @Header("cache-control", "no-store")
-  list(@Query("view") view: unknown): Promise<SubmissionListResponse> {
-    return this.service.list(parseRequest(submissionListViewSchema, view))
+  list(@ZodQuery("view", submissionListViewSchema) view: z.output<typeof submissionListViewSchema>): Promise<SubmissionListResponse> {
+    return this.service.list(view)
   }
 
   @ConvertedFeature("submission")
@@ -145,8 +146,8 @@ export class SubmissionController {
   /** 201 when recorded; 200 with `created: false` when the same URL and requisition is already recorded (C-EXIST-3). */
   @Post("existing-applications")
   @Header("cache-control", "no-store")
-  async addExistingApplication(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
-    const result = await this.service.addExistingApplication(parseRequest(createExistingApplicationRequestSchema, body))
+  async addExistingApplication(@ZodBody(createExistingApplicationRequestSchema) body: z.output<typeof createExistingApplicationRequestSchema>, @Res({ passthrough: true }) reply: FastifyReply) {
+    const result = await this.service.addExistingApplication(body)
     reply.status(result.created ? 201 : 200)
     return result
   }

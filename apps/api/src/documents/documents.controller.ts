@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
 import {
   type ApplicationDetail,
   type ApplicationSummary,
@@ -16,7 +16,7 @@ import type { FastifyReply } from "fastify"
 import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
-import { parseRequest } from "../http/parse-body.js"
+import { ZodBody } from "../http/zod-request.js"
 import { DocumentsService } from "./documents.service.js"
 
 const MEDIA_TYPE = {
@@ -40,8 +40,8 @@ export class ApplicationsController {
   /** 201 with `created: true`; 200 with `created: false` when the requisition already has an Application. */
   @Post()
   @Header("cache-control", "no-store")
-  async create(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply): Promise<CreateApplicationResponse> {
-    const result = await this.service.createApplication(parseRequest(createApplicationRequestSchema, body))
+  async create(@ZodBody(createApplicationRequestSchema) body: z.output<typeof createApplicationRequestSchema>, @Res({ passthrough: true }) reply: FastifyReply): Promise<CreateApplicationResponse> {
+    const result = await this.service.createApplication(body)
     reply.status(result.created ? 201 : 200)
     return result
   }
@@ -100,8 +100,8 @@ export class CandidateContactController {
 
   @Put()
   @Header("cache-control", "no-store")
-  update(@Body() body: unknown): Promise<CandidateContact> {
-    return this.service.updateContact(parseRequest(candidateContactSchema, body))
+  update(@ZodBody(candidateContactSchema) body: z.output<typeof candidateContactSchema>): Promise<CandidateContact> {
+    return this.service.updateContact(body)
   }
 }
 
@@ -118,8 +118,8 @@ export class AtsMinimumController {
 
   @Put()
   @Header("cache-control", "no-store")
-  update(@Body() body: unknown): Promise<AtsMinimum> {
-    return this.service.updateAtsMinimum(parseRequest(atsMinimumSchema, body))
+  update(@ZodBody(atsMinimumSchema) body: z.output<typeof atsMinimumSchema>): Promise<AtsMinimum> {
+    return this.service.updateAtsMinimum(body)
   }
 }
 

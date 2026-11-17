@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, Put } from "@nestjs/common"
+import { Controller, Delete, Get, Header, Put } from "@nestjs/common"
 import {
   type CandidateSettingsResponse,
   type SalaryResponse,
@@ -7,7 +7,9 @@ import {
   setWorkAuthorizationRequestSchema,
 } from "@eve/contracts"
 
-import { parseRequest } from "../http/parse-body.js"
+import type { z } from "zod"
+
+import { ZodBody } from "../http/zod-request.js"
 import { SalaryService } from "./salary.service.js"
 
 @Controller("v1/salary")
@@ -22,8 +24,8 @@ export class SalaryController {
 
   @Put("gross-salary-policy")
   @Header("cache-control", "no-store")
-  setPolicy(@Body() body: unknown): Promise<SalaryResponse> {
-    return this.service.setGross("gross_salary_policy", parseRequest(setGrossSalaryRequestSchema, body))
+  setPolicy(@ZodBody(setGrossSalaryRequestSchema) body: z.output<typeof setGrossSalaryRequestSchema>): Promise<SalaryResponse> {
+    return this.service.setGross("gross_salary_policy", body)
   }
 
   @Delete("gross-salary-policy")
@@ -34,8 +36,8 @@ export class SalaryController {
 
   @Put("current-salary")
   @Header("cache-control", "no-store")
-  setCurrent(@Body() body: unknown): Promise<SalaryResponse> {
-    return this.service.setGross("current_salary", parseRequest(setGrossSalaryRequestSchema, body))
+  setCurrent(@ZodBody(setGrossSalaryRequestSchema) body: z.output<typeof setGrossSalaryRequestSchema>): Promise<SalaryResponse> {
+    return this.service.setGross("current_salary", body)
   }
 
   @Delete("current-salary")
@@ -46,8 +48,8 @@ export class SalaryController {
 
   @Put("preferred-net-pay")
   @Header("cache-control", "no-store")
-  setNet(@Body() body: unknown): Promise<SalaryResponse> {
-    return this.service.setNet(parseRequest(setPreferredNetPayRequestSchema, body))
+  setNet(@ZodBody(setPreferredNetPayRequestSchema) body: z.output<typeof setPreferredNetPayRequestSchema>): Promise<SalaryResponse> {
+    return this.service.setNet(body)
   }
 
   @Delete("preferred-net-pay")
@@ -69,8 +71,7 @@ export class CandidateSettingsController {
 
   @Put("work-authorization")
   @Header("cache-control", "no-store")
-  async setWorkAuthorization(@Body() body: unknown): Promise<CandidateSettingsResponse> {
-    const { workAuthorization } = parseRequest(setWorkAuthorizationRequestSchema, body)
+  async setWorkAuthorization(@ZodBody(setWorkAuthorizationRequestSchema) { workAuthorization }: z.output<typeof setWorkAuthorizationRequestSchema>): Promise<CandidateSettingsResponse> {
     return { workAuthorization: await this.service.setWorkAuthorization(workAuthorization) }
   }
 }
