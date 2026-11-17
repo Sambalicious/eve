@@ -10,18 +10,21 @@ updates:
       actions:
         update-types: [minor, patch]
 
-  # pnpm workspace: the root and every workspace package (apps/*, packages/*).
+  # pnpm workspace (one root lockfile covers every package).
   # Dependabot's "npm" ecosystem reads pnpm-lock.yaml.
   - package-ecosystem: npm
-    directories:
-      - /
-      - /apps/*
-      - /packages/*
+    # One pnpm lockfile at the root: scanning each workspace as well only opened a
+    # duplicate PR per package for the same bump.
+    directory: /
     schedule:
       interval: weekly
     groups:
       npm-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # @types/node tracks the Node the code runs on (engines >=22.15, .nvmrc 24), not the latest.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
   # apps/api/Dockerfile (node base image, pinned by digest).
   - package-ecosystem: docker
@@ -31,6 +34,10 @@ updates:
     groups:
       docker-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # The shipped image stays on node 22 (see apps/api/Dockerfile); a new major is a deliberate upgrade.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   # Image references in the compose files (postgres, browser and egress digests).
   # docker/* holds no Dockerfiles; its compose files are covered here.
