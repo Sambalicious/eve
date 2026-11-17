@@ -1,10 +1,14 @@
-import { Body, Controller, Get, Header, Put, Query, UseGuards } from "@nestjs/common"
+import { Controller, Get, Header, Put, UseGuards } from "@nestjs/common"
 import { type PreferencesResponse, type PreferencesVersionsResponse, preferencesVersionsQuerySchema } from "@eve/contracts"
+import { z } from "zod"
 
-import { ApiException } from "../http/api-exception.js"
-import { parseSaveBody } from "./preferences-rules.js"
+import { ParsedBody, ZodQuery } from "../http/zod-request.js"
+import { type PreferencesSave, preferencesSaveOrRefuse } from "./preferences-request.js"
 import { PreferencesSaveLimitGuard } from "./preferences-save-limit.guard.js"
 import { PreferencesService } from "./preferences.service.js"
+
+/** F-TM-05: the read takes no query parameter; any one is refused. */
+const noQuery = z.object({}).strict()
 
 /**
  * `GET`/`PUT /v1/me/preferences` and `GET /v1/me/preferences/versions`
@@ -18,9 +22,8 @@ export class PreferencesController {
 
   @Get()
   @Header("cache-control", "no-store")
-  read(@Query() query: Record<string, unknown>): Promise<PreferencesResponse> {
-    // F-TM-05: this GET takes no query parameter; any one is refused.
-    if (Object.keys(query ?? {}).length > 0) throw new ApiException("bad_request")
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the pipe refuses any parameter, so the value is always {}
+  read(@ZodQuery(noQuery) _query: z.output<typeof noQuery>): Promise<PreferencesResponse> {
     return this.service.read()
   }
 
@@ -28,18 +31,13 @@ export class PreferencesController {
   @Put()
   @UseGuards(PreferencesSaveLimitGuard)
   @Header("cache-control", "no-store")
-  save(@Body() body: unknown): Promise<PreferencesResponse> {
-    const parsed = parseSaveBody(body)
-    if (parsed.kind === "bad_request") throw new ApiException("bad_request")
-    if (parsed.kind === "field_errors") throw ApiException.badRequestWithFieldErrors(parsed.fieldErrors)
-    return this.service.save(parsed.baseVersion, parsed.values)
+  save(@ParsedBody(preferencesSaveOrRefuse) request: PreferencesSave): Promise<PreferencesResponse> {
+    return this.service.save(request.baseVersion, request.values)
   }
 
   @Get("versions")
   @Header("cache-control", "no-store")
-  versions(@Query() query: Record<string, unknown>): Promise<PreferencesVersionsResponse> {
-    const parsed = preferencesVersionsQuerySchema.safeParse(query ?? {})
-    if (!parsed.success) throw new ApiException("bad_request")
-    return this.service.versions(parsed.data.limit, parsed.data.before)
+  versions(@ZodQuery(preferencesVersionsQuerySchema) query: z.output<typeof preferencesVersionsQuerySchema>): Promise<PreferencesVersionsResponse> {
+    return this.service.versions(query.limit, query.before)
   }
 }
