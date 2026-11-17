@@ -303,7 +303,7 @@ export class DiscoveryService {
     return this.pasteResponse(result.id, result.created, result.outcome, result.applicationId)
   }
 
-  /** The paste response for a stored or held posting (its summary as now stored). */
+  /** The paste response for a stored or held posting. */
   private async pasteResponse(id: string, created: boolean, outcome: PasteDescriptionOutcome, applicationId: string | null): Promise<PasteJobLinkResponse> {
     const row = await this.repository.findPosting(id)
     if (!row) throw new ApiException("internal_error")

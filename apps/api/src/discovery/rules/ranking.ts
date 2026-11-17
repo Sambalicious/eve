@@ -8,7 +8,7 @@ import { foldForKeywords } from "./rule-result.js"
  * `backend`, `mobile` and `devops_platform` are ranked last, never excluded
  * for their family. EPIC-0006 (AC-1.1, AC-1.4) adds `software_engineering`,
  * `platform_engineering`, `data_ml` and `solutions_customer`, all in the last
- * tier, and narrows `devops_platform` (platform engineering moves out).
+ * tier.
  */
 export type RoleFamily = RoleFamilyValue
 
