@@ -1,5 +1,8 @@
 import { type DynamicModule, Module } from "@nestjs/common"
 
+import { AuthTableCleanup } from "../auth/auth-table-cleanup.js"
+import { SessionRepository } from "../auth/session.repository.js"
+import { SignInAttemptRepository } from "../auth/sign-in-attempt.repository.js"
 import { ConfigModule } from "../config/config.module.js"
 import type { SharedRuntimeConfig } from "../config/env.js"
 import { WORKER_STATEMENT_TIMEOUT_MS } from "../db/create-database.js"
@@ -12,6 +15,7 @@ import { RetentionRunner } from "../records/retention-runner.js"
 import { SpendModule } from "../spend/spend.module.js"
 import { StackPostsWorkerModule } from "../stack-posts/stack-posts.module.js"
 import { SubmissionWorkerModule } from "../submission/submission.module.js"
+import { AuthCleanupJobs } from "./auth-cleanup-jobs.js"
 import { CandidateJobRunner } from "./candidate-job-runner.js"
 import { DiscoveryJobs } from "./discovery-jobs.js"
 import { JobQueue, WORKER_CONFIG } from "./job-queue.js"
@@ -32,7 +36,7 @@ export function workerAppConfig(config: WorkerConfig): SharedRuntimeConfig & Fil
   return { databaseUrl: config.databaseUrl, statementTimeoutMs: WORKER_STATEMENT_TIMEOUT_MS, anthropic: config.anthropic, candidateStorageDir: config.candidateStorageDir, formAgentEnabled: config.formAgentEnabled === true, documentBridgesEnabled: config.documentBridgesEnabled === true, documentDirectionEnabled: config.documentDirectionEnabled === true, ...(config.spend ? { spend: config.spend } : {}) }
 }
 
-/** The `worker` process: scheduled and queued jobs (slice 3: discovery and posting evaluation; slice 5: submission; slice 6: notifications; EPIC-0005: Stack posts reads; automatic 12-month expiry). */
+/** The `worker` process: scheduled and queued jobs (slice 3: discovery and posting evaluation; slice 5: submission; slice 6: notifications; EPIC-0005: Stack posts reads; automatic 12-month expiry; hourly auth table housekeeping). */
 @Module({})
 export class WorkerModule {
   static forRoot(config: WorkerConfig): DynamicModule {
@@ -40,7 +44,7 @@ export class WorkerModule {
       module: WorkerModule,
       imports: [ConfigModule.forRoot(workerAppConfig(config)), ClockModule, DatabaseModule, FilesModule, SpendModule, DiscoveryWorkerModule, SubmissionWorkerModule.forRoot(config.browser ?? null), NotificationWorkerModule.forRoot(config.mailer ?? null), StackPostsWorkerModule],
       // JobQueue first: Nest runs bootstrap hooks in order, so the heartbeat starts after pg-boss.
-      providers: [{ provide: WORKER_CONFIG, useValue: config }, JobQueue, CandidateJobRunner, DiscoveryJobs, SubmissionJobs, NotificationJobs, AccessRequestJobs, StackPostsJobs, RetentionRunner, RetentionJobs, WorkerHeartbeat],
+      providers: [{ provide: WORKER_CONFIG, useValue: config }, JobQueue, CandidateJobRunner, DiscoveryJobs, SubmissionJobs, NotificationJobs, AccessRequestJobs, StackPostsJobs, RetentionRunner, RetentionJobs, AuthTableCleanup, SessionRepository, SignInAttemptRepository, AuthCleanupJobs, WorkerHeartbeat],
       exports: [JobQueue],
     }
   }
