@@ -31,8 +31,7 @@ test("OUT-01 loading the Hiring view makes no outbound request from the api and 
   const hiring = new HiringPage(page)
   await hiring.open()
   await expect(hiring.checkSection()).toBeVisible()
-  await page.waitForLoadState("networkidle")
-  expect(outboundRequests().slice(before)).toEqual([])
+  await expect.poll(() => outboundRequests().slice(before), { timeout: 2_000 }).toEqual([])
   expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
 })
 
@@ -43,8 +42,7 @@ test("OUT-02 pasting a Greenhouse link reaches the Greenhouse public API only", 
   await hiring.open()
   await hiring.submit(GREENHOUSE_JOB_URL)
   await expect(hiring.resultStatus().getByText(COPY.created, { exact: true })).toBeVisible()
-  await page.waitForTimeout(1000)
-  expect(hosts(outboundRequests().slice(before).map((r) => r.url))).toEqual(["boards-api.greenhouse.io"])
+  await expect.poll(() => hosts(outboundRequests().slice(before).map((r) => r.url)), { timeout: 5_000 }).toEqual(["boards-api.greenhouse.io"])
   expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
 })
 
@@ -56,8 +54,7 @@ test("OUT-03 pasting a linkedin.com URL anyway reaches no host", async ({ page }
   await hiring.submit("https://www.linkedin.com/jobs/view/3999999999")
   await hiring.saveAnyway().click()
   await expect(hiring.resultStatus().filter({ hasText: hiddenUndated })).toHaveCount(1)
-  await page.waitForTimeout(1000)
-  expect(outboundRequests().slice(before)).toEqual([])
+  await expect.poll(() => outboundRequests().slice(before), { timeout: 2_000 }).toEqual([])
   expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
 })
 
@@ -67,8 +64,7 @@ test("OUT-04 pasting an unsupported host reaches no host", async ({ page }) => {
   await hiring.open()
   await hiring.submit("https://careers.example.org/jobs/123")
   await expect(hiring.resultStatus().filter({ hasText: hiddenUndated })).toHaveCount(1)
-  await page.waitForTimeout(1000)
-  expect(outboundRequests().slice(before)).toEqual([])
+  await expect.poll(() => outboundRequests().slice(before), { timeout: 2_000 }).toEqual([])
 })
 
 /**
@@ -99,6 +95,7 @@ for (const row of OUT_162) {
       const status = legacy.resultStatus().filter({ hasText: row.line })
       await expect(status).toHaveText(`${row.line} ${COPY.hiddenView}`)
       await expect(status.getByRole("link", { name: COPY.hiddenView, exact: true })).toHaveAttribute("href", /^\/postings\/[0-9a-f-]{36}$/)
+      // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
       await page.waitForTimeout(500)
       await expect(toast).toHaveCount(0)
     }

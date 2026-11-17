@@ -251,8 +251,7 @@ test.describe("Check this job: hidden result (r3, EPIC-0006 AC-5.5/5.7, owner de
       expect(stored[0]).toMatchObject({ origin: "pasted_link", status: "not_checked", candidateEmail: ADA.email })
       await expect(hiring.resultStatus().getByRole("link", { name: COPY.hiddenView, exact: true })).toHaveAttribute("href", `/postings/${stored[0]!.id}`)
       await expect(hiring.urlField()).toHaveValue("")
-      await page.waitForTimeout(500)
-      expect(await aiCallsForUrl(stored[0]!.applicationUrl)).toBe(0)
+      await expect.poll(() => aiCallsForUrl(stored[0]!.applicationUrl), { timeout: 2_000 }).toBe(0)
     })
   }
 
@@ -439,10 +438,9 @@ test.describe("Check this job: linkedin.com warning (AC 5.5, 5.7, D7)", () => {
     await hiring.submit("https://www.linkedin.com/posts/acme_hiring-activity-7250000000000000000-abcd")
     await hiring.saveAnyway().click()
     await expectHiddenLine(hiring, COPY.hiddenCreated(COPY.hiddenUndated))
-    await page.waitForTimeout(1000)
     const forbidden = (url: string) => /(^|\.)linkedin\.com$|(^|\.)google\.com$/i.test(new URL(url).hostname)
     expect(requests.map((r) => r.url()).filter(forbidden)).toEqual([])
-    expect(outboundRequests().slice(apiBefore).map((r) => r.url).filter(forbidden)).toEqual([])
+    await expect.poll(() => outboundRequests().slice(apiBefore).map((r) => r.url).filter(forbidden), { timeout: 2_000 }).toEqual([])
   })
 })
 

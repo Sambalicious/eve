@@ -199,7 +199,6 @@ test.describe("Family choice (AC 2.2)", () => {
     await setHiringInputs(ADA.email, { families: ["senior_frontend", "backend"], frameworks: ["React"], prefs: null })
     const hiring = await openAs(page, ADA.email)
     await hiring.waitForGroups(1)
-    await page.waitForLoadState("networkidle")
     const historyBefore = await page.evaluate(() => history.length)
     const requests = recordRequests(page)
     await hiring.familySelect().selectOption("backend")
@@ -209,6 +208,7 @@ test.describe("Family choice (AC 2.2)", () => {
     await expect.poll(async () => decodedParam((await hiring.linkedinHrefs())[0]!, "keywords")!.split(" AND ")[1]).toBe(BACKEND)
     for (const href of await hiring.linkedinHrefs()) expect(decodedParam(href, "keywords")).toContain(BACKEND)
     await expect(page.getByRole("status").filter({ hasText: LINKS_COPY.liveFamily("Backend") })).toHaveCount(1)
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(requests.map((r) => r.url())).toEqual([])
     expect(await page.evaluate(() => history.length)).toBe(historyBefore)
@@ -225,12 +225,12 @@ test.describe("Family choice (AC 2.2)", () => {
     await setHiringInputs(ADA.email, { families: ["senior_frontend", "fullstack", "backend"], frameworks: ["React"] })
     const hiring = await openAs(page, ADA.email)
     await hiring.waitForGroups(1)
-    await page.waitForLoadState("networkidle")
     const requests = recordRequests(page)
     await hiring.familySelect().selectOption("fullstack")
     await expect(page).toHaveURL(/family=fullstack/)
     await hiring.familySelect().selectOption("backend")
     await expect(page).toHaveURL(/family=backend/)
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(requests.map((r) => `${r.method()} ${r.url()}`)).toEqual([])
   })
@@ -606,6 +606,7 @@ test.describe("Freshness (AC 3.8)", () => {
     const tabB = await context.newPage()
     await tabB.goto("/settings")
     await saveCriteria(tabB, session.csrfToken, { frameworks: ["Vue"] })
+    // Deliberate negative wait: the open tab must not update by itself, and there is no signal for a push that never comes.
     await page.waitForTimeout(1000)
     await expect(tabA.linkedinLinks().first()).toHaveAccessibleName(LINKS_COPY.linkLiSr("Frontend", "React"))
     await page.reload()

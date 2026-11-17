@@ -74,6 +74,7 @@ test("OM14-E2E-01 the three kinds are readable, one copies exactly and one opens
   expect(new URL(href).searchParams.get("subject")).toBe(`${OUTREACH.referralLabel} for ${application.title} at ${application.company}`)
   const before = page.url()
   await section.getByRole("link", { name: /^Open in email/ }).click()
+  // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
   await page.waitForTimeout(300)
   expect(page.url()).toBe(before)
 

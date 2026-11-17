@@ -81,8 +81,10 @@ test.describe("Trigger semantics and activation (AC-13)", () => {
     test(`AX9-03 (HAI:62 ${surface}) hovering the trigger and the help line for 2 seconds each opens nothing`, async ({ page }) => {
       const help = await reach(page, surface)
       await help.trigger(surface).hover()
+      // Deliberate 2s dwell: the requirement is that nothing opens while the pointer rests here, so the duration is the test.
       await page.waitForTimeout(2000)
       await lineOf(help, surface).hover()
+      // Deliberate 2s dwell: the requirement is that nothing opens while the pointer rests here, so the duration is the test.
       await page.waitForTimeout(2000)
       await expect(help.popover(surface)).toHaveCount(0)
       await expect(help.trigger(surface)).toHaveAttribute("aria-expanded", "false")

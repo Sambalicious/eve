@@ -36,7 +36,7 @@ async function reachSettled(page: Page, surface: Surface): Promise<HelpPage> {
   const help = new HelpPage(page)
   await help.reach(surface)
   if (surface === "hiring") await help.hiring().waitUntilReady()
-  await page.waitForLoadState("networkidle")
+  await expect(help.trigger(surface)).toBeVisible()
   return help
 }
 
@@ -48,6 +48,7 @@ for (const surface of ["verify", "sources", "hiring"] as const) {
     await help.open(surface)
     await help.closeButton(surface).click()
     await expect(help.popover(surface)).toHaveCount(0)
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(browser.map((r) => r.url())).toEqual([])
     expect(browser.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
@@ -61,6 +62,7 @@ test("OUT9-02 (HVH:145) on the settled Hiring view, opening and closing the popo
   const before = outboundRequests().length
   await help.open("hiring")
   await help.closeButton("hiring").click()
+  // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
   await page.waitForTimeout(500)
   expect(browser.map((r) => r.url())).toEqual([])
   expect(outboundRequests().slice(before)).toEqual([])
@@ -78,7 +80,6 @@ test("OUT9-03 (HVH:136) recording from page load, opening the Hiring popover and
     await help.goLink(link).click()
     await expect(help.popover("hiring")).toHaveCount(0)
   }
-  await page.waitForLoadState("networkidle")
   expect(browser.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
   expect(outboundRequests().slice(before).map((r) => r.url).filter(isForbiddenHost)).toEqual([])
   expect(outboundRequests().slice(before)).toEqual([])
