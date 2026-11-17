@@ -1,7 +1,7 @@
 import { OUTREACH_KINDS, OUTREACH_KIND_SLUGS, type OutreachKind } from "@eve/contracts"
-import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
+import { parseUuid } from "../http/uuid-param.js"
 
 /**
  * The two Outreach routes that can carry a body, as Fastify's registered route
@@ -20,6 +20,5 @@ export function outreachKind(slug: string): OutreachKind {
 
 /** The existing uuid rule: a malformed Application id is `404 not_found`, never a 400. */
 export function outreachUuid(id: string): string {
-  if (!z.uuid().safeParse(id).success) throw new ApiException("not_found")
-  return id
+  return parseUuid(id, "not_found")
 }

@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Header, Put } from "@nestjs/common"
+import { Controller, Get, Header, Put } from "@nestjs/common"
 import { type Controls, type RaiseCeilingResponse, raiseCeilingRequestSchema, setGlobalPauseRequestSchema } from "@eve/contracts"
 
-import { parseRequest } from "../http/parse-body.js"
+import type { z } from "zod"
+
+import { ZodBody } from "../http/zod-request.js"
 import { ControlsService } from "./controls.service.js"
 import { ConvertedFeature } from "../auth/converted-feature.guard.js"
 
@@ -19,14 +21,13 @@ export class ControlsController {
 
   @Put("global-pause")
   @Header("cache-control", "no-store")
-  setGlobalPause(@Body() body: unknown): Promise<Controls> {
-    return this.service.setGlobalPause(parseRequest(setGlobalPauseRequestSchema, body).paused)
+  setGlobalPause(@ZodBody(setGlobalPauseRequestSchema) body: z.output<typeof setGlobalPauseRequestSchema>): Promise<Controls> {
+    return this.service.setGlobalPause(body.paused)
   }
 
   @Put("ceiling")
   @Header("cache-control", "no-store")
-  raiseCeiling(@Body() body: unknown): Promise<RaiseCeilingResponse> {
-    const request = parseRequest(raiseCeilingRequestSchema, body)
+  raiseCeiling(@ZodBody(raiseCeilingRequestSchema) request: z.output<typeof raiseCeilingRequestSchema>): Promise<RaiseCeilingResponse> {
     return this.service.raiseCeiling(request.month, request.ceiling)
   }
 }

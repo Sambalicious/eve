@@ -1,11 +1,10 @@
-import { Controller, Delete, Get, Header, HttpCode, Param, Put, Body } from "@nestjs/common"
-import { type Lead, type LeadStage, leadRequestSchema, type LeadsResponse } from "@eve/contracts"
-import { z } from "zod"
+import { Controller, Delete, Get, Header, HttpCode, Put } from "@nestjs/common"
+import { type Lead, type LeadRequest, type LeadStage, leadRequestSchema, type LeadsResponse } from "@eve/contracts"
 
 import { ApiException } from "../http/api-exception.js"
+import { UuidParam } from "../http/uuid-param.js"
+import { ZodBody } from "../http/zod-request.js"
 import { LeadsService } from "./leads.service.js"
-
-const uuidSchema = z.uuid()
 
 /**
  * v1.29.0 lead pipeline. The global guard requires the Candidate's session on
@@ -25,21 +24,15 @@ export class LeadsController {
 
   @Put(":jobPostingId")
   @Header("cache-control", "no-store")
-  async upsert(@Param("jobPostingId") jobPostingId: string, @Body() body: unknown): Promise<Lead> {
-    const id = uuidSchema.safeParse(jobPostingId)
-    if (!id.success) throw new ApiException("bad_request")
-    const parsed = leadRequestSchema.safeParse(body)
-    if (!parsed.success) throw new ApiException("bad_request")
-    const lead = await this.service.setStage(id.data, parsed.data.stage as LeadStage)
+  async upsert(@UuidParam("jobPostingId", "bad_request") id: string, @ZodBody(leadRequestSchema) body: LeadRequest): Promise<Lead> {
+    const lead = await this.service.setStage(id, body.stage as LeadStage)
     if (!lead) throw new ApiException("not_found")
     return lead
   }
 
   @Delete(":jobPostingId")
   @HttpCode(204)
-  async remove(@Param("jobPostingId") jobPostingId: string): Promise<void> {
-    const id = uuidSchema.safeParse(jobPostingId)
-    if (!id.success) throw new ApiException("bad_request")
-    await this.service.remove(id.data)
+  async remove(@UuidParam("jobPostingId", "bad_request") id: string): Promise<void> {
+    await this.service.remove(id)
   }
 }

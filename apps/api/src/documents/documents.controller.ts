@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Param, Post, Put, Query, Res } from "@nestjs/common"
 import {
   type ApplicationDetail,
   type ApplicationSummary,
@@ -16,7 +16,8 @@ import type { FastifyReply } from "fastify"
 import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
-import { parseRequest } from "../http/parse-body.js"
+import { UuidParam } from "../http/uuid-param.js"
+import { ZodBody } from "../http/zod-request.js"
 import { DocumentsService } from "./documents.service.js"
 
 const MEDIA_TYPE = {
@@ -40,33 +41,33 @@ export class ApplicationsController {
   /** 201 with `created: true`; 200 with `created: false` when the requisition already has an Application. */
   @Post()
   @Header("cache-control", "no-store")
-  async create(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply): Promise<CreateApplicationResponse> {
-    const result = await this.service.createApplication(parseRequest(createApplicationRequestSchema, body))
+  async create(@ZodBody(createApplicationRequestSchema) body: z.output<typeof createApplicationRequestSchema>, @Res({ passthrough: true }) reply: FastifyReply): Promise<CreateApplicationResponse> {
+    const result = await this.service.createApplication(body)
     reply.status(result.created ? 201 : 200)
     return result
   }
 
   @Get(":id")
   @Header("cache-control", "no-store")
-  read(@Param("id") id: string): Promise<ApplicationDetail> {
-    return this.service.detail(uuid(id))
+  read(@UuidParam("id", "not_found") id: string): Promise<ApplicationDetail> {
+    return this.service.detail(id)
   }
 
   /** Generate or regenerate both documents. 202: generation runs in the background. */
   @Post(":id/documents/generate")
   @HttpCode(202)
   @Header("cache-control", "no-store")
-  generate(@Param("id") id: string): Promise<ApplicationSummary> {
-    return this.service.startGeneration(uuid(id))
+  generate(@UuidParam("id", "not_found") id: string): Promise<ApplicationSummary> {
+    return this.service.startGeneration(id)
   }
 
   @Get(":id/documents/:file")
-  async download(@Param("id") id: string, @Param("file") file: string, @Res({ passthrough: true }) reply: FastifyReply): Promise<Buffer> {
+  async download(@UuidParam("id", "not_found") id: string, @Param("file") file: string, @Res({ passthrough: true }) reply: FastifyReply): Promise<Buffer> {
     const match = /^(resume|cover-letter)\.(pdf|docx)$/.exec(file)
     if (!match) throw new ApiException("not_found")
     const kind = match[1] === "resume" ? "resume" : "cover_letter"
     const format = match[2] === "pdf" ? "pdf" : "docx"
-    const { bytes, filename } = await this.service.download(uuid(id), kind, format)
+    const { bytes, filename } = await this.service.download(id, kind, format)
     reply
       .header("content-type", MEDIA_TYPE[format])
       .header("content-disposition", `attachment; filename="${filename}"`)
@@ -100,8 +101,8 @@ export class CandidateContactController {
 
   @Put()
   @Header("cache-control", "no-store")
-  update(@Body() body: unknown): Promise<CandidateContact> {
-    return this.service.updateContact(parseRequest(candidateContactSchema, body))
+  update(@ZodBody(candidateContactSchema) body: z.output<typeof candidateContactSchema>): Promise<CandidateContact> {
+    return this.service.updateContact(body)
   }
 }
 
@@ -118,12 +119,7 @@ export class AtsMinimumController {
 
   @Put()
   @Header("cache-control", "no-store")
-  update(@Body() body: unknown): Promise<AtsMinimum> {
-    return this.service.updateAtsMinimum(parseRequest(atsMinimumSchema, body))
+  update(@ZodBody(atsMinimumSchema) body: z.output<typeof atsMinimumSchema>): Promise<AtsMinimum> {
+    return this.service.updateAtsMinimum(body)
   }
-}
-
-function uuid(id: string): string {
-  if (!z.uuid().safeParse(id).success) throw new ApiException("not_found")
-  return id
 }

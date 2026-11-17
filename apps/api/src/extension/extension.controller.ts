@@ -1,9 +1,11 @@
-import { Body, Controller, Header, HttpCode, Post } from "@nestjs/common"
+import { Controller, Header, HttpCode, Post } from "@nestjs/common"
 import { type ExtensionFillResponse, extensionFillRequestSchema } from "@eve/contracts"
 
 import { CurrentSession } from "../auth/current-session.decorator.js"
 import type { ActiveSession } from "../auth/session.service.js"
-import { parseRequest } from "../http/parse-body.js"
+import type { z } from "zod"
+
+import { ZodBody } from "../http/zod-request.js"
 import { ExtensionService } from "./extension.service.js"
 
 /**
@@ -20,7 +22,7 @@ export class ExtensionController {
   @Post("extension/fill")
   @HttpCode(200)
   @Header("cache-control", "no-store")
-  fill(@CurrentSession() session: ActiveSession, @Body() body: unknown): Promise<ExtensionFillResponse> {
-    return this.service.fill(parseRequest(extensionFillRequestSchema, body), session.candidateId)
+  fill(@CurrentSession() session: ActiveSession, @ZodBody(extensionFillRequestSchema) body: z.output<typeof extensionFillRequestSchema>): Promise<ExtensionFillResponse> {
+    return this.service.fill(body, session.candidateId)
   }
 }

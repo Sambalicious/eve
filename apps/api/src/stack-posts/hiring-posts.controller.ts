@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Headers, Param, Post, Put, Query } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Header, HttpCode, Headers, Post, Put, Query } from "@nestjs/common"
 import {
   type HiringAlertFeedsResponse,
   type HiringPostsResponse,
@@ -6,14 +6,12 @@ import {
   alertFeedVerificationRequestSchema,
   registerAlertFeedRequestSchema,
 } from "@eve/contracts"
-import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
+import { UuidParam } from "../http/uuid-param.js"
 import { parsePage, registrationFieldErrors, verificationFieldErrors } from "./field-errors.js"
 import { HiringPostsService } from "./hiring-posts.service.js"
 import { requireJson } from "./require-json.js"
-
-const uuid = z.uuid()
 
 /**
  * EPIC-0007 Phase 3 routes (contract v1.20.0). The global guard requires the
@@ -56,8 +54,7 @@ export class HiringPostsController {
   @Delete("hiring-feeds/:id")
   @HttpCode(204)
   @Header("cache-control", "no-store")
-  async remove(@Param("id") id: string): Promise<void> {
-    if (!uuid.safeParse(id).success) throw new ApiException("bad_request")
+  async remove(@UuidParam("id", "bad_request") id: string): Promise<void> {
     await this.service.remove(id)
   }
 
