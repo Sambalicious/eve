@@ -5,11 +5,9 @@
  * Tests compare against these, never against the web app's copy objects.
  */
 export const P3 = {
-  // Hiring Alert feeds section
   feedsTitle: "Hiring alert feeds", // C-HP-FEEDS-SEC-TITLE (lower-case "alert" since EPIC-0011 repair wave 1)
-  // EPIC-0011 repair wave 1 (TD-RW1): the per-section "You haven't recorded permitted use" panel and its "Record
-  // permitted use" button are gone. One step at the top of Set up alerts ("Confirm you may use these feeds",
-  // button "I confirm") opens the date-and-basis dialog and records every list that is still unconfirmed.
+  // EPIC-0011 repair wave 1 (TD-RW1): one shared step at the top of Set up alerts ("Confirm you may use these
+  // feeds", button "I confirm") opens the date-and-basis dialog and records every list still unconfirmed.
   confirmTitle: "Confirm you may use these feeds", // find.alerts.confirm.title (EXACT)
   confirmButton: "I confirm", // find.alerts.confirm.button
   unconfirmedHint: "Confirm above to add feeds.", // find.alerts.unconfirmedHint
@@ -53,7 +51,6 @@ export const P3 = {
   stackFeedAdd: "Add feed", // C-SP-FEED-ADD
   stackFeedsTitle: "Alert feeds", // C-SP-FEEDS-SEC-TITLE
 
-  // Hiring posts section
   postsTitle: "Hiring posts", // C-HP-POSTS-TITLE
   notVetted: "Not vetted", // C-HP-NOTCHECKED
   rowCheck: "Check this job", // C-HP-ROW-CHECK
@@ -82,7 +79,6 @@ export const P3 = {
   postsEmptyWaitingBody:
     "Eve reads your Hiring alert feeds at 02:00, 08:00, 14:00 and 20:00 WAT and keeps only LinkedIn posts and articles.", // C-HP-POSTS-EMPTY-WAITING-BODY
 
-  // API
   notVerifiedMessage: "Record the permitted-use verification for Google Alerts feeds before registering a feed.", // 409 alert_feeds_not_verified
 } as const
 

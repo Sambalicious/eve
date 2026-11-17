@@ -188,8 +188,6 @@ export const applicationDetailSchema = applicationSummarySchema
   .strict()
 export type ApplicationDetail = z.infer<typeof applicationDetailSchema>
 
-// v1.28.0: `applicationsResponseSchema` moved to ./application-board.ts (list rows gain the board fields).
-
 export const createApplicationRequestSchema = z
   .object({
     jobPostingId: z.uuid(),

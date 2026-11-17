@@ -29,13 +29,11 @@ export const E11 = {
   privacyLink: "Data and privacy", // EXACT
   // Hidden controls (ADV:48 table)
   hiddenControls: ["Check first sends", "Blocked", "Unsure sends", "Form answers", "Pause and cost", "Today's cap", "Monthly cost"] as const,
-  // Home
   simplerTitle: "Eve is simpler now", // EXACT
   simplerDismiss: "Got it", // PROPOSAL
   improveHeading: "Improve your results", // EXACT
   recentHeading: "Recent applications", // EXACT
   pasteSubmit: "Check this job", // PROPOSAL
-  // Applications board
   boardRegion: "Applications board", // EXACT
   viewBoard: "Board",
   viewList: "List",
@@ -49,7 +47,6 @@ export const E11 = {
   backToInterview: "Back to Interview", // PROPOSAL
   confirmAppliedTitle: "Mark as applied?", // PROPOSAL
   confirmAppliedBody: "This records that you applied. It can't be undone.", // PROPOSAL
-  // Find jobs
   findTitle: "Find jobs", // EXACT
   findSections: ["Search links", "Hiring posts", "Posts from your field", "Set up alerts"] as const, // PROPOSAL except Hiring posts / Set up alerts
   jobBoards: "Job boards", // PROPOSAL (Operator only)
@@ -58,7 +55,6 @@ export const E11 = {
   // Status words (status.*)
   postingWords: ["Good match", "Not a match", "Checking", "Couldn't check", "Hidden"] as const, // EXACT
   retiredPostingWords: ["Skipped", "Excluded", "Eligible", "Unverified"] as const,
-  // Upload / onboarding
   uploadTitle: "Upload your resume", // PROPOSAL
   consentApprove: "Approve", // PROPOSAL
   consentOperatorApproved: "The person who runs your Eve has approved the AI provider for this Eve.", // PROPOSAL

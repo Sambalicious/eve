@@ -2,14 +2,13 @@ import { z } from "zod"
 
 import { keywordFoldsToEmpty } from "./keyword-fold.js"
 
-/** v1.4.0 (slice 3): Job Sources, the employer list, Job Postings, Eligibility and Match. */
 export const JOB_SOURCES_PATH = "/v1/job-sources"
 export const EMPLOYER_LIST_APPROVE_PATH = "/v1/job-sources/employer-list/approve"
 export const JOB_POSTINGS_PATH = "/v1/job-postings"
 export const JOB_POSTING_LINKS_PATH = "/v1/job-postings/links"
 /** v1.18.0 (EPIC-0006): re-queue the session Candidate's visible failed and not-checked postings. */
 export const JOB_POSTINGS_CHECK_AGAIN_PATH = "/v1/job-postings/check-again"
-/** `GET` only from v1.25.0 (EPIC-0002 B1): the `PUT` is removed; its fields live in `PUT /v1/me/preferences`. */
+/** `GET` only from v1.25.0 (EPIC-0002 B1); the write lives in `PUT /v1/me/preferences`. */
 export const ELIGIBILITY_SETTINGS_PATH = "/v1/eligibility-settings"
 
 export const applicationSystemSchema = z.enum(["greenhouse", "lever", "ashby"])
@@ -125,10 +124,9 @@ export const evaluationFailureSchema = z.enum([
 ])
 
 /**
- * Role families in display order (AC-1.2). v1.12.0 added `backend`, `mobile`
- * and `devops_platform`. v1.18.0 (EPIC-0006) adds `software_engineering`,
- * `platform_engineering`, `data_ml` and `solutions_customer`, which rank in the
- * last tier, and narrows `devops_platform` (no platform engineering titles).
+ * Role families in display order (AC-1.2). `software_engineering`,
+ * `platform_engineering`, `data_ml` and `solutions_customer` rank in the last
+ * tier, and `devops_platform` excludes platform engineering titles.
  */
 export const roleFamilySchema = z.enum([
   "senior_frontend",

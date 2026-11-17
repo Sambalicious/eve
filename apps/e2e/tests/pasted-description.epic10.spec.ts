@@ -75,7 +75,7 @@ test.describe("the description panel in every paste form (PD-1.1, PD-1.3)", () =
     })
   }
 
-  // EPIC-0011 R1: Home's "Add a job link" form is replaced by one paste box (link or description in the same field).
+  // EPIC-0011 R1: one paste box takes either a link or a description.
   test("PD:44 (Home, EPIC-0011) the one paste box takes a pasted description: Job title and Company appear for text, and the request carries description, title and company", async ({ page }) => {
     const company = `${PD_PREFIX} Home Box`
     // EPIC-0011 FD:154: the Home paste box needs a Career Profile in use and an approved AI provider.

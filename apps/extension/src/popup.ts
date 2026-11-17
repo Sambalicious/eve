@@ -2,9 +2,9 @@
  * The popup: connect an Eve origin, review what Eve would type, then watch the
  * background fill it (ADR 0016).
  *
- * The popup no longer owns a fill. It renders `fillRun` from
- * `chrome.storage.session` and re-renders whenever that record changes, so a
- * popup that closes mid-run loses nothing and reopening shows the live run.
+ * The popup renders `fillRun` from `chrome.storage.session` and re-renders
+ * whenever that record changes, so a popup that closes mid-run loses nothing
+ * and reopening shows the live run.
  */
 import { eveOriginOf } from "./origin.js"
 import { isSensitiveLabel, maskedValue } from "./review.js"
@@ -26,13 +26,12 @@ void (() => {
   type Tone = "muted" | "success" | "warning" | "destructive"
   type Icon = "info" | "spinner" | "check" | "alert" | "stop" | "x"
 
-  /** One line under a result headline: a quiet icon, then words. */
   interface Row {
     icon: Icon
     text: string
   }
 
-  /** The plan on screen. It lives only in this popup's memory, as before. */
+  /** The plan on screen. It lives only in this popup's memory. */
   interface ReviewedPlan {
     application: EveFillApplication
     values: EveFillPlanValue[]
@@ -425,7 +424,6 @@ void (() => {
     connectionText.replaceChildren(...nodes)
   }
 
-  /** The line, the address block and the one filled button, for the view on screen. */
   function paintConnection(kind: View["kind"]): void {
     const running = kind === "active" || kind === "other-tab"
     const canChange = !running && connected !== null
@@ -669,7 +667,6 @@ void (() => {
     if (view.kind === "terminal" && (previousKind === "active" || previousKind === "other-tab" || previousKind === "interrupted")) reviewButton.focus()
   }
 
-  /** Reads the saved origin, the active tab and the stored run, then paints once. */
   async function start(): Promise<void> {
     // Register first: a change between the read and the listener would otherwise be lost.
     chrome.storage.onChanged.addListener((changes, areaName) => {

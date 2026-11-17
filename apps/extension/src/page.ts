@@ -306,7 +306,6 @@ void (() => {
     return label !== null && selfVisible(label)
   }
 
-  /** The control's kind, or "skip" for a control Eve never reads. */
   function kindOf(element: HTMLElement): EveFieldKind | "skip" {
     if (element instanceof HTMLSelectElement) return "select"
     if (element instanceof HTMLTextAreaElement) return "textarea"
@@ -377,7 +376,6 @@ void (() => {
     else nodes.push(element)
   }
 
-  /** The ref the last read gave a control, or null when it was not read. */
   function refFor(element: HTMLElement): string | null {
     for (const [ref, nodes] of refs) if (nodes.includes(element)) return ref
     return null
