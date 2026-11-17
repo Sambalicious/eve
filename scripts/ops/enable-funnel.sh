@@ -31,7 +31,14 @@ fi
 
 say "Tailscale"
 if ! command -v tailscale >/dev/null; then
-  curl -fsSL https://tailscale.com/install.sh | sh
+  # Tailscale's signed apt repository, not `curl install.sh | sh`. Debian and Ubuntu only.
+  # shellcheck source=scripts/ops/apt-repo.sh
+  . "$ROOT/scripts/ops/apt-repo.sh"
+  TS_OS="$(apt_os_id)"
+  TS_CODENAME="$(apt_os_codename)"
+  apt_add_repo tailscale "https://pkgs.tailscale.com/stable/$TS_OS/$TS_CODENAME.noarmor.gpg" tailscale.gpg \
+    "https://pkgs.tailscale.com/stable/$TS_OS" "$TS_CODENAME" main
+  sudo apt-get install -y -qq tailscale >/dev/null
 fi
 
 if ! sudo tailscale status >/dev/null 2>&1; then

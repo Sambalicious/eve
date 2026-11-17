@@ -30,7 +30,14 @@ sudo apt-get install -y -qq ca-certificates curl rsync >/dev/null
 
 say "Docker"
 if ! command -v docker >/dev/null; then
-  curl -fsSL https://get.docker.com | sudo sh
+  # Docker's signed apt repository, not `curl get.docker.com | sh`. Debian and Ubuntu only.
+  # shellcheck source=scripts/ops/apt-repo.sh
+  . "$ROOT/scripts/ops/apt-repo.sh"
+  DOCKER_OS="$(apt_os_id)"
+  DOCKER_CODENAME="$(apt_os_codename)"
+  apt_add_repo docker "https://download.docker.com/linux/$DOCKER_OS/gpg" docker.asc \
+    "https://download.docker.com/linux/$DOCKER_OS" "$DOCKER_CODENAME" stable
+  sudo apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null
 fi
 sudo usermod -aG docker "$USER" || true
 
