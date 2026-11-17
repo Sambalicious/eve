@@ -6,6 +6,7 @@ import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fa
 
 import { registerPublicWriteGate } from "../access-request/public-write-gate.js"
 import type { AppConfig } from "../config/env.js"
+import { REQUEST_ID_HEADER, accessLogOptions } from "./access-log.js"
 import { registerOutreachPathGate } from "../outreach/outreach-path-gate.js"
 
 /**
@@ -13,8 +14,8 @@ import { registerOutreachPathGate } from "../outreach/outreach-path-gate.js"
  * hop count (EPIC-0003): with 1 behind Caddy, `request.ip` is the address Caddy
  * saw, and a client-sent X-Forwarded-For entry can't change it.
  */
-export function createFastifyAdapter(config: Pick<AppConfig, "accessRequest">): FastifyAdapter {
-  return new FastifyAdapter({ logger: false, trustProxy: trustHops(config.accessRequest.trustProxy) })
+export function createFastifyAdapter(config: Pick<AppConfig, "accessRequest" | "accessLog">, logStream?: { write(line: string): void }): FastifyAdapter {
+  return new FastifyAdapter({ ...accessLogOptions(config.accessLog, logStream), trustProxy: trustHops(config.accessRequest.trustProxy) })
 }
 
 /**
@@ -26,7 +27,14 @@ export function trustHops(hops: number): false | ((address: string, hop: number)
   return hops === 0 ? false : (_address, hop) => hop < hops
 }
 
-export async function configureHttpApp(app: NestFastifyApplication, config: Pick<AppConfig, "publicOrigin">): Promise<INestApplication> {
+export async function configureHttpApp(app: NestFastifyApplication, config: Pick<AppConfig, "publicOrigin" | "accessLog">): Promise<INestApplication> {
+  // The id a request is logged under is also sent back, so a Candidate can quote it. Only with the log on.
+  if (config.accessLog) {
+    app.getHttpAdapter().getInstance().addHook("onRequest", (request, reply, done) => {
+      void reply.header(REQUEST_ID_HEADER, request.id)
+      done()
+    })
+  }
   // Before any body parser: the one public write is checked on Origin, media type and size first.
   registerPublicWriteGate(app.getHttpAdapter().getInstance(), config.publicOrigin)
   await app.register(fastifyCookie)
