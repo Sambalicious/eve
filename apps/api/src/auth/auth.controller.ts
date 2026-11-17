@@ -18,6 +18,7 @@ import {
 } from "./cookies.js"
 import { Public } from "./public.decorator.js"
 import { SessionService } from "./session.service.js"
+import { SignInStartThrottle } from "./sign-in-start-throttle.js"
 import { SignInService } from "./sign-in.service.js"
 
 @Controller("v1/auth")
@@ -25,7 +26,8 @@ export class AuthController {
   constructor(
     private readonly signIn: SignInService,
     private readonly sessions: SessionService,
-    @Inject(APP_CONFIG) private readonly config: AppConfig
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
+    private readonly startThrottle: SignInStartThrottle
   ) {}
 
   /** Full-page navigation from the sign-in page. Redirects to Google. */
@@ -36,6 +38,8 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Res() reply: FastifyReply
   ): Promise<void> {
+    // Too many starts: send the visitor back to the sign-in page, the same place a failed start goes.
+    if (!this.startThrottle.allow(request.ip)) return this.redirectToSignIn(reply, "failed", toSafeReturnPath(next))
     const outcome = await this.signIn.start(next, request.cookies[SESSION_COOKIE])
     switch (outcome.kind) {
       case "already-signed-in":

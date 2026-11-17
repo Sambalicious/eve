@@ -1,3 +1,4 @@
+import { SignInStartThrottle } from "../../src/auth/sign-in-start-throttle.js"
 import type { INestApplication, Type } from "@nestjs/common"
 import type { NestFastifyApplication } from "@nestjs/platform-fastify"
 import { Test } from "@nestjs/testing"
@@ -129,6 +130,9 @@ export async function createTestApp(options: {
     .useValue(TEST_EXTRACTION_CHILD)
     .overrideProvider(FORM_SESSION_FACTORY)
     .useValue(options.formSessions ?? unavailableFormSessions)
+    // Suites start sign-in hundreds of times a minute from one address; the throttle has its own spec.
+    .overrideProvider(SignInStartThrottle)
+    .useValue({ allow: () => true })
     .overrideProvider(QUESTION_SCHEMAS)
     .useValue(options.questionSchemas ?? noQuestionSchemas)
   if (options.alertFeedHttp) builder.overrideProvider(ALERT_FEED_HTTP).useValue(options.alertFeedHttp)
