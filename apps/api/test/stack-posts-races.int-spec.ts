@@ -544,9 +544,9 @@ describe("daily-summary.feature @concurrent @ac-8.2 (a post stored while the sum
     expect([thisOne.includes(SHARED_POST), next.includes(SHARED_POST)]).toEqual([true, false])
   })
 
-  // F-QA-E5F-01 (fixed in repair wave 2, architecture.r1.md "Revision r2"): a post stamped before a claim but committed
-  // after that summary rendered used to fall in neither window. The write now re-stamps first_seen_at past the latest
-  // claim as its last statement, so this post belongs to the next summary.
+  // F-QA-E5F-01 (architecture.r1.md "Revision r2"): a post stamped before a claim but committed after that summary
+  // rendered would fall in neither window, so the write re-stamps first_seen_at past the latest claim as its last
+  // statement, which puts this post in the next summary.
   it("first seen before this summary's claim but committed after it rendered: listed in exactly one summary", async () => {
     await verify().expect(200)
     const feedA = await registeredQuietly(FEED_A)

@@ -22,10 +22,6 @@ import { clearPostings, resetCriteria, seed } from "./support/epic-0006.js"
  * end to end through the real sender with a recording Mailer. Source: gherkin r6
  * hidden-postings-applications-and-links.feature:206-228 (AC-3.10) and
  * evaluation-failure-lines.feature:78-84 (AC-7.7, PROPOSAL P18).
- *
- * Expected red on this branch until Q3-2 merges: "AC-3.10 … failure list holds
- * 'Senior Frontend Engineer at Hooli' only". The failure list has no visibility
- * filter yet, so the hidden Globex Application's failure is still listed.
  */
 const DAY = "2026-10-24"
 const clock = new TestClock("2026-10-24T19:00:00.000Z") // 20:00 WAT
@@ -132,7 +128,6 @@ describe("AC-3.10 @AC-3.10 hidden postings are left out of the daily summary's s
     expect(text).not.toContain("Hotline Paralegal")
   })
 
-  // Expected red until Q3-2 (failure-list visibility filter) merges.
   it("applications-and-links:221 the failure list holds 'Senior Frontend Engineer at Hooli' only (expected red pending Q3-2)", async () => {
     await seedDay()
     const text = await sendSummary()

@@ -20,7 +20,6 @@ import { TestClock } from "./support/test-clock.js"
  * Gherkin: advanced-switch.r1.feature ADV:17 to ADV:194 (AC-3.1, 3.4, 3.5, 3.8, 3.9, 7.4),
  * navigation.r1.feature NAV:152 (flag read failure is web-only), upgrade-and-compat.r1.feature UPG:92/UPG:116.
  * Also the QA rows for RLS on candidate_view_setting and the activation_state / candidate_view_setting lock race (D4).
- * Expected red until migration 0033 and the C2 routes land.
  */
 let database: TestDatabase
 let google: FakeGoogle

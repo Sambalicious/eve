@@ -81,12 +81,10 @@ const SUBMISSION_ACTIONS = ["sample", "sample/approve", "sample/reject", "queue"
 const REASON_ACTIONS = new Set<string>(["sample/reject", "same-company/decline"])
 
 export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
-  // ── Session and identity ────────────────────────────────────────────
   { method: "GET", path: "/v1/session", kind: "session", proof: "returns the caller's own CSRF token only" },
   { method: "POST", path: "/v1/auth/logout", kind: "session", proof: "ends the caller's own session; A's session still works" },
   { method: "GET", path: "/v1/me", kind: "session", proof: "B's ID, email and capabilities; none of A's" },
 
-  // ── r5 routes and Job Postings (A1) ─────────────────────────────────
   { method: "GET", path: "/v1/candidate-settings/job-criteria", kind: "own-scope", proof: "B's body holds B's values, none of A's", named: true },
   { method: "PUT", path: "/v1/candidate-settings/job-criteria", kind: "own-scope", proof: "B's save changes B's row only; A's row and version are byte-equal", named: true },
   { method: "GET", path: "/v1/stack-posts", kind: "own-scope", proof: "B's page and totalCount count B's posts only", named: true },
@@ -97,7 +95,6 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "PUT", path: "/v1/stack-posts/alert-feeds/verification", kind: "own-scope", proof: "writes only the caller's row; another Candidate's row, their registration gate and their reads are unchanged", send: { verifiedOn: "2026-10-01", verificationBasis: "B basis." } },
   { method: "POST", path: "/v1/stack-posts/alert-feeds", kind: "own-scope", proof: "A's record never lifts B's 409; a URL A registered is accepted for B once B has their own record; B's limit counts B's feeds", named: true },
   { method: "DELETE", path: "/v1/stack-posts/alert-feeds/:id", kind: "foreign-id", resource: "alert-feed", status: 204, proof: "A's feed ID sent by B gets the same 204 as an unknown ID and A's feed stays (R5-2)", named: true },
-  // ── EPIC-0007 (merged first): Hiring search inputs (P1), Hiring feeds and posts (P3) ──
   // F-SEC-40: these run the generic HTTP check with B's session as well as their dedicated
   // cases in cross-candidate.int-spec.ts. POST stays `named` only: its proof is about A's
   // record and URL lists never changing B's 409 or refusal codes, which a sentinel and
@@ -113,7 +110,6 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "POST", path: "/v1/job-postings/links", kind: "own-scope", proof: "a link A holds, pasted by B, gives B their own row; A's row is unchanged", named: true },
   { method: "POST", path: "/v1/job-postings/check-again", kind: "own-scope", proof: "B's press claims B's rows only (to waiting, no job); A's rows and A's jobs are unchanged", named: true },
 
-  // ── Slice 1-2: AI provider, Career Profile, answers, settings ───────
   { method: "GET", path: "/v1/ai-provider", kind: "own-scope", proof: "B's approval state; none of A's approval time" },
   { method: "POST", path: "/v1/ai-provider/approval", kind: "operator-only", proof: "a non-Operator gets 404; the installation-wide ai_provider_approval stays as it was, even when empty (F-SEC-01; per-Candidate ai_terms_approval arrives in slice C)", send: { termsCheckedOn: ANTHROPIC_TERMS.checkedOn } },
   { method: "GET", path: "/v1/career-profile", kind: "own-scope", proof: "B's profile; none of A's facts" },
@@ -141,7 +137,6 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "GET", path: "/v1/candidate-settings/ats", kind: "own-scope", proof: "B's minimum or the default 40; never A's" },
   { method: "PUT", path: "/v1/candidate-settings/ats", kind: "own-scope", proof: "writes B's row only; A's minimum is unchanged", send: { minAtsPercent: 55 } },
 
-  // ── EPIC-0002 B1: the session Candidate's Job Preferences (contract v1.25.0, D40) ──
   // No route takes a Candidate ID. B's first save (baseVersion null) creates B's version 1; A's record and history stay byte-equal.
   // v1.28.0 (EPIC-0011 C2)
   { method: "PUT", path: "/v1/me/advanced", kind: "own-scope", proof: "writes the caller's own candidate_view_setting row only; A's row is unchanged", send: { enabled: true } },
@@ -150,7 +145,6 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "PUT", path: "/v1/me/preferences", kind: "own-scope", proof: "B's save writes B's rows only; A's record and versions are byte-equal", send: { baseVersion: null, values: B_PREFERENCES } },
   { method: "GET", path: "/v1/me/preferences/versions", kind: "own-scope", proof: "B's own versions only, newest first" },
 
-  // ── Slice 3: Job Sources and eligibility settings (shared catalog) ──
   { method: "GET", path: "/v1/job-sources", kind: "own-scope", proof: "the installation catalog; no Candidate rows" },
   { method: "POST", path: "/v1/job-sources/employer-list/approve", kind: "operator-only", proof: "a non-Operator gets 404; the installation approval is unchanged" },
   { method: "PUT", path: "/v1/job-sources/remote-boards/:key/verification", kind: "operator-only", proof: "a non-Operator gets 404; the board's verification is unchanged", send: { verifiedOn: "2026-10-01", basis: "B" } },
@@ -158,7 +152,6 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   // v1.25.0 (EPIC-0002 B1): the PUT is removed (404 for everyone, cross-candidate-registry.int-spec.ts); the GET stays, read by no rule.
   { method: "GET", path: "/v1/eligibility-settings", kind: "own-scope", proof: "the installation singleton; no Candidate rows" },
 
-  // ── Slice 4: Applications and Tailored Documents ────────────────────
   { method: "GET", path: "/v1/applications", kind: "own-scope", proof: "B's Applications; none of A's" },
   { method: "POST", path: "/v1/applications", kind: "foreign-id", resource: "posting", body: (id) => ({ jobPostingId: id }), proof: "A's posting ID that B does not hold is 404; no Application is created" },
   { method: "GET", path: "/v1/applications/:id", kind: "foreign-id", resource: "application", proof: "A's Application ID is 404 for B" },
@@ -175,7 +168,6 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "PUT", path: "/v1/leads/:jobPostingId", kind: "foreign-id", resource: "posting", body: () => ({ stage: "saved" }), proof: "A's posting ID that B does not hold is 404; no lead is created" },
   { method: "DELETE", path: "/v1/leads/:jobPostingId", kind: "foreign-id", resource: "posting", status: 204, proof: "A's posting ID sent by B gets the same 204 as an unknown ID; A's rows are unchanged" },
 
-  // ── Slice 5: submission and samples (guarded before slice E) ────────
   { method: "GET", path: "/v1/submission/status", kind: "own-scope", guarded: true, proof: "Operator only before E (409 for B); B never reads A's gate state" },
   { method: "PUT", path: "/v1/submission/automatic", kind: "own-scope", guarded: true, proof: "409 for B; A's switch is unchanged", send: { enabled: false } },
   { method: "GET", path: "/v1/submissions", kind: "own-scope", guarded: true, proof: "409 for B; none of A's submissions" },
@@ -206,10 +198,8 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   // answers null for B; A's rows stay byte-equal.
   { method: "POST", path: "/v1/extension/fill", kind: "own-scope", proof: "B's fill of A's Application URL answers application null with empty values; A's rows are unchanged", send: { url: "https://boards.greenhouse.io/ada-registry/jobs/1", fields: [] } },
 
-  // ── Slice 6: notifications (guarded before slice F) ─────────────────
   { method: "GET", path: "/v1/notifications/status", kind: "own-scope", guarded: true, proof: "409 for B before F; none of A's send counts" },
 
-  // ── Slice 7: controls (guarded before slice D) and records ──────────
   { method: "GET", path: "/v1/controls", kind: "own-scope", guarded: true, proof: "409 for B before D; no spend figure" },
   { method: "PUT", path: "/v1/controls/global-pause", kind: "own-scope", guarded: true, proof: "409 for B before D; the pause is unchanged", send: { paused: true } },
   { method: "PUT", path: "/v1/controls/ceiling", kind: "own-scope", guarded: true, proof: "409 for B before D; the ceiling is unchanged", send: { month: "2026-10", ceiling: "60.00" } },

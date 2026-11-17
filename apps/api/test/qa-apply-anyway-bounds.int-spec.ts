@@ -94,10 +94,6 @@ import { TestClock } from "./support/test-clock.js"
  * repository methods the contract names (`claim`, `dropQueuedUnlessRanked`,
  * `markSubmitting`), as submission.int-spec.ts does for SEC-014 and SEC-017,
  * and end to end through `SubmissionService.submit` with fake-form hooks.
- *
- * Written before the candidate exists: expected red until the backend lands
- * migration 0026, the new create checks, the override fields and the
- * remove-from-queue route.
  */
 const SENDER = "ada.okafor@gmail.com"
 const APP_PASSWORD = "abcdefghijklmnop"
@@ -193,8 +189,6 @@ afterAll(async () => {
   await rm(storage, { recursive: true, force: true })
 })
 
-// ── helpers ────────────────────────────────────────────────────
-
 const ada = () => database.operatorId
 const now = () => clock.now()
 const service = () => asOperator(app, app.get(SubmissionService))
@@ -266,10 +260,6 @@ function htmlText(raw: string): string {
 }
 
 const linesOf = (text: string) => text.split(/\r?\n/).map((l) => l.trim())
-
-// ════════════════════════════════════════════════════════════
-// AA-1. Which decisions can be overridden (POST /v1/applications order of checks)
-// ════════════════════════════════════════════════════════════
 
 const OVERRIDABLE: readonly (readonly [string, Decision])[] = [
   ["weak_core_match", WEAK],
@@ -478,10 +468,6 @@ describe("AA-1.5, AA-1.6 the posting is never changed and the ranked path is unc
   })
 })
 
-// ════════════════════════════════════════════════════════════
-// AA-2.1, AA-2.2 acknowledgement and stored decision
-// ════════════════════════════════════════════════════════════
-
 describe("AA-2.1 the acknowledgement must be present and equal the current decision", () => {
   it.each([
     ["absent", undefined],
@@ -550,10 +536,6 @@ describe("AA-2.1 the acknowledgement must be present and equal the current decis
     })
   })
 })
-
-// ════════════════════════════════════════════════════════════
-// AA-2.3, AA-4.3 applies and notAppliesReason
-// ════════════════════════════════════════════════════════════
 
 describe("AA-2.3 / AA-4.3 whether an override applies follows the current decision", () => {
   const CASES: readonly (readonly [string, Decision, boolean, boolean, string | null])[] = [
@@ -705,10 +687,6 @@ describe("AA-2.7 legacy overrides (time only) apply only on a visible ranked pos
     await expectDocumentsReady(q.id)
   })
 })
-
-// ════════════════════════════════════════════════════════════
-// AA-2.4 to AA-2.6 the three submission checks
-// ════════════════════════════════════════════════════════════
 
 /** Runs `change` once, at the first fill (the form is being filled; the claim has happened). */
 function onFirstFill(change: () => Promise<void>) {
@@ -988,10 +966,6 @@ describe("r-AA amended scenarios: no-override drops return to documents ready", 
   })
 })
 
-// ════════════════════════════════════════════════════════════
-// AA-2.8 every other submission rule still applies to an applying override
-// ════════════════════════════════════════════════════════════
-
 describe("AA-2.8 the usual submission rules hold for a queued override whose decision still applies", () => {
   it("apply-anyway:525 @AA-2.8 cap reached (5 today): no attempt starts and it stays queued for tomorrow", async () => {
     await passGate()
@@ -1055,10 +1029,6 @@ describe("AA-2.8 the usual submission rules hold for a queued override whose dec
     expect(forms.clicks).toEqual([])
   })
 })
-
-// ════════════════════════════════════════════════════════════
-// AA-3. Activation Gate samples
-// ════════════════════════════════════════════════════════════
 
 /** `n` approved samples that count toward the five. */
 async function approvedSamples(n: number) {
@@ -1191,10 +1161,6 @@ describe("AA-3.2 / AA-3.3 approving and attempting a sample whose posting change
     expect((await row(rankedOverrideApp)).sample_state).toBeNull()
   })
 })
-
-// ════════════════════════════════════════════════════════════
-// AA-5. Remove from queue
-// ════════════════════════════════════════════════════════════
 
 describe("AA-5 POST /v1/applications/{id}/remove-from-queue", () => {
   it("apply-anyway:920 @AA-5.2 removing returns to documents ready and keeps documents, 6 answers, the override and attempt number 0; one queue_removed event", async () => {
@@ -1396,10 +1362,6 @@ describe("AA-5 POST /v1/applications/{id}/remove-from-queue", () => {
   })
 })
 
-// ════════════════════════════════════════════════════════════
-// AA-6. A posting that already has an Application
-// ════════════════════════════════════════════════════════════
-
 describe("AA-6 'anyway' on a posting that already has an Application", () => {
   const MARKABLE: readonly (readonly [string, Parameters<typeof insertApplication>[4], Decision | "legacy" | null])[] = [
     ["documents ready, created while ranked", {}, null],
@@ -1490,10 +1452,6 @@ describe("AA-6 'anyway' on a posting that already has an Application", () => {
   })
 })
 
-// ════════════════════════════════════════════════════════════
-// AA-7.1 deleting details, AA-7.5 races
-// ════════════════════════════════════════════════════════════
-
 describe("AA-7.1 deleting detailed records clears every override field", () => {
   it("apply-anyway:1117 @AA-7.1 by the Candidate (delete-details): no override time or stored decision; legacy column null; override null in the API", async () => {
     const p = await posting({ decision: WEAK, requisition: "R-4601" })
@@ -1583,10 +1541,6 @@ describe("AA-7.5 a create racing a Job criteria save stores the decision of whic
     expect((await applicationDetail(created.application.id)).override).toMatchObject({ applies: false, notAppliesReason: "decision_changed" })
   })
 })
-
-// ════════════════════════════════════════════════════════════
-// AA-4.6 emails (Confirmed, Blocked, daily summary)
-// ════════════════════════════════════════════════════════════
 
 const squash = (text: string) => text.replace(/\s+/g, " ")
 const emailWithSubject = (prefix: string) => smtp.received.find((email) => /Subject: (.*)/.exec(email.raw)?.[1]?.includes(prefix) || email.raw.includes(`Subject: ${prefix}`))
@@ -1722,10 +1676,6 @@ describe("AA-4.6 emails mark an override Application", () => {
     expect(emailWithSubject("Applied:")).toBeDefined()
   })
 })
-
-// ════════════════════════════════════════════════════════════
-// Migration 0026-apply-anyway-bounds (run last: it drops and re-adds columns on this file's database)
-// ════════════════════════════════════════════════════════════
 
 describe("migration 0026-apply-anyway-bounds (AA-2.7, AA-7.6)", () => {
   type Module = { up: (db: unknown) => Promise<void>; down: (db: unknown) => Promise<void> }

@@ -42,7 +42,7 @@ import {
  * api and Postgres. Source: api-contract.r1.md v1.18.0 and gherkin r4
  * (hidden-postings-board, posting-age, seniority-floor visibility,
  * hidden-postings-applications-and-links API scenarios, per-candidate-tenancy
- * counts and notices). Expected to fail until the EPIC-0006 backend lands.
+ * counts and notices).
  *
  * Ada is the Operator; Kofi is a second, non-Operator Candidate.
  */

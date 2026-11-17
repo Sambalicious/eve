@@ -23,7 +23,6 @@ import { greenhouseJob } from "./fixtures/epic-0006-sources.js"
  * and the stored shared facts. No implementation function is imported, so the
  * tests hold whatever the classifier's internal names are.
  * Source: role-family-catalog.feature, seniority-floor.feature.
- * Expected to fail until the EPIC-0006 backend lands.
  */
 let database: TestDatabase
 let google: FakeGoogle
