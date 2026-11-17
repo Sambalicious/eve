@@ -5,12 +5,23 @@ import { promisify } from "node:util"
 
 import type { ResumeMediaType } from "@eve/contracts"
 
+import { Semaphore } from "../shared/semaphore.js"
 import type { KnownExtractionReason } from "./refusal-reason.js"
 
 /** Below this the file holds no usable text (a scanned image, an empty page). */
 const MIN_TEXT_LENGTH = 40
 /** Well above any resume; bounds the prompt. */
 export const MAX_TEXT_LENGTH = 60_000
+
+/**
+ * Child processes allowed to run at once in this process. Each one may take up to
+ * `rssMb` of resident memory, so an unbounded burst of uploads could exhaust the
+ * host; the rest wait their turn. Waiting holds no deadline: both deadlines start
+ * when the child is spawned (see `runExtractionChild`), so a queued upload is
+ * bounded by its own start-up after it gets a slot, not by its time in the queue.
+ */
+export const EXTRACTION_CONCURRENCY = 2
+const extractionSlots = new Semaphore(EXTRACTION_CONCURRENCY)
 
 /**
  * Bounds for the extraction child process (SEC-201). A real resume parses in well
@@ -59,7 +70,8 @@ export type ExtractionOutcome = Readonly<{ ok: true; text: string }> | Readonly<
  * can stall or exhaust only that process (SEC-201). The child is killed when it
  * does not start within `startupTimeoutMs`, parsing passes `timeoutMs` after it
  * reported ready, its resident memory passes the cap, or its output passes the
- * byte limit.
+ * byte limit. At most `EXTRACTION_CONCURRENCY` children run at once; a further
+ * call waits for a slot and only then spawns.
  */
 export async function runResumeExtraction(
   mediaType: ResumeMediaType,
@@ -67,7 +79,7 @@ export async function runResumeExtraction(
   limits: ExtractionLimits = EXTRACTION_LIMITS,
   child: ExtractionChild = COMPILED_EXTRACTION_CHILD
 ): Promise<ExtractionOutcome> {
-  const outcome = await runExtractionChild(mediaType, bytes, limits, child)
+  const outcome = await extractionSlots.use(() => runExtractionChild(mediaType, bytes, limits, child))
   if (!outcome.ok) return outcome
   const trimmed = outcome.text.replace(/\n{3,}/g, "\n\n").trim()
   if (trimmed.length < MIN_TEXT_LENGTH) return { ok: false, reason: "too_short" }
