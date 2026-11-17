@@ -78,6 +78,21 @@ const INCOMPLETE_DETAIL = {
  * blocks as Missing Approved Answer; an exhausted agent budget blocks with the
  * seventh reason's `budget` sub-reason.
  */
+/**
+ * The browser opens `apply_url`, but automatic mode was decided from `application_url`
+ * (the one `locateAts` accepted). Lever and Ashby take `apply_url` from board JSON, so a
+ * hostile board could name another host and have it allowlisted. Open it only when both
+ * URLs sit on the same host.
+ */
+export function isAutomaticTarget(posting: Readonly<{ apply_mode: string; apply_url: string; application_url: string }>): boolean {
+  if (posting.apply_mode !== "automatic") return false
+  try {
+    return new URL(posting.apply_url).host.toLowerCase() === new URL(posting.application_url).host.toLowerCase()
+  } catch {
+    return false
+  }
+}
+
 @Injectable()
 export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name)
@@ -169,7 +184,7 @@ export class SubmissionService {
     }
     const app = await this.repository.findApplication(applicationId)
     const posting = await this.repository.findPostingForApplication(applicationId)
-    if (!app || !posting || app.state !== "documents_ready" || posting.apply_mode !== "automatic") return { result: "refused", refusal: "not_ready" }
+    if (!app || !posting || app.state !== "documents_ready" || !isAutomaticTarget(posting)) return { result: "refused", refusal: "not_ready" }
     if (kind === "automatic" && app.submission_state === "queued") {
       // AC 6.2 (EPIC-0004 prd.r2 AC 4.6, 5.6): a status check, not an evaluation. It makes no model call and
       // reads the stored decision, which every Job criteria save has already re-decided. v1.24.0 (AA-2.3 to 2.5):
@@ -363,7 +378,7 @@ export class SubmissionService {
    */
   async readForm(applicationId: string): Promise<"read" | "paused" | "not_ready" | "browser_unavailable" | "off_origin"> {
     const posting = await this.repository.findPostingForApplication(applicationId)
-    if (!posting || posting.apply_mode !== "automatic") return "not_ready"
+    if (!posting || !isAutomaticTarget(posting)) return "not_ready"
     const control = await this.repository.readControl()
     if (control.global_paused || control.cost_paused) return "paused"
     return this.mutex.withLock(() => this.readFormInSession(applicationId, posting.apply_url, posting.application_system))
