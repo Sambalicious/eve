@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Put } from "@nestjs/common"
-import { type OutreachItem, type OutreachResponse, readerNameRequestSchema } from "@eve/contracts"
+import { Controller, Get, Header, HttpCode, Param, Post, Put } from "@nestjs/common"
+import { type OutreachItem, type OutreachKind, type OutreachResponse, type ReaderNameRequest, readerNameRequestSchema } from "@eve/contracts"
 
 import { CandidateScope } from "../db/candidate-scope.js"
-import { parseRequest } from "../http/parse-body.js"
 import { UuidParam } from "../http/uuid-param.js"
-import { outreachKind } from "./outreach-path.js"
+import { ZodBody } from "../http/zod-request.js"
+import { OutreachKindParam, outreachKind } from "./outreach-path.js"
 import { OutreachService } from "./outreach.service.js"
 
 /**
@@ -49,14 +49,12 @@ export class OutreachController {
 
   @Put(":id/outreach/:kind/reader-name")
   @Header("cache-control", "no-store")
-  setReaderName(@UuidParam("id", "not_found") id: string, @Param("kind") kind: string, @Body() body: unknown): Promise<OutreachItem> {
-    // The path is read before the body (section 2, step 3 before step 4): the id by its pipe, the kind here, so a malformed id or an unknown
-    // kind answers `404 not_found` even when the body is malformed too, rather than relying on the body's 400.
+  setReaderName(@UuidParam("id", "not_found") id: string, @OutreachKindParam() kind: OutreachKind, @ZodBody(readerNameRequestSchema) request: ReaderNameRequest): Promise<OutreachItem> {
+    // The path is read before the body (section 2, step 3 before step 4): the id and the kind by their pipes, which answer
+    // before the body pipe, so a malformed id or an unknown kind is `404 not_found` even when the body is malformed too.
     // CR-6: Fastify parses the body before this handler, so the pre-body gate resolves the same path (and the
     // Application 404) first; this order still holds for anything the gate lets through.
-    const parsedKind = outreachKind(kind)
     // A malformed body, a non-object, a missing key, an unknown extra key or a non-string is `400 bad_request`.
-    const request = parseRequest(readerNameRequestSchema, body)
-    return this.service.setReaderName(id, parsedKind, request.readerName)
+    return this.service.setReaderName(id, kind, request.readerName)
   }
 }

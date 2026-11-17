@@ -1,9 +1,15 @@
-import { Body, Controller, Get, Header, Put, UseGuards } from "@nestjs/common"
-import { type JobCriteriaResponse, jobCriteriaFieldErrors, jobCriteriaRequestSchema } from "@eve/contracts"
+import { Controller, Get, Header, Put, UseGuards } from "@nestjs/common"
+import { type JobCriteriaRequest, type JobCriteriaResponse, jobCriteriaFieldErrors, jobCriteriaRequestSchema } from "@eve/contracts"
 
 import { ApiException } from "../http/api-exception.js"
+import { type RequestRefusal, ZodBody } from "../http/zod-request.js"
 import { JobCriteriaSaveLimitGuard } from "./job-criteria-save-limit.guard.js"
 import { JobCriteriaService } from "./job-criteria.service.js"
+
+/** A 400 names each bad field; a body that cannot be named by field (not an object, an unknown key) is a plain 400. */
+function refuseCriteria(...[body, issues]: Parameters<RequestRefusal>): ApiException {
+  return ApiException.badRequestWithFieldErrors(jobCriteriaFieldErrors(body, issues))
+}
 
 /**
  * `GET`/`PUT /v1/candidate-settings/job-criteria` (contract v1.13.0). The
@@ -24,9 +30,7 @@ export class JobCriteriaController {
   @Put()
   @UseGuards(JobCriteriaSaveLimitGuard)
   @Header("cache-control", "no-store")
-  update(@Body() body: unknown): Promise<JobCriteriaResponse> {
-    const parsed = jobCriteriaRequestSchema.safeParse(body)
-    if (!parsed.success) throw ApiException.badRequestWithFieldErrors(jobCriteriaFieldErrors(body, parsed.error.issues))
-    return this.service.save(parsed.data)
+  update(@ZodBody(jobCriteriaRequestSchema, refuseCriteria) criteria: JobCriteriaRequest): Promise<JobCriteriaResponse> {
+    return this.service.save(criteria)
   }
 }

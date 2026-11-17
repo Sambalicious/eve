@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 import { CandidateScope } from "../src/db/candidate-scope.js"
 import { TenantDatabase } from "../src/db/tenant-database.js"
-import { StackPostsController } from "../src/stack-posts/stack-posts.controller.js"
+import { VerificationBodyPipe } from "../src/stack-posts/stack-posts-request.js"
 import { StackPostsService } from "../src/stack-posts/stack-posts.service.js"
 import { StackPostsSummaryReader } from "../src/stack-posts/stack-posts-summary.js"
 import { Browser } from "./support/browser.js"
@@ -91,8 +91,7 @@ describe("Stack posts belong to one Candidate (EPIC-0002 A1, EPIC-0005 tables)",
     const saved = await CandidateScope.run(otherId, () => service.saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "Invitee basis." }))
     expect(saved.verification).toMatchObject({ verifiedOn: "2026-10-20", verificationBasis: "Invitee basis." })
     expect(saved.feeds.map((feed) => feed.id)).toEqual([OTHER_FEED])
-    const controller = app.get(StackPostsController)
-    await expect(CandidateScope.run(otherId, () => controller.saveVerification({ verifiedOn: "not-a-date" }, "application/json"))).rejects.toMatchObject({ code: "bad_request" })
+    await expect(CandidateScope.run(otherId, () => app.get(VerificationBodyPipe).transform({ verifiedOn: "not-a-date" }))).rejects.toMatchObject({ code: "bad_request" })
     expect(await database.db.selectFrom("alert_feed_candidate_verification").select(["candidate_id", "verification_basis"]).execute()).toEqual([{ candidate_id: otherId, verification_basis: "Invitee basis." }])
     expect(alertFeedsResponseSchema.parse((await owner.get(ALERT_FEEDS_PATH).expect(200)).body).verification).toBeNull()
   })

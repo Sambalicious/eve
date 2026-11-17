@@ -13,6 +13,12 @@ export type SessionLookup =
   | { kind: "missing" }
   | { kind: "expired" }
 
+/**
+ * A session ends this long after sign-in even when it is used every day, so a stolen cookie that
+ * keeps being used does not live forever. The Candidate signs in with Google again.
+ */
+export const SESSION_ABSOLUTE_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000
+
 @Injectable()
 export class SessionService {
   constructor(
@@ -36,14 +42,16 @@ export class SessionService {
   /**
    * Resolves the cookie to an active session and records the activity. A
    * session is valid while less than 14 days have passed since its last
-   * activity; at exactly 14 days it has expired and is deleted.
+   * activity; at exactly 14 days it has expired and is deleted. It also expires
+   * 30 days after sign-in whatever its activity.
    */
   async resume(sessionId: string | undefined): Promise<SessionLookup> {
     if (!sessionId) return { kind: "missing" }
     const now = this.clock.now()
     const cutoff = new Date(now.getTime() - SESSION_IDLE_TIMEOUT_MS)
     const idHash = hashToken(sessionId)
-    const stored = await this.sessions.touchIfActive(idHash, now, cutoff)
+    const createdAfter = new Date(now.getTime() - SESSION_ABSOLUTE_LIFETIME_MS)
+    const stored = await this.sessions.touchIfActive(idHash, now, cutoff, createdAfter)
     if (!stored) {
       await this.sessions.delete(idHash)
       return { kind: "expired" }

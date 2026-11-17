@@ -12,7 +12,7 @@ import { ConfigModule } from "../src/config/config.module.js"
 import { anthropicConfig } from "../src/config/env.js"
 import { DatabaseModule } from "../src/db/database.module.js"
 import { CLOCK, ClockModule } from "../src/shared/clock.js"
-import { SpendLedger } from "../src/spend/spend-ledger.js"
+import { SpendLedger, STALE_RESERVATION_MS } from "../src/spend/spend-ledger.js"
 import { DEFAULT_SPEND_CONFIG, type SpendConfig } from "../src/spend/spend-math.js"
 import { asOperator } from "./support/operator-scope.js"
 import { type TestDatabase, startMigratedDatabase } from "./support/postgres.js"
@@ -353,5 +353,61 @@ describe("form-agent caps (ADR 0008: USD 0.03 per attempt, USD 5 a month)", () =
       .execute()
     expect(await formStep()).toEqual({ ok: false, failure: "budget_exhausted" })
     expect(client.calls).toBe(0)
+  })
+})
+
+describe("a reservation that was never settled or released is reaped after six hours", () => {
+  const MONTH = "2026-10-01"
+  const stale = () => new Date(clock.now().getTime() - STALE_RESERVATION_MS - 60_000)
+  const fresh = () => new Date(clock.now().getTime() - 60_000)
+
+  /** One entry this month at a chosen status and creation time (reap fixtures). */
+  async function entry(status: "reserved" | "settled" | "released", createdAt: Date): Promise<string> {
+    await database.db.insertInto("spend_month").values({ month: MONTH, ceiling_micros: 50 * USD, raised_at: null, created_at: clock.now() }).onConflict((oc) => oc.column("month").doNothing()).execute()
+    const id = crypto.randomUUID()
+    await database.db
+      .insertInto("spend_entry")
+      .values({ id, month: MONTH, category: "ai", sub_budget: null, purpose: "fixture", status, reserved_micros: USD, actual_micros: status === "settled" ? USD : null, application_id: null, attempt_id: null, created_at: createdAt, settled_at: status === "reserved" ? null : createdAt })
+      .execute()
+    return id
+  }
+
+  async function row(id: string) {
+    return database.db.selectFrom("spend_entry").selectAll().where("id", "=", id).executeTakeFirstOrThrow()
+  }
+
+  it("releases a reservation older than the threshold, and it no longer counts toward the month", async () => {
+    const id = await entry("reserved", stale())
+    expect((await ledger.month()).spent).toBe(USD)
+    expect(await ledger.reapStale()).toBe(1)
+    expect(await row(id)).toMatchObject({ status: "released" })
+    expect((await row(id)).settled_at?.toISOString()).toBe(clock.now().toISOString())
+    expect((await ledger.month()).spent).toBe(0)
+  })
+
+  it("leaves a reservation younger than the threshold reserved, still counting", async () => {
+    const id = await entry("reserved", fresh())
+    expect(await ledger.reapStale()).toBe(0)
+    expect(await row(id)).toMatchObject({ status: "reserved", settled_at: null })
+    expect((await ledger.month()).spent).toBe(USD)
+  })
+
+  it("never touches a settled or released entry, however old", async () => {
+    const settled = await entry("settled", stale())
+    const released = await entry("released", stale())
+    expect(await ledger.reapStale()).toBe(0)
+    expect(await row(settled)).toMatchObject({ status: "settled" })
+    expect((await row(settled)).settled_at?.toISOString()).toBe(stale().toISOString())
+    expect(await row(released)).toMatchObject({ status: "released" })
+    expect((await row(released)).settled_at?.toISOString()).toBe(stale().toISOString())
+    expect((await ledger.month()).spent).toBe(USD)
+  })
+
+  it("returns how many it released, and none on the next tick", async () => {
+    await entry("reserved", stale())
+    await entry("reserved", stale())
+    await entry("reserved", fresh())
+    expect(await ledger.reapStale()).toBe(2)
+    expect(await ledger.reapStale()).toBe(0)
   })
 })
