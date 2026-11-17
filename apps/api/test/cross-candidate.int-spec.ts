@@ -23,6 +23,7 @@ import { JobCriteriaService } from "../src/job-criteria/job-criteria.service.js"
 import { HiringPostsController } from "../src/stack-posts/hiring-posts.controller.js"
 import { HiringPostsService } from "../src/stack-posts/hiring-posts.service.js"
 import { StackPostsController } from "../src/stack-posts/stack-posts.controller.js"
+import { VerificationBodyPipe } from "../src/stack-posts/stack-posts-request.js"
 import { StackPostsService } from "../src/stack-posts/stack-posts.service.js"
 import { Browser } from "./support/browser.js"
 import { insertCandidatePosting } from "./support/candidate-posting.js"
@@ -173,13 +174,13 @@ describe("cross-Candidate cases (B never reads or changes A's rows)", () => {
   it("PUT alert feed verification: writes only the caller's row; another Candidate's row, their registration gate and their reads are unchanged", async () => {
     await database.db.insertInto("alert_feed_candidate_verification").values({ candidate_id: database.operatorId, verified_on: "2026-10-19", verification_basis: "OWNER-STACK-BASIS", updated_at: clock.now() }).execute()
     const before = await database.db.selectFrom("alert_feed_candidate_verification").selectAll().where("candidate_id", "=", database.operatorId).executeTakeFirstOrThrow()
-    const theirs = alertFeedsResponseSchema.parse(await asOther(() => app.get(StackPostsController).saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "Invitee." }, "application/json")))
+    const theirs = alertFeedsResponseSchema.parse(await asOther(() => app.get(StackPostsController).saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "Invitee." })))
     expect(theirs.verification).toMatchObject({ verifiedOn: "2026-10-20", verificationBasis: "Invitee." })
     expect(JSON.stringify(theirs)).not.toContain("OWNER-")
     expect(await database.db.selectFrom("alert_feed_candidate_verification").selectAll().where("candidate_id", "=", database.operatorId).executeTakeFirstOrThrow()).toEqual(before)
     expect(await database.db.selectFrom("alert_feed_candidate_verification").select("candidate_id").orderBy("candidate_id").execute()).toHaveLength(2)
     // An unknown key (a candidateId aimed at A) is a plain 400 and writes nothing.
-    await expect(asOther(() => app.get(StackPostsController).saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "x", candidateId: database.operatorId }, "application/json"))).rejects.toMatchObject({ code: "bad_request" })
+    await expect(asOther(() => app.get(VerificationBodyPipe).transform({ verifiedOn: "2026-10-20", verificationBasis: "x", candidateId: database.operatorId }))).rejects.toMatchObject({ code: "bad_request" })
     expect(await database.db.selectFrom("alert_feed_candidate_verification").selectAll().where("candidate_id", "=", database.operatorId).executeTakeFirstOrThrow()).toEqual(before)
     // A's gate is unchanged: with 10 feeds A passes the record check and is refused at the limit, which comes before any fetch.
     const at = new Date("2026-10-20T09:00:00.000Z")
@@ -217,13 +218,13 @@ describe("cross-Candidate cases (B never reads or changes A's rows)", () => {
 
   it("PUT hiring feed verification: writes only the caller's row; another Candidate's row, their registration gate and their reads are unchanged", async () => {
     const before = await database.db.selectFrom("hiring_feed_verification").selectAll().where("candidate_id", "=", database.operatorId).executeTakeFirstOrThrow()
-    const theirs = hiringAlertFeedsResponseSchema.parse(await asOther(() => app.get(HiringPostsController).saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "Invitee basis." }, "application/json")))
+    const theirs = hiringAlertFeedsResponseSchema.parse(await asOther(() => app.get(HiringPostsController).saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "Invitee basis." })))
     expect(theirs.verification).toMatchObject({ verifiedOn: "2026-10-20", verificationBasis: "Invitee basis." })
     expect(JSON.stringify(theirs)).not.toContain("OWNER-")
     expect(await database.db.selectFrom("hiring_feed_verification").selectAll().where("candidate_id", "=", database.operatorId).executeTakeFirstOrThrow()).toEqual(before)
     expect(await database.db.selectFrom("hiring_feed_verification").select("candidate_id").orderBy("candidate_id").execute()).toHaveLength(2)
     // An unknown key (a candidateId aimed at A) is a plain 400 and writes nothing.
-    await expect(asOther(() => app.get(HiringPostsController).saveVerification({ verifiedOn: "2026-10-20", verificationBasis: "x", candidateId: database.operatorId }, "application/json"))).rejects.toMatchObject({ code: "bad_request" })
+    await expect(asOther(() => app.get(VerificationBodyPipe).transform({ verifiedOn: "2026-10-20", verificationBasis: "x", candidateId: database.operatorId }))).rejects.toMatchObject({ code: "bad_request" })
     expect(await database.db.selectFrom("hiring_feed_verification").selectAll().where("candidate_id", "=", database.operatorId).executeTakeFirstOrThrow()).toEqual(before)
     expect((await owner.get(HIRING_FEED_VERIFICATION_PATH.replace("/verification", "")).expect(200)).body.verification.verificationBasis).toBe("OWNER-BASIS-MARKER")
   })

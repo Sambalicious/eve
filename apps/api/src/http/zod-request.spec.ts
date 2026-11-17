@@ -9,7 +9,7 @@ import { z } from "zod"
 
 import { ApiException } from "./api-exception.js"
 import { parseRequest } from "./parse-body.js"
-import { ZodBody, ZodQuery, ZodRequestPipe } from "./zod-request.js"
+import { ParseRequestPipe, ParsedBody, ParsedQuery, ZodBody, ZodQuery, ZodRequestPipe } from "./zod-request.js"
 
 const schema = z.object({ enabled: z.boolean() }).strict()
 
@@ -42,6 +42,19 @@ describe("ZodRequestPipe", () => {
     expect(fromPipe.fieldErrors).toEqual(fromParse.fieldErrors)
   })
 
+  it("throws what `refuse` builds from the raw value and the issues", async () => {
+    const seen: unknown[] = []
+    const pipe = new ZodRequestPipe(schema, (value, issues) => {
+      seen.push(value, issues.length)
+      return ApiException.badRequestWithFieldErrors([{ field: "page", position: null, problem: "invalid" }])
+    })
+    const refused = await refusal(() => pipe.transform({ enabled: "yes" }))
+    expect(refused.getStatus()).toBe(400)
+    expect(refused.fieldErrors).toEqual([{ field: "page", position: null, problem: "invalid" }])
+    expect(seen).toEqual([{ enabled: "yes" }, 1])
+    expect(await pipe.transform({ enabled: false })).toEqual({ enabled: false })
+  })
+
   it("registers the pipe on the handler parameter", () => {
     class Probe {
       body(): void {}
@@ -54,6 +67,36 @@ describe("ZodRequestPipe", () => {
     const queryArgs = Reflect.getMetadata("__routeArguments__", Probe, "query") as Record<string, { pipes: unknown[]; data: unknown }>
     expect(Object.values(queryArgs)[0]?.data).toBe("view")
     expect(Object.values(queryArgs)[0]?.pipes[0]).toBeInstanceOf(ZodRequestPipe)
+  })
+})
+
+describe("ParseRequestPipe", () => {
+  it("returns what parse returns, including for an absent value", async () => {
+    expect(await new ParseRequestPipe((value) => (value === undefined ? 1 : Number(value))).transform(undefined)).toBe(1)
+    expect(await new ParseRequestPipe((value) => Number(value)).transform("4")).toBe(4)
+  })
+
+  it("throws what parse throws", async () => {
+    const refused = await refusal(() =>
+      new ParseRequestPipe(() => {
+        throw new ApiException("not_found")
+      }).transform({})
+    )
+    expect(refused.code).toBe("not_found")
+  })
+
+  it("registers on the handler parameter", () => {
+    class Probe {
+      body(): void {}
+      query(): void {}
+    }
+    ParsedBody((value) => value)(Probe.prototype, "body", 0)
+    ParsedQuery("page", (value) => value)(Probe.prototype, "query", 0)
+    const bodyArgs = Reflect.getMetadata("__routeArguments__", Probe, "body") as Record<string, { pipes: unknown[] }>
+    expect(Object.values(bodyArgs)[0]?.pipes[0]).toBeInstanceOf(ParseRequestPipe)
+    const queryArgs = Reflect.getMetadata("__routeArguments__", Probe, "query") as Record<string, { pipes: unknown[]; data: unknown }>
+    expect(Object.values(queryArgs)[0]?.data).toBe("page")
+    expect(Object.values(queryArgs)[0]?.pipes[0]).toBeInstanceOf(ParseRequestPipe)
   })
 })
 
@@ -72,12 +115,6 @@ const RAW_INPUT_ALLOWED: Record<string, string> = {
   "preferences/preferences.controller.ts#PreferencesController.read": "this GET takes no query parameter; any one is refused",
   "preferences/preferences.controller.ts#PreferencesController.save": "bounds, shape and per-field errors come from parseSaveBody",
   "preferences/preferences.controller.ts#PreferencesController.versions": "the query is defaulted from an absent object before parsing",
-  "stack-posts/hiring-posts.controller.ts#HiringPostsController.posts": "page parsing answers a bad_request carrying a page field error",
-  "stack-posts/hiring-posts.controller.ts#HiringPostsController.register": "JSON content type is checked first and a 400 carries registration field errors",
-  "stack-posts/hiring-posts.controller.ts#HiringPostsController.saveVerification": "JSON content type is checked first and a 400 carries every field error",
-  "stack-posts/stack-posts.controller.ts#StackPostsController.posts": "page parsing answers a bad_request carrying a page field error",
-  "stack-posts/stack-posts.controller.ts#StackPostsController.register": "JSON content type is checked first and a 400 carries registration field errors",
-  "stack-posts/stack-posts.controller.ts#StackPostsController.saveVerification": "JSON content type is checked first and a 400 carries every field error",
   "outreach/outreach.controller.ts#OutreachController.setReaderName": "the kind (a slug, not a UUID) is checked before the body, and a body pipe would run first",
 }
 
@@ -89,7 +126,10 @@ function controllerFiles(dir: string): string[] {
   })
 }
 
-/** `file#Class.method` for every handler parameter decorated with a bare `@Body` or `@Query`. */
+/**
+ * `file#Class.method` for every handler parameter decorated with `@Body` or `@Query` and no pipe: bare, or given
+ * only the parameter name. `@Body(SomePipe)` passes a pipe argument, so it is validated and not listed.
+ */
 function rawInputHandlers(): string[] {
   const found: string[] = []
   for (const path of controllerFiles(SRC)) {
@@ -100,7 +140,8 @@ function rawInputHandlers(): string[] {
           for (const decorator of ts.getDecorators(parameter) ?? []) {
             const call = decorator.expression
             const name = ts.isCallExpression(call) && ts.isIdentifier(call.expression) ? call.expression.text : undefined
-            if (name === "Body" || name === "Query") found.push(`${relative(SRC, path)}#${node.parent.name.text}.${node.name.getText(file)}`)
+            const piped = ts.isCallExpression(call) && call.arguments.some((argument) => !ts.isStringLiteralLike(argument))
+            if ((name === "Body" || name === "Query") && !piped) found.push(`${relative(SRC, path)}#${node.parent.name.text}.${node.name.getText(file)}`)
           }
         }
       }
