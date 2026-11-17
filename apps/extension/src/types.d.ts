@@ -111,6 +111,17 @@ interface EveBridgeApi {
   download(applicationId: string, document: EveDocumentKind): Promise<EveBridgeDownloadResult>
 }
 
+/**
+ * The two APIs the injected scripts install on their tab's global: `page.ts`
+ * sets `__evePage` in the employer's tab, `eve-bridge.ts` sets `__eveBridge` in
+ * Eve's. Declared once here so `globalThis.__evePage` is typed everywhere with no
+ * cast. They are not shared functions on purpose: `chrome.scripting.executeScript`
+ * serializes the `func` it is given, so a helper from the background's scope
+ * would not exist in the tab. An injected func must name only `globalThis`.
+ */
+declare var __evePage: EvePageApi | undefined
+declare var __eveBridge: EveBridgeApi | undefined
+
 /** The popup's first request: read the page and ask Eve what it would type, without typing anything. */
 type EveFillPlanRequest = { type: "FILL_PLAN" }
 

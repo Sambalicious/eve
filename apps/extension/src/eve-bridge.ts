@@ -193,6 +193,5 @@ void (() => {
     }
   }
 
-  const host = globalThis as unknown as { __eveBridge?: EveBridgeApi }
-  host.__eveBridge = { fill, download }
+  globalThis.__eveBridge = { fill, download }
 })()
