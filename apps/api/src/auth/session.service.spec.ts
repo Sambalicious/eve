@@ -18,7 +18,8 @@ describe("SessionService.resume", () => {
     expect(touchIfActive).toHaveBeenCalledWith(
       hashToken("raw-id"),
       new Date("2026-10-15T08:00:00Z"),
-      new Date("2026-10-01T08:00:00Z")
+      new Date("2026-10-01T08:00:00Z"),
+      new Date("2026-09-15T08:00:00Z")
     )
   })
 

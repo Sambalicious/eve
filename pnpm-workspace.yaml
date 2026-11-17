@@ -7,3 +7,11 @@ packages:
 # version notices; each has a pure-JS or prebuilt-binary fallback. CI also passes --ignore-scripts.
 # Add a package here only after confirming it fails without its script.
 onlyBuiltDependencies: []
+
+# pnpm audit (CI gate: --prod --audit-level=high) ignores only this advisory: a picomatch
+# ReDoS (<=4.0.7) reached through @mastra/core, with no patched version published yet.
+# Matching runs on our own fixed patterns, not user input. Remove the entry once a patch
+# ships and the lockfile resolves it; any other high advisory still fails CI.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf

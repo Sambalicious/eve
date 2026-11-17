@@ -9,7 +9,7 @@ import { z } from "zod"
 
 import { ApiException } from "./api-exception.js"
 import { parseRequest } from "./parse-body.js"
-import { ZodBody, ZodQuery, ZodRequestPipe } from "./zod-request.js"
+import { ParseRequestPipe, ParsedBody, ParsedQuery, ZodBody, ZodQuery, ZodRequestPipe } from "./zod-request.js"
 
 const schema = z.object({ enabled: z.boolean() }).strict()
 
@@ -42,6 +42,19 @@ describe("ZodRequestPipe", () => {
     expect(fromPipe.fieldErrors).toEqual(fromParse.fieldErrors)
   })
 
+  it("throws what `refuse` builds from the raw value and the issues", async () => {
+    const seen: unknown[] = []
+    const pipe = new ZodRequestPipe(schema, (value, issues) => {
+      seen.push(value, issues.length)
+      return ApiException.badRequestWithFieldErrors([{ field: "page", position: null, problem: "invalid" }])
+    })
+    const refused = await refusal(() => pipe.transform({ enabled: "yes" }))
+    expect(refused.getStatus()).toBe(400)
+    expect(refused.fieldErrors).toEqual([{ field: "page", position: null, problem: "invalid" }])
+    expect(seen).toEqual([{ enabled: "yes" }, 1])
+    expect(await pipe.transform({ enabled: false })).toEqual({ enabled: false })
+  })
+
   it("registers the pipe on the handler parameter", () => {
     class Probe {
       body(): void {}
@@ -57,28 +70,47 @@ describe("ZodRequestPipe", () => {
   })
 })
 
+describe("ParseRequestPipe", () => {
+  it("returns what parse returns, including for an absent value", async () => {
+    expect(await new ParseRequestPipe((value) => (value === undefined ? 1 : Number(value))).transform(undefined)).toBe(1)
+    expect(await new ParseRequestPipe((value) => Number(value)).transform("4")).toBe(4)
+  })
+
+  it("throws what parse throws", async () => {
+    const refused = await refusal(() =>
+      new ParseRequestPipe(() => {
+        throw new ApiException("not_found")
+      }).transform({})
+    )
+    expect(refused.code).toBe("not_found")
+  })
+
+  it("registers on the handler parameter", () => {
+    class Probe {
+      body(): void {}
+      query(): void {}
+    }
+    ParsedBody((value) => value)(Probe.prototype, "body", 0)
+    ParsedQuery("page", (value) => value)(Probe.prototype, "query", 0)
+    const bodyArgs = Reflect.getMetadata("__routeArguments__", Probe, "body") as Record<string, { pipes: unknown[] }>
+    expect(Object.values(bodyArgs)[0]?.pipes[0]).toBeInstanceOf(ParseRequestPipe)
+    const queryArgs = Reflect.getMetadata("__routeArguments__", Probe, "query") as Record<string, { pipes: unknown[]; data: unknown }>
+    expect(Object.values(queryArgs)[0]?.data).toBe("page")
+    expect(Object.values(queryArgs)[0]?.pipes[0]).toBeInstanceOf(ParseRequestPipe)
+  })
+})
+
 /**
- * Every handler input goes through a contract schema (`@ZodBody` / `@ZodQuery`), so an invalid
- * request answers the one `bad_request` envelope. A handler may take a raw `@Body()` or `@Query()`
- * only when it validates by a rule `parseRequest` cannot express; each is listed here with the reason.
+ * Every handler input goes through a request pipe: a contract schema (`@ZodBody` / `@ZodQuery`, with a refusal
+ * where the 400 names the bad fields) or a parser (`@ParsedBody` / `@ParsedQuery`), so an invalid request answers
+ * the one `bad_request` envelope, or the route's own field-error form of it. A handler may take a raw `@Body()` or
+ * `@Query()` only when it has nothing to refuse; each is listed here with the reason.
  */
 const SRC = fileURLToPath(new URL("../", import.meta.url))
 
 const RAW_INPUT_ALLOWED: Record<string, string> = {
-  "access-request/access-request.controller.ts#AccessRequestController.create": "the service maps a bad body to access_request_invalid field codes, on a public route",
-  "auth/auth.controller.ts#AuthController.start": "`next` is an opaque redirect target the sign-in service sanitises; a bad one falls back, never a 400",
-  "documents/documents.controller.ts#ApplicationsController.list": "an unknown or repeated `retention` value is ignored (full list), by design (D-E11)",
-  "job-criteria/job-criteria.controller.ts#JobCriteriaController.update": "a 400 carries per-field errors built from the raw body",
-  "preferences/preferences.controller.ts#PreferencesController.read": "this GET takes no query parameter; any one is refused",
-  "preferences/preferences.controller.ts#PreferencesController.save": "bounds, shape and per-field errors come from parseSaveBody",
-  "preferences/preferences.controller.ts#PreferencesController.versions": "the query is defaulted from an absent object before parsing",
-  "stack-posts/hiring-posts.controller.ts#HiringPostsController.posts": "page parsing answers a bad_request carrying a page field error",
-  "stack-posts/hiring-posts.controller.ts#HiringPostsController.register": "JSON content type is checked first and a 400 carries registration field errors",
-  "stack-posts/hiring-posts.controller.ts#HiringPostsController.saveVerification": "JSON content type is checked first and a 400 carries every field error",
-  "stack-posts/stack-posts.controller.ts#StackPostsController.posts": "page parsing answers a bad_request carrying a page field error",
-  "stack-posts/stack-posts.controller.ts#StackPostsController.register": "JSON content type is checked first and a 400 carries registration field errors",
-  "stack-posts/stack-posts.controller.ts#StackPostsController.saveVerification": "JSON content type is checked first and a 400 carries every field error",
-  "outreach/outreach.controller.ts#OutreachController.setReaderName": "the kind (a slug, not a UUID) is checked before the body, and a body pipe would run first",
+  "auth/auth.controller.ts#AuthController.start": "`next` is an opaque redirect target the sign-in service sanitises and falls back from, so it has no invalid form and never answers a 400; a pipe would only wrap that call and move the sign-in rule out of the service",
+  "documents/documents.controller.ts#ApplicationsController.list": "`retention` never refuses: an unknown, empty or repeated value is ignored (full list), by design (D-E11), so a pipe would be a safeParse that swallows its failure",
 }
 
 function controllerFiles(dir: string): string[] {
@@ -89,7 +121,10 @@ function controllerFiles(dir: string): string[] {
   })
 }
 
-/** `file#Class.method` for every handler parameter decorated with a bare `@Body` or `@Query`. */
+/**
+ * `file#Class.method` for every handler parameter decorated with `@Body` or `@Query` and no pipe: bare, or given
+ * only the parameter name. `@Body(SomePipe)` passes a pipe argument, so it is validated and not listed.
+ */
 function rawInputHandlers(): string[] {
   const found: string[] = []
   for (const path of controllerFiles(SRC)) {
@@ -100,7 +135,8 @@ function rawInputHandlers(): string[] {
           for (const decorator of ts.getDecorators(parameter) ?? []) {
             const call = decorator.expression
             const name = ts.isCallExpression(call) && ts.isIdentifier(call.expression) ? call.expression.text : undefined
-            if (name === "Body" || name === "Query") found.push(`${relative(SRC, path)}#${node.parent.name.text}.${node.name.getText(file)}`)
+            const piped = ts.isCallExpression(call) && call.arguments.some((argument) => !ts.isStringLiteralLike(argument))
+            if ((name === "Body" || name === "Query") && !piped) found.push(`${relative(SRC, path)}#${node.parent.name.text}.${node.name.getText(file)}`)
           }
         }
       }

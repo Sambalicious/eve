@@ -69,13 +69,14 @@ describe("Private dashboard: session idle expiry", () => {
       await browser.getSession(sessionCookie).expect(401)
     })
 
+    // Idle time counts from the last activity; the 30-day absolute lifetime is the separate rule below.
     it("counts from the last activity, not from sign-in", async () => {
       const sessionCookie = await signInLastActiveAt(LAST_ACTIVE)
       clock.set("2026-10-14T09:00:00+01:00")
       await browser.getSession(sessionCookie).expect(200)
       clock.set("2026-10-28T08:59:59+01:00")
       await browser.getSession(sessionCookie).expect(200)
-      clock.set("2026-11-11T08:59:58+01:00")
+      clock.set("2026-10-30T08:59:58+01:00")
       await browser.getSession(sessionCookie).expect(200)
     })
   })
@@ -100,6 +101,21 @@ describe("Private dashboard: session idle expiry", () => {
     // The web app sends the Candidate to /sign-in?next=/blocked&reason=expired; sign-in returns there.
     const { location } = await browser.signIn(candidate, "/blocked")
     expect(location).toBe(`${PUBLIC_ORIGIN}/blocked`)
+  })
+
+  // Audit finding 2: a session used every few days still ends 30 days after sign-in.
+  it("ends 30 days after sign-in even when it is used inside the idle window", async () => {
+    const sessionCookie = await signInLastActiveAt(LAST_ACTIVE)
+    for (const day of ["2026-10-11", "2026-10-21", "2026-10-30"]) {
+      clock.set(`${day}T09:00:00+01:00`)
+      await browser.getSession(sessionCookie).expect(200)
+    }
+    clock.set("2026-10-31T08:59:59+01:00")
+    await browser.getSession(sessionCookie).expect(200)
+    clock.set("2026-10-31T09:00:01+01:00")
+    const response = await browser.getSession(sessionCookie).expect(401)
+    expect(response.body.error.code).toBe("session_expired")
+    expect(await database.db.selectFrom("dashboard_session").selectAll().execute()).toHaveLength(0)
   })
 
   // A revoked or deleting Candidate must lose access on the next request, not at idle expiry.

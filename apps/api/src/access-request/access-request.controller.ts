@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Header, HttpCode, HttpStatus, Post, Req } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, HttpStatus, Post, Req } from "@nestjs/common"
 import { ACCESS_REQUEST_PATH, ACCESS_REQUEST_PROOF_PATH, type AccessRequestAccepted, type AccessRequestProof } from "@eve/contracts"
 import type { FastifyRequest } from "fastify"
 
 import { Public, PublicWrite } from "../auth/public.decorator.js"
+import { ParsedBody } from "../http/zod-request.js"
+import { type AcceptedAccessRequest, accessRequestOrRefuse } from "./access-request-request.js"
 import { AccessRequestService } from "./access-request.service.js"
 
 const RECEIVED: AccessRequestAccepted = Object.freeze({ status: "received" })
@@ -27,7 +29,7 @@ export class AccessRequestController {
   @PublicWrite()
   @HttpCode(HttpStatus.ACCEPTED)
   @Header("cache-control", "no-store")
-  async create(@Body() body: unknown, @Req() request: FastifyRequest): Promise<AccessRequestAccepted> {
+  async create(@ParsedBody(accessRequestOrRefuse) body: AcceptedAccessRequest, @Req() request: FastifyRequest): Promise<AccessRequestAccepted> {
     await this.service.submit(body, request.ip)
     return RECEIVED
   }
