@@ -1,19 +1,16 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Post } from "@nestjs/common"
+import { Controller, Delete, Get, Header, HttpCode, Patch, Post } from "@nestjs/common"
 import {
   type ApprovedAnswer,
   type ApprovedAnswersResponse,
   type CreateApprovedAnswerRequest,
+  type UpdateApprovedAnswerRequest,
   createApprovedAnswerRequestSchema,
   updateApprovedAnswerRequestSchema,
 } from "@eve/contracts"
-import { z } from "zod"
 
-import { ApiException } from "../http/api-exception.js"
-import { parseRequest } from "../http/parse-body.js"
+import { UuidParam } from "../http/uuid-param.js"
 import { ZodBody } from "../http/zod-request.js"
 import { ApprovedAnswersService } from "./approved-answers.service.js"
-
-const answerIdSchema = z.uuid()
 
 @Controller("v1/approved-answers")
 export class ApprovedAnswersController {
@@ -33,20 +30,13 @@ export class ApprovedAnswersController {
 
   @Patch(":id")
   @Header("cache-control", "no-store")
-  update(@Param("id") id: string, @Body() body: unknown): Promise<ApprovedAnswer> {
-    return this.service.update(answerId(id), parseRequest(updateApprovedAnswerRequestSchema, body).value)
+  update(@UuidParam("id", "not_found") id: string, @ZodBody(updateApprovedAnswerRequestSchema) body: UpdateApprovedAnswerRequest): Promise<ApprovedAnswer> {
+    return this.service.update(id, body.value)
   }
 
   @Delete(":id")
   @HttpCode(204)
-  delete(@Param("id") id: string): Promise<void> {
-    return this.service.delete(answerId(id))
+  delete(@UuidParam("id", "not_found") id: string): Promise<void> {
+    return this.service.delete(id)
   }
-}
-
-/** A malformed id names no answer: 404, the same as an unknown one. */
-function answerId(raw: string): string {
-  const result = answerIdSchema.safeParse(raw)
-  if (!result.success) throw new ApiException("not_found")
-  return result.data
 }

@@ -3,7 +3,8 @@ import { type OutreachItem, type OutreachResponse, readerNameRequestSchema } fro
 
 import { CandidateScope } from "../db/candidate-scope.js"
 import { parseRequest } from "../http/parse-body.js"
-import { outreachKind, outreachUuid } from "./outreach-path.js"
+import { UuidParam } from "../http/uuid-param.js"
+import { outreachKind } from "./outreach-path.js"
 import { OutreachService } from "./outreach.service.js"
 
 /**
@@ -33,30 +34,29 @@ export class OutreachController {
 
   @Get(":id/outreach")
   @Header("cache-control", "no-store")
-  read(@Param("id") id: string): Promise<OutreachResponse> {
+  read(@UuidParam("id", "not_found") id: string): Promise<OutreachResponse> {
     // The explicit scope is the session's Candidate; the service opens one transaction per read.
-    return this.service.read(CandidateScope.require(), outreachUuid(id))
+    return this.service.read(CandidateScope.require(), id)
   }
 
   /** 202: the Run runs in the background. A second request while one is in flight returns the same item and starts nothing. */
   @Post(":id/outreach/:kind/write")
   @HttpCode(202)
   @Header("cache-control", "no-store")
-  write(@Param("id") id: string, @Param("kind") kind: string): Promise<OutreachItem> {
-    return this.service.startWrite(outreachUuid(id), outreachKind(kind))
+  write(@UuidParam("id", "not_found") id: string, @Param("kind") kind: string): Promise<OutreachItem> {
+    return this.service.startWrite(id, outreachKind(kind))
   }
 
   @Put(":id/outreach/:kind/reader-name")
   @Header("cache-control", "no-store")
-  setReaderName(@Param("id") id: string, @Param("kind") kind: string, @Body() body: unknown): Promise<OutreachItem> {
-    // The path is read before the body (section 2, step 3 before step 4), so a malformed id or an unknown
+  setReaderName(@UuidParam("id", "not_found") id: string, @Param("kind") kind: string, @Body() body: unknown): Promise<OutreachItem> {
+    // The path is read before the body (section 2, step 3 before step 4): the id by its pipe, the kind here, so a malformed id or an unknown
     // kind answers `404 not_found` even when the body is malformed too, rather than relying on the body's 400.
     // CR-6: Fastify parses the body before this handler, so the pre-body gate resolves the same path (and the
     // Application 404) first; this order still holds for anything the gate lets through.
-    const applicationId = outreachUuid(id)
     const parsedKind = outreachKind(kind)
     // A malformed body, a non-object, a missing key, an unknown extra key or a non-string is `400 bad_request`.
     const request = parseRequest(readerNameRequestSchema, body)
-    return this.service.setReaderName(applicationId, parsedKind, request.readerName)
+    return this.service.setReaderName(id, parsedKind, request.readerName)
   }
 }

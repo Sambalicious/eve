@@ -1,4 +1,4 @@
-import { Controller, Get, Header, HttpCode, Param, Post, Put, Res } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Param, Post, Put, Res, type PipeTransform } from "@nestjs/common"
 import {
   type CheckAgainResponse,
   type EligibilitySettings,
@@ -17,9 +17,18 @@ import type { FastifyReply } from "fastify"
 import { z } from "zod"
 
 import { ApiException } from "../http/api-exception.js"
+import { UuidParam } from "../http/uuid-param.js"
 import { ZodBody, ZodQuery } from "../http/zod-request.js"
 import { DiscoveryService } from "./discovery.service.js"
 import { OperatorOnly } from "../auth/operator-only.guard.js"
+
+/** An unknown board key is `404 not_found`, checked before the body like the path ids. */
+const boardKeyPipe: PipeTransform<string, string> = {
+  transform(key) {
+    if (!remoteBoardKeySchema.safeParse(key).success) throw new ApiException("not_found")
+    return key
+  },
+}
 
 /** `null`, `[]` and `"x"` are bodies and are refused; only an absent body counts as `{}`. */
 const checkAgainBodySchema = checkAgainRequestSchema.default({})
@@ -46,15 +55,15 @@ export class JobSourcesController {
   @OperatorOnly()
   @Put("remote-boards/:key/verification")
   @Header("cache-control", "no-store")
-  verify(@Param("key") key: string, @ZodBody(verifyJobSourceRequestSchema) body: z.output<typeof verifyJobSourceRequestSchema>): Promise<JobSourcesResponse> {
-    return this.service.verifyRemoteBoard(boardKey(key), body)
+  verify(@Param("key", boardKeyPipe) key: string, @ZodBody(verifyJobSourceRequestSchema) body: z.output<typeof verifyJobSourceRequestSchema>): Promise<JobSourcesResponse> {
+    return this.service.verifyRemoteBoard(key, body)
   }
 
   @OperatorOnly()
   @Put("remote-boards/:key/enabled")
   @Header("cache-control", "no-store")
-  setEnabled(@Param("key") key: string, @ZodBody(setJobSourceEnabledRequestSchema) body: z.output<typeof setJobSourceEnabledRequestSchema>): Promise<JobSourcesResponse> {
-    return this.service.setRemoteBoardEnabled(boardKey(key), body.enabled)
+  setEnabled(@Param("key", boardKeyPipe) key: string, @ZodBody(setJobSourceEnabledRequestSchema) body: z.output<typeof setJobSourceEnabledRequestSchema>): Promise<JobSourcesResponse> {
+    return this.service.setRemoteBoardEnabled(key, body.enabled)
   }
 }
 
@@ -83,8 +92,7 @@ export class JobPostingsController {
 
   @Get(":id")
   @Header("cache-control", "no-store")
-  read(@Param("id") id: string): Promise<JobPostingDetail> {
-    if (!z.uuid().safeParse(id).success) throw new ApiException("not_found")
+  read(@UuidParam("id", "not_found") id: string): Promise<JobPostingDetail> {
     return this.service.posting(id)
   }
 
@@ -117,7 +125,3 @@ export class EligibilitySettingsController {
   }
 }
 
-function boardKey(key: string): string {
-  if (!remoteBoardKeySchema.safeParse(key).success) throw new ApiException("not_found")
-  return key
-}

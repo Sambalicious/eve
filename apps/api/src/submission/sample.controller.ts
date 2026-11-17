@@ -1,8 +1,9 @@
-import { Controller, Get, Header, HttpCode, Param, Post } from "@nestjs/common"
+import { Controller, Get, Header, HttpCode, Post } from "@nestjs/common"
 import { type FormAnswersResponse, type PrepareSamplesResult, type SamplesResponse, type SubmissionSummary, sampleStateSchema } from "@eve/contracts"
-import { z } from "zod"
 
-import { ApiException } from "../http/api-exception.js"
+import type { z } from "zod"
+
+import { UuidParam } from "../http/uuid-param.js"
 import { ZodQuery } from "../http/zod-request.js"
 import { SampleService } from "./sample.service.js"
 import { ConvertedFeature } from "../auth/converted-feature.guard.js"
@@ -37,8 +38,7 @@ export class SampleController {
   @ConvertedFeature("submission")
   @Get("applications/:id/form-answers")
   @Header("cache-control", "no-store")
-  formAnswers(@Param("id") id: string): Promise<FormAnswersResponse> {
-    if (!z.uuid().safeParse(id).success) throw new ApiException("not_found")
+  formAnswers(@UuidParam("id", "not_found") id: string): Promise<FormAnswersResponse> {
     return this.service.formAnswers(id)
   }
 }

@@ -78,14 +78,7 @@ const RAW_INPUT_ALLOWED: Record<string, string> = {
   "stack-posts/stack-posts.controller.ts#StackPostsController.posts": "page parsing answers a bad_request carrying a page field error",
   "stack-posts/stack-posts.controller.ts#StackPostsController.register": "JSON content type is checked first and a 400 carries registration field errors",
   "stack-posts/stack-posts.controller.ts#StackPostsController.saveVerification": "JSON content type is checked first and a 400 carries every field error",
-  // Path id and body are checked in that order (404 before 400); a body pipe would reorder them. Moves to UuidParam next.
-  "answers/approved-answers.controller.ts#ApprovedAnswersController.update": "id is checked before the body",
-  "outreach/outreach.controller.ts#OutreachController.setReaderName": "id and kind are checked before the body",
-  "records/records.controller.ts#RecordsController.edit": "id is checked before the body",
-  "records/records.controller.ts#RecordsController.record": "id is checked before the body",
-  "submission/submission.controller.ts#SubmissionController.declineSameCompany": "id is checked before the body",
-  "submission/submission.controller.ts#SubmissionController.rejectSample": "id is checked before the body",
-  "submission/submission.controller.ts#SubmissionController.removeFromQueue": "id is checked before the body",
+  "outreach/outreach.controller.ts#OutreachController.setReaderName": "the kind (a slug, not a UUID) is checked before the body, and a body pipe would run first",
 }
 
 function controllerFiles(dir: string): string[] {
