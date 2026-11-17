@@ -1,0 +1,11 @@
+# TEST/DEV ONLY. Mounted by docker/test/compose.submission-test.yml, never by the
+# production docker-compose.yml. The fake ATS sits on a Docker network with a
+# private (RFC 1918) address, so those ranges are left out here. Loopback,
+# link-local (cloud metadata), CGNAT, "this network" and the IPv6 ranges stay denied.
+127.0.0.0/8
+169.254.0.0/16
+100.64.0.0/10
+0.0.0.0/8
+::1/128
+fc00::/7
+fe80::/10

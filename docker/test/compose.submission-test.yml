@@ -37,6 +37,10 @@ services:
           - collect.fixture.test
 
   egress:
+    # Relaxed private-address deny (fake ATS lives on a private Docker address). Production
+    # compose never references this file.
+    volumes:
+      - ./docker/egress/deny-private-dst.test.txt:/etc/squid/deny-private-dst.txt:ro
     depends_on:
       fake-ats:
         condition: service_started

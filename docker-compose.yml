@@ -262,6 +262,7 @@ services:
     volumes:
       - ./docker/egress/squid.conf:/etc/squid/squid.conf:ro
       - ./docker/egress/allowlist-helper.pl:/etc/squid/allowlist-helper.pl:ro
+      - ./docker/egress/deny-private-dst.txt:/etc/squid/deny-private-dst.txt:ro
       - egress-allowlist:/etc/squid/allow:ro
     # SEC-505: the entrypoint starts as root and Squid drops to `proxy` (uid 13),
     # which needs SETUID/SETGID; nothing else. Writable paths are tmpfs only.
