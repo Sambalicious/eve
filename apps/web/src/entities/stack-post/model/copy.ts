@@ -20,7 +20,6 @@ export const stackPostsCopy = {
   /** C-SP-NEWTAB. */
   newTab: NEW_TAB,
 
-  // Search links
   /** C-SP-LINKS-TITLE. */
   linksTitle: "Search links",
   /** C-SP-LINKS-DESC. */
@@ -59,7 +58,6 @@ export const stackPostsCopy = {
   linksEmptyBody: "Search links are built from the Frameworks and Technologies in your job criteria.",
   linksEmptyAction: "Add job criteria",
 
-  // Alert feeds: section and verification
   /** C-SP-FEEDS-SEC-TITLE. */
   feedsSectionTitle: "Alert feeds",
   /** C-SP-FEEDS-DESC. */
@@ -114,7 +112,6 @@ export const stackPostsCopy = {
   /** C-SP-VERIFY-ERR-NET. */
   verifyErrNet: "Couldn't save your confirmation. Nothing changed. Try again.",
 
-  // Alert feeds: list, form and removal
   /** C-SP-FEEDS-TITLE, C-SP-FEEDS-COUNT. */
   feedsTitle: "Your feeds",
   feedsCount: (n: number) => `${n} of ${ALERT_FEED_LIMIT}`,
@@ -176,7 +173,6 @@ export const stackPostsCopy = {
   removeDone: "Alert feed removed.",
   removeErrNet: "Couldn't remove the Alert feed. Eve still reads it. Try again.",
 
-  // Posts
   /** C-SP-POSTS-TITLE, C-SP-POSTS-DESC. */
   postsTitle: "Posts",
   postsDesc: "LinkedIn posts and articles from your Alert feeds, newest first.",
