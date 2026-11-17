@@ -82,7 +82,9 @@ export function extendedProtocolForScopes<P extends object>(pool: P): P {
     const release = client.release
     client.release = (...releaseArgs: unknown[]) => {
       marked.delete(client)
-      if (releaseArgs[0] !== undefined) return release.apply(client, releaseArgs)
+      // pg treats a truthy first argument as "destroy this client"; kysely >= 0.29.9 passes an explicit
+      // `false` on a normal release, which must still be reset with DISCARD ALL.
+      if (releaseArgs[0]) return release.apply(client, releaseArgs)
       void resetThenRelease(client, release)
       return undefined
     }
