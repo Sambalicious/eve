@@ -101,16 +101,16 @@ describe("ParseRequestPipe", () => {
 })
 
 /**
- * Every handler input goes through a contract schema (`@ZodBody` / `@ZodQuery`), so an invalid
- * request answers the one `bad_request` envelope. A handler may take a raw `@Body()` or `@Query()`
- * only when it validates by a rule `parseRequest` cannot express; each is listed here with the reason.
+ * Every handler input goes through a request pipe: a contract schema (`@ZodBody` / `@ZodQuery`, with a refusal
+ * where the 400 names the bad fields) or a parser (`@ParsedBody` / `@ParsedQuery`), so an invalid request answers
+ * the one `bad_request` envelope, or the route's own field-error form of it. A handler may take a raw `@Body()` or
+ * `@Query()` only when it has nothing to refuse; each is listed here with the reason.
  */
 const SRC = fileURLToPath(new URL("../", import.meta.url))
 
 const RAW_INPUT_ALLOWED: Record<string, string> = {
-  "auth/auth.controller.ts#AuthController.start": "`next` is an opaque redirect target the sign-in service sanitises; a bad one falls back, never a 400",
-  "documents/documents.controller.ts#ApplicationsController.list": "an unknown or repeated `retention` value is ignored (full list), by design (D-E11)",
-  "outreach/outreach.controller.ts#OutreachController.setReaderName": "the kind (a slug, not a UUID) is checked before the body, and a body pipe would run first",
+  "auth/auth.controller.ts#AuthController.start": "`next` is an opaque redirect target the sign-in service sanitises and falls back from, so it has no invalid form and never answers a 400; a pipe would only wrap that call and move the sign-in rule out of the service",
+  "documents/documents.controller.ts#ApplicationsController.list": "`retention` never refuses: an unknown, empty or repeated value is ignored (full list), by design (D-E11), so a pipe would be a safeParse that swallows its failure",
 }
 
 function controllerFiles(dir: string): string[] {
