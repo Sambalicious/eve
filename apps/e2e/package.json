@@ -12,15 +12,15 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.1",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
-    "eslint": "^10.13.0",
-    "globals": "^17.13.0",
-    "msw": "^3.0.3",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
+    "msw": "^3.0.5",
     "pg": "^8.23.1",
     "pg-connection-string": "^2.14.1",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.71.2"
+    "typescript-eslint": "^8.72.2"
   }
 }
