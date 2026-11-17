@@ -78,7 +78,7 @@ jobs:
           # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       # TURBO_FILTER is empty on a full run, else --filter=<pkg> per affected package.
       - run: pnpm turbo run typecheck lint $TURBO_FILTER
       # Every affected package's tests except the api integration project, which
@@ -104,7 +104,7 @@ jobs:
           # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm turbo run build --filter=@eve/contracts
       # The api integration project starts its own postgres:17-alpine through
       # Testcontainers (apps/api/test/support/postgres-cluster.ts) on the runner's
@@ -128,7 +128,7 @@ jobs:
           # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Install Chromium and its system dependencies
         run: pnpm --filter @eve/e2e exec playwright install --with-deps chromium
       # Global setup (apps/e2e/support/global-setup.ts) runs postgres:17-alpine with

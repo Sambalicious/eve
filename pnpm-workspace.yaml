@@ -1,3 +1,9 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Dependency lifecycle scripts never run. The four packages in the lockfile that declare one
+# (cpu-features, ssh2, protobufjs, unrs-resolver) only build optional native addons or print
+# version notices; each has a pure-JS or prebuilt-binary fallback. CI also passes --ignore-scripts.
+# Add a package here only after confirming it fails without its script.
+onlyBuiltDependencies: []
