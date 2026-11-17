@@ -110,9 +110,8 @@ export class JobPostingsController {
 }
 
 /**
- * v1.25.0 (EPIC-0002 B1): only the read stays. It returns the installation row,
- * now frozen and read by no rule; `PUT` was removed (404) because the hours live
- * in each Candidate's Job Preferences (`/v1/me/preferences`).
+ * v1.25.0 (EPIC-0002 B1): the installation row only; no rule reads it, because
+ * the hours live in each Candidate's Job Preferences (`/v1/me/preferences`).
  */
 @Controller("v1/eligibility-settings")
 export class EligibilitySettingsController {

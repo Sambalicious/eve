@@ -5,8 +5,8 @@ import type { StructuredFields } from "../eligibility.js"
  * EPIC-0002 A0: fixture postings for the owner Eligibility golden snapshot.
  * Each one runs through today's rules with the owner's values. The set
  * covers every rule result, every skip reason and every role family, so a
- * change of behaviour when slice B moves rules onto Job Preferences shows up
- * as a byte difference in `owner-regression.snap.json`.
+ * change of behaviour shows up as a byte difference in
+ * `owner-regression.snap.json`.
  *
  * Do not edit a fixture to make the snapshot pass. Adding fixtures is fine;
  * the snapshot then changes in its own commit with a reason.
@@ -136,7 +136,7 @@ const SPECS: readonly Spec[] = [
   { title: "Senior Frontend Engineer", text: "Hybrid: 3 days a week in our Lagos office.", extraction: { workArrangement: "remote" } },
   // Industry unverified: no business stated.
   { title: "Senior Frontend Engineer", text: "Remote, open to Nigeria.", extraction: { employerBusiness: null } },
-  // A0 item 1 (r4), added in repair wave 1 (F-QA-03): a second title for each family, the precedence
+  // A0 item 1 (r4, F-QA-03): a second title for each family, the precedence
   // cases, React Native, the pre-filter title forms, the contract employment type and a currency with no rate.
   { title: "Fullstack Developer", text: "Remote, open to Nigeria." },
   { title: "Senior Product Engineer", text: "Remote, open to Nigeria." },

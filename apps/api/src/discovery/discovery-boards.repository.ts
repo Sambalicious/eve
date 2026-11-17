@@ -4,11 +4,8 @@ import type { RemoteBoardKey } from "../db/schema.js"
 import type { TenantDatabase } from "../db/tenant-database.js"
 
 /**
- * The employer and remote board catalog, split out of `DiscoveryRepository`
- * (which delegates to this class, one instance per facade).
- *
- * Like the facade, every statement runs in the scope's `CandidateTx`; the board
- * tables are shared (item 6 until slices B and C).
+ * The employer and remote board catalog. Every statement runs in the scope's
+ * `CandidateTx`; the board tables are shared rather than Candidate-scoped.
  */
 export class DiscoveryBoardsRepository {
   constructor(private readonly tenant: TenantDatabase) {}

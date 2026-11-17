@@ -28,12 +28,7 @@ import { seniorityMarker } from "./rules/seniority.js"
 import { DiscoveryBoardsRepository } from "./discovery-boards.repository.js"
 import { DiscoveryEvaluationRepository, identityIn, visibilityFactsOf } from "./discovery-evaluation.repository.js"
 
-/**
- * The board catalog and the evaluation lifecycle live beside this file (split by
- * role); this class keeps every entry point and delegates. The constants and the
- * visibility helper moved with the evaluation code and are re-exported here, so
- * every import path that used this module keeps working.
- */
+// Re-exported so every import path that used this module keeps working.
 export { RETRYABLE_FAILURES, RETRY_ATTEMPTS_LIMIT, RETRY_BACKOFF_MINUTES, visibilityFactsOf } from "./discovery-evaluation.repository.js"
 
 export type NewPosting = Readonly<{
@@ -58,7 +53,6 @@ export type NewPosting = Readonly<{
 
 export type StoredPosting = Readonly<{ id: string; created: boolean }>
 
-/** EPIC-0006: one list request's reads, from one transaction. */
 /** The tier map changed between decoding a cursor and reading its page (EPIC-0002 B1). */
 export class TierMapChangedError extends Error {
   constructor() {
@@ -182,8 +176,8 @@ export const VERDICT_TIMEOUTS = transactionTimeouts(5_000, 10_000)
  * `candidate_id`. `job_posting` holds shared posting facts only (item 6); a
  * Candidate's status, skip and evaluation state is their `candidate_posting`
  * row. The board catalog, `evaluation_setting`, `employer_list_state` and
- * `control_state` stay shared until slices B and C; only the Operator reaches
- * them until then.
+ * `control_state` are shared rather than Candidate-scoped, which is why their
+ * writes are the Operator's.
  */
 @Injectable()
 export class DiscoveryRepository {
@@ -289,17 +283,14 @@ export class DiscoveryRepository {
     )
   }
 
-  /**
-   * EPIC-0006: one list request in one transaction, so the page, the count,
-   * the aggregate and the criteria all see the same Job criteria row and the
-   * same visibility context (architecture.r1 "DiscoveryService.listPostings").
-   */
   /** EPIC-0002 B1: the hash of the Candidate's current tier map, which the cursor binding covers. */
   currentTierHash(): Promise<string> {
     return this.tenant.run(async (tx, candidateId) => tierMapHash(await tierMapIn(tx, candidateId)))
   }
 
   /**
+   * EPIC-0006: one list request in one transaction, so the page, the count, the
+   * aggregate and the criteria all see the same row and visibility context.
    * `tierHash` is the hash the caller decoded the cursor under. The page reads
    * the tier map again in its own transaction; if it changed in between (a
    * save committed), the cursor is stale: `TierMapChangedError`, a 400 like
@@ -643,8 +634,6 @@ export class DiscoveryRepository {
     return wellFormedTechnologies(row?.technologies ?? null)
   }
 
-  // Settings, pauses and Job Sources.
-
   readControl() {
     return this.tenant.run((tx) => tx.selectFrom("control_state").selectAll().executeTakeFirstOrThrow())
   }
@@ -806,13 +795,13 @@ async function findSharedFacts(tx: CandidateTx, applicationUrl: string, requisit
   )
 }
 
-/** A 48-bit advisory lock key for (Candidate, posting); a collision only serialises two unrelated evaluations. */
 /** A stored `job_posting.role_family`, as a catalog key; null when none (untitled, or a value outside the catalog). */
 function storedFamily(value: string | null): RoleFamilyValue | null {
   const parsed = roleFamilySchema.safeParse(value)
   return parsed.success ? parsed.data : null
 }
 
+/** A 48-bit advisory lock key for (Candidate, posting); a collision only serialises two unrelated evaluations. */
 export function evaluationLockKey(candidateId: string, postingId: string): number {
   const digest = createHash("sha256").update(`eve/evaluate/${candidateId}/${postingId}`).digest()
   return digest.readUIntBE(0, 6) % 2 ** 52
@@ -857,5 +846,5 @@ export function wellFormedTechnologies(stored: unknown): StoredTechnology[] | nu
   })
 }
 
-/** Moved to `db/transaction-timeouts.ts` (EPIC-0005 r4); re-exported for existing callers. */
+/** Re-exported from `db/transaction-timeouts.ts` for existing callers. */
 export { isLockTimeout }

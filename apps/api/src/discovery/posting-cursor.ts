@@ -51,7 +51,7 @@ export type CursorBinding = Readonly<{
   foldedKeyword: string | null
   /** The session's Candidate. */
   candidateId: string
-  /** `tierMapHash` of the tier map the page used. In A1 every Candidate ranks by the built TIER (`TIER_HASH`); slice B passes the preferences version's map. */
+  /** `tierMapHash` of the tier map the page was ranked with. */
   tierHash: string
 }>
 
@@ -64,7 +64,7 @@ export function tierMapHash(tiers: Readonly<Record<RoleFamily, number>>): string
     .slice(0, 22)
 }
 
-/** The built TIER's hash: the tier binding of every A1 cursor. */
+/** The built TIER's hash: a fixed tier binding for tests. */
 export const TIER_HASH = tierMapHash(TIER)
 
 const CURSOR_VERSION = 2

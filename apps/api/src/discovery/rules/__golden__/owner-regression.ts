@@ -39,7 +39,7 @@ export const OWNER_PREFERENCES = eligibilityPreferencesOf(
 /** The owner's migrated Job criteria (EPIC-0004 0012): 70 percent, no frameworks or technologies, so step 5 is off. */
 export const OWNER_CRITERIA = decisionCriteria({ minCoreMatchPercent: Math.round(OWNER_EVALUATION.matchThreshold * 100), frameworks: [], technologies: [] })
 
-/** The whole AC 5.1 order in one call (main moved its own copy into posting-verdict.spec.ts, CR-06). */
+/** The whole AC 5.1 order in one call. */
 function decidePosting(input: AssessmentInput, criteria: DecisionCriteria): PostingAssessment & PostingVerdict {
   const assessment = assessPosting(input)
   return { ...assessment, ...finishVerdict(assessment, criteria) }

@@ -263,8 +263,8 @@ describe("bidi control characters in a quote (SEC-005, AC 4.10)", () => {
   })
 })
 
-// Replaces the QA scratch probe (zz-qa-perf-probe.spec.ts). The model's quotes are untrusted and need not be
-// distinctive: 40 one-character quotes that occur thousands of times must not cost seconds of worker CPU.
+// The model's quotes are untrusted and need not be distinctive: 40 one-character quotes that occur thousands
+// of times must not cost seconds of worker CPU.
 describe("verification cost on short, frequent quotes (AC 4.9)", () => {
   const BUDGET_MS = 500
   const sentence = "We use a React app. "
@@ -493,13 +493,12 @@ describe("per-call comparison budget (SEC-009 part 2, AC 4.9, AC 4.12 proposal)"
   })
 })
 
-// QA-G4-1 (finding-g4-tests): the linear scan that replaced the edge-trim regex in `tokenise`. The trim is not
-// exported, so these tests reach it through the public `nameAppearsInQuote`, which tokenises the quote the same way
-// and is not budgeted.
+// QA-G4-1 (finding-g4-tests): the trim is not exported, so these tests reach the linear scan in `tokenise`
+// through the public `nameAppearsInQuote`, which tokenises the quote the same way and is not budgeted.
 describe("edge-punctuation trim in tokenise (SEC-009 part 2, dot runs)", () => {
-  /** The trim as origin/main had it before SEC-009 part 2 (quadratic on a long inner run). */
+  /** The quadratic trim SEC-009 part 2 replaced. */
   const OLD_EDGE_TRIM = /^[.\-_]+|[.\-_]+$/gu
-  /** origin/main's TOKEN_SPLIT, so the reference tokenises exactly as the product does. */
+  /** The same TOKEN_SPLIT as the product, so the reference tokenises exactly as it does. */
   const TOKEN_SPLIT = /[\s,;:()[\]{}!?"'|]+/u
   const MAX_NGRAM = 12
 
