@@ -21,7 +21,6 @@ describe("downloadName", () => {
   })
 
   it("never includes the requisition or application id", () => {
-    // DOC:85, superseded: the old name appended the requisition; now nothing id-shaped appears at all.
     const filename = downloadName("Samuel Ayegbusi", "ClickHouse", "resume", "pdf")
     expectClean(filename)
     expect(filename).not.toContain("R-1042")

@@ -175,7 +175,7 @@ describe("generation prompt flag states (EPIC-0012 Revision 2 addendum, A1 to A4
     expect(ungated(BRIDGES_ON)).toEqual(ungated(OFF_OFF))
     expect(ungated(DIRECTION_ON)).toEqual(ungated(OFF_OFF))
     expect(ungated(BOTH_ON)).toEqual(ungated(OFF_OFF))
-    // Each gated line sits where the old bridge and direction lines sat, in prompt order.
+    // Each gated line sits in prompt order.
     expect(BOTH_ON.indexOf(BRIDGES_LINE)).toBeGreaterThan(BOTH_ON.indexOf("Truth comes first."))
     expect(BOTH_ON.indexOf(DIRECTION_LINE)).toBeGreaterThan(BOTH_ON.indexOf(BRIDGES_LINE))
   })

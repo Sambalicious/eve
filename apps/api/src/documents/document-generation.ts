@@ -102,7 +102,7 @@ export function withoutContactFacts(sections: readonly StoredSection[], contact:
 export type EmphasisTheme = Readonly<{ theme: string; factIds: string[] }>
 
 /**
- * EPIC-0014 D5 (moved from `documents.service.ts`): each fact's id and the text
+ * EPIC-0014 D5: each fact's id and the text
  * the claim check reads, which includes its section's heading (title, employer,
  * dates) because the heading supports its facts' claims too. The Outreach Run
  * builds its fact map from the same function, so the two flows cannot drift.

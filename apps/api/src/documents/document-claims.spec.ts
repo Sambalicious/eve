@@ -317,7 +317,7 @@ describe("repair: natural sentence openers in cover-letter body lines (F-QA4-07)
   })
 
   it.each([
-    // QA's 8 realistic lines (3 were blocked on d95ee20).
+    // QA's 8 realistic lines.
     ["My strongest work has been in payments infrastructure, where I led the migration of 14 services from Heroku to AWS ECS.", "M14"],
     ["I care about reliability: I designed an idempotent webhook pipeline handling about 2.5 million events per day.", "WH"],
     ["Mentoring matters to me; I mentored 6 engineers and 3 were promoted to senior within 18 months.", "MEN"],

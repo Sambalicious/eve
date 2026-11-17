@@ -1,6 +1,6 @@
 /**
- * EPIC-0012 QA gate 3 (step 6a, after repair wave 2). Adversarial unit tests by an independent QA session.
- * Test files only; no product code changed. Report: epics/active/EPIC-0012-tailoring-rules/test-plan.r3.md.
+ * EPIC-0012 QA gate 3 (step 6a, after repair wave 2). Adversarial unit tests.
+ * Report: epics/active/EPIC-0012-tailoring-rules/test-plan.r3.md.
  *
  * Convention, as in the gate-1 and gate-2 specs: `it` asserts behaviour the candidate shows and the design
  * requires. `it.fails` asserts REQUIRED behaviour the candidate does not show: each one is a blocker QA3-Bn in
@@ -174,9 +174,6 @@ describe("pipeline helper sanity", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 1. The judge rubber-stamps everything it is sent (design addendum F, advisor). What does code still stop?
-// ---------------------------------------------------------------------------------------------------------
 describe("1a. rubber-stamp judge: classes the design promises code stops (hard fails)", () => {
   const WIND_BASE = "Built wind farm financial models for offshore projects"
   it.each([
@@ -299,9 +296,6 @@ describe("1c. OBSERVATION: the same lift in a letter sentence ('I initiated…')
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 2. Post-judge text mutation: cap trims (R14), orphan drop (A6), dedupe (R13), density repair, fallback
-// ---------------------------------------------------------------------------------------------------------
 const JEST = [kw("Jest")]
 const jestParagraphs = (count: number) => ["components", "forms", "pages", "reports", "emails"].slice(0, count).map((n) => line(`I tested ${n} with Jest.`, "JTEST"))
 
@@ -451,9 +445,6 @@ describe("2. a refused or failed judge cannot let reworded text out through any 
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 3. R14 letter cap
-// ---------------------------------------------------------------------------------------------------------
 describe("3. R14: the letter holds at most three mentions of a keyword; it never blocks", () => {
   const mentionsOf = (letter: CoverLetterContent, re: RegExp) => letter.paragraphs.map((p) => (p.text.match(re) ?? []).length).reduce((a, b) => a + b, 0)
   const REACT = [kw("React")]
@@ -503,9 +494,6 @@ describe("3. R14: the letter holds at most three mentions of a keyword; it never
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 4. R8 to R16, fresh variants
-// ---------------------------------------------------------------------------------------------------------
 describe("4. R8: the heading and employer never lend a verb; wording only", () => {
   it.each([
     ["PAY_LEAD", "Led the payments migration"],
@@ -728,9 +716,6 @@ describe("4. R16: a failed judge call is a provider_error only when the letter b
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 5. R12 headline
-// ---------------------------------------------------------------------------------------------------------
 describe("5. R12 headline: never prints a title the profile does not hold", () => {
   const POSTING_TITLE = "Head of Sustainability"
   it.each([
@@ -829,9 +814,6 @@ describe("5. R12 headline: never prints a title the profile does not hold", () =
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 6. Flags: prompt builders and the judge prompt in all four states
-// ---------------------------------------------------------------------------------------------------------
 describe("6. flags: the prompts in all four states", () => {
   const STATES = [
     { bridges: false, direction: false },

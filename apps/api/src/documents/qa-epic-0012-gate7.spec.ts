@@ -1,6 +1,6 @@
 /**
  * EPIC-0012 QA gate 7 (after owner-approved repair wave 6: R24, default-deny quotation provenance).
- * Adversarial unit tests by an independent QA session. Test files only; no product code changed. Report:
+ * Adversarial unit tests. Report:
  * epics/active/EPIC-0012-tailoring-rules/test-plan.r7.md.
  *
  * Convention, as in the gate-1 to 6 specs: `it` asserts behaviour the candidate shows and the design requires.
@@ -8,9 +8,9 @@
  * it turns red when the defect is fixed (then it becomes `it`). "OBSERVATION" tests pin a class the design accepts
  * (C1-C10, residuals i-iii), leaves to the judge, or that the report raises as a minor; they pass today.
  *
- * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper, copied
- * unchanged through gates 5 and 6: it replays documents.service.ts generate() in the service's order. Fresh inputs
- * only: no row repeats a gate-6 input or a Revision 6 row (QA6 rows, W1-W18, the R24 must-pass rows, C5-C10 pins).
+ * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper: it
+ * replays documents.service.ts generate() in the service's order. Fresh inputs only: no row repeats a gate-6
+ * input or a Revision 6 row (QA6 rows, W1-W18, the R24 must-pass rows, C5-C10 pins).
  */
 import { describe, expect, it } from "vitest"
 
@@ -164,9 +164,6 @@ const letterWith = (frame: string, posting: PostingGuard, judge: Judge = RUBBER_
 const storedLower = (outcome: Outcome) => allText(outcome).toLowerCase()
 const quotedStored = (frame: string, posting: PostingGuard) => storedLower(letterWith(frame, posting)).includes("revenue within")
 
-// ---------------------------------------------------------------------------------------------------------
-// 1. R24 holes: text the employer never wrote, stored inside quotation marks, both flags off, rubber stamp.
-// ---------------------------------------------------------------------------------------------------------
 describe("1. R24: fabricated quotations that still reach storage", () => {
   // QA7-B1. Closed by R25 step 3. S0 now also requires balanced spaced marks, so a sentence that is fact wording
   // but carries only one end of a quotation no longer skips the check, and B reads every active mark at the end of
@@ -254,9 +251,6 @@ describe("1. R24: fabricated quotations that still reach storage", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 2. QA6-B1, B2, B3 closed against fresh inputs; normalisation, invisible characters, edges and sentence shapes.
-// ---------------------------------------------------------------------------------------------------------
 const INVISIBLES: readonly (readonly [string, string])[] = [
   ["ZWSP", "\u200b"], ["ZWNJ", "\u200c"], ["ZWJ", "\u200d"], ["WJ", "\u2060"], ["BOM", "\ufeff"], ["SHY", "\u00ad"],
   ["CGJ", "\u034f"], ["VS16", "\ufe0f"], ["VS1", "\ufe00"], ["LRM", "\u200e"], ["RLM", "\u200f"], ["ALM", "\u061c"],
@@ -302,7 +296,6 @@ describe("2. QA6-B1, B2, B3 hold against fresh inputs", () => {
   describe.each(STATES)("%s", (_state, flags) => {
     const posting = guardFor(flags)
     it.each([
-      // normalisation
       ["NFD of the whole sentence", `Your plan to “${FAB}” is clear.`.normalize("NFD")],
       ["NFKD of fullwidth quotes", `Your plan to ＂${FAB}＂ is clear.`.normalize("NFKD")],
       ["fullwidth straight double quotes", `Your plan to ＂${FAB}＂ is clear.`],
@@ -313,14 +306,12 @@ describe("2. QA6-B1, B2, B3 hold against fresh inputs", () => {
       ["superscript-digit footnote glued", `Your plan to “${FAB}”¹ is clear.`],
       ["Greek oxia as a closer, Latin acute as opener", `Your plan to ´${FAB}´ is clear.`],
       ["NFD-decomposable mark ǅ inside", `Your plan to “ǅ ${FAB}” is clear.`],
-      // homoglyphs inside the fabricated words or the marks
       ["Cyrillic а and е inside a sourced quote's words", `I won the “аnalyst of thе year” award, and ${FAB}.`],
       ["Greek ο in the fabricated words", `Your plan to “dοuble revenue” is clear.`],
       ["Armenian ՚ as both marks", `Your plan to ՚${FAB}՚ is clear.`],
       ["Hebrew geresh ׳ and gershayim ״", `Your plan to ״${FAB}״ is clear.`],
       ["Arabic-Indic digits in the quote", `Your plan to “${FAB} by ٢٠٣٠” is clear.`],
       ["Devanagari digits in the quote", `Your plan to “${FAB} by २०३०” is clear.`],
-      // characters at the allowlist edge
       ["ASCII ,, then ''", `Your plan to ,,${FAB}'' is clear.`],
       ["ASCII << >>", `Your plan to <<${FAB}>> is clear.`],
       ["ASCII backticks", `Your plan to \`\`${FAB}'' is clear.`],
@@ -335,7 +326,6 @@ describe("2. QA6-B1, B2, B3 hold against fresh inputs", () => {
       ["L4: closer then a slash and a word", `I won the “analyst of the year”/${FAB}.`],
       ["L4: closer then a hash and a word", `I won the “analyst of the year”#${FAB}.`],
       ["L4: closer then an ellipsis and a word", `I won the “analyst of the year”…${FAB}.`],
-      // nested, doubled, glued
       ["a fabricated shell around a sourced quote", `Your plan to “${FAB} “analyst of the year”” is clear.`],
       ["a sourced quote inside guillemets inside a fabricated quote", `Your plan to «${FAB} “analyst of the year” too» is clear.`],
       ["triple glued closers", `Your plan to “‘«${FAB}»’” is clear.`],
@@ -343,7 +333,6 @@ describe("2. QA6-B1, B2, B3 hold against fresh inputs", () => {
       ["a real quote, a comma, then a fabricated quote", `I won the “analyst of the year”, “${FAB}”.`],
       ["a real quote then a fabricated one with no space", `I won the “analyst of the year”“${FAB}”.`],
       ["the fact's straight marks reused around fabricated words", `Won the "analyst of the year" award for the "${FAB}" models`],
-      // sentences
       ["a fabricated quote after an abbreviation that splits", `I joined Acme Inc. In 2021, “${FAB}” was the goal.`],
       ["a quotation ending in ?! with the next sentence fabricated", `Did I win the “analyst of the year?!” “${FAB}.”`],
       ["two sentences, the closer glued to the next one", `I won the “analyst of the year.”Your plan to “${FAB}” is clear.`],
@@ -396,9 +385,6 @@ describe("2. QA6-B1, B2, B3 hold against fresh inputs", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 3. Normalisation classifies, it never rewrites.
-// ---------------------------------------------------------------------------------------------------------
 describe("3. stored text is never rewritten by normalisation", () => {
   it.each([
     ["NFD accents", `I built “risk models for Zürich Energy and Société Générale” last year.`.normalize("NFD")],
@@ -419,9 +405,6 @@ describe("3. stored text is never rewritten by normalisation", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 4. False positives: legitimate text passes (fresh), C1-C10 behave as accepted, new cases observed.
-// ---------------------------------------------------------------------------------------------------------
 describe("4. legitimate text", () => {
   it.each([
     ["I couldn’t’ve done it alone."], ["Y’all’s support mattered."], ["We’re ready, and we’ll deliver."], ["I joined at 8 o’clock sharp."],
@@ -503,9 +486,6 @@ describe("4. legitimate text", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 5. Rubber-stamp judge, every flag state, fresh adversarial draft; then regressions with fresh inputs.
-// ---------------------------------------------------------------------------------------------------------
 describe("5. rubber-stamp judge and regressions", () => {
   const RESUME = resumeOf(
     [line("Built wind farm financial models for offshore projects in Tableau", "WIND"), line("Built wind farm financial models, “\u202ethe best in Europe\u202c”", "WIND")],

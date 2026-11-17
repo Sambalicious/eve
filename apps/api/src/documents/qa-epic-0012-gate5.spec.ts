@@ -1,6 +1,6 @@
 /**
  * EPIC-0012 QA gate 5 (after owner-approved repair wave 4: R21 whole-title headline, R22 quote marks by class).
- * Adversarial unit tests by an independent QA session. Test files only; no product code changed. Report:
+ * Adversarial unit tests. Report:
  * epics/active/EPIC-0012-tailoring-rules/test-plan.r5.md.
  *
  * Convention, as in the gate-1 to 4 specs: `it` asserts behaviour the candidate shows and the design requires.
@@ -8,10 +8,9 @@
  * it turns red when the defect is fixed (then it becomes `it`). "OBSERVATION" tests pin a class the design accepts
  * or leaves to the judge; they pass today.
  *
- * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper,
- * unchanged: it replays documents.service.ts generate() in the service's order (hard fails, judge, fallback,
- * sentence drop, A6, R14 cap, R17 settle, density repair, validation, R16). Fresh inputs only: no row repeats a
- * gate-4 input.
+ * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper: it
+ * replays documents.service.ts generate() in the service's order (hard fails, judge, fallback, sentence drop,
+ * A6, R14 cap, R17 settle, density repair, validation, R16). Fresh inputs only: no row repeats a gate-4 input.
  */
 import { describe, expect, it } from "vitest"
 
@@ -147,18 +146,13 @@ const JEST = [kw("Jest")]
 const REACT = [kw("React")]
 
 
-// ---------------------------------------------------------------------------------------------------------
-// 1. QA4-B1 / QA4-B2 (R21): the whole profile title, or nothing. Fresh inputs; both flags off (no flag gates it).
-// ---------------------------------------------------------------------------------------------------------
 describe("1. R21 headline: a title the Candidate never held never prints", () => {
   const PM = "Product Manager"
   it.each([
-    // an extra word
     ["Product Manager Payments"],
     ["Product Manager Shadow"],
     ["Product Manager Student"],
     ["Former Product Manager"],
-    // a bracket qualifier
     ["Product Manager (Acting)"],
     ["Product Manager (contract)"],
     ["Product Manager (Volunteer)"],
@@ -166,7 +160,6 @@ describe("1. R21 headline: a title the Candidate never held never prints", () =>
     ["Product Manager{Intern}"],
     ["Product Manager <Trainee>"],
     ["Product Manager (2020) (Intern)"],
-    // a separated qualifier
     ["Product Manager — Trainee"],
     ["Product Manager · Intern"],
     ["Product Manager: Placement"],
@@ -177,7 +170,6 @@ describe("1. R21 headline: a title the Candidate never held never prints", () =>
     ["Product Manager — Intern 2021"],
     ["Product Manager (Jan 2020 – present) – Intern"],
     ["Product Manager 2020, Apprentice"],
-    // a relation phrase
     ["Product Manager to be"],
     ["Product Manager in Training"],
     ["Product Manager-in-waiting"],
@@ -185,13 +177,11 @@ describe("1. R21 headline: a title the Candidate never held never prints", () =>
     ["Analyst under the Product Manager"],
     ["Secretary to the Product Manager"],
     ["Coordinator supporting Product Manager"],
-    // a multi-title entry
     ["Intern → Product Manager"],
     ["Product Manager (Intern) → Product Manager"],
     ["Analyst; Product Manager"],
     ["Lead/Product Manager"],
     ["Product Manager & Product Owner"],
-    // a step up in front
     ["Associate Product Manager"],
     ["Senior Associate Product Manager"],
     ["Lead Associate Product Manager"],
@@ -294,9 +284,6 @@ describe("1. R21 headline: a title the Candidate never held never prints", () =>
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 2. QA4-B3 (R22): quote marks by class. Fresh mark styles, orientations and contexts, every flag state.
-// ---------------------------------------------------------------------------------------------------------
 describe("2. R22 quotation marks", () => {
   const FAB = "double revenue within the decade"
   const letterWith = (frame: string, posting: PostingGuard, judge: Judge = RUBBER_STAMP) =>
@@ -472,9 +459,6 @@ describe("2. R22 quotation marks", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 3. A judge that approves everything, in each flag state (fresh adversarial draft).
-// ---------------------------------------------------------------------------------------------------------
 describe("3. rubber-stamp judge in every flag state", () => {
   const RESUME = resumeOf(
     [line("Built wind farm financial models for offshore projects in Tableau", "WIND"), line("Built wind farm financial models, ‚the sharpest in Europe‘", "WIND")],
@@ -508,9 +492,6 @@ describe("3. rubber-stamp judge in every flag state", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 4. Regressions: QA3-B1..B4, M1, M2, QA2-B1..B8 and R8..R20, fresh inputs.
-// ---------------------------------------------------------------------------------------------------------
 describe("4. regressions (fresh inputs)", () => {
   it("QA3-B1 / R17: a judged paragraph the cap trims to a re-failing sentence is dropped, the letter stays valid", () => {
     const forms = ["profile", "search", "export"].map((n) => line(`I tested React ${n} forms.`, "QA"))
