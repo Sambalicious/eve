@@ -130,7 +130,6 @@ export type BoardState = {
   criteria: JobCriteriaResponse
   /** Next Check again answer; default claims every visible failed/not_checked posting. */
   checkAgain: ((state: BoardState) => Response | CheckAgainResponse) | null
-  /** Next paste response. */
   paste: { status: 200 | 201; created: boolean; posting: JobPostingDetail } | null
 }
 

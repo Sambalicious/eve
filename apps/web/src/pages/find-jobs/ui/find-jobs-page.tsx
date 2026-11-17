@@ -681,7 +681,6 @@ function PostsSection({
   const headingRef = useRef<HTMLHeadingElement>(null)
   const shownPage = useRef(page)
 
-  // After a page change, the new rows replace the old ones; then the view moves to the Posts heading (design-spec F6 step 3).
   useEffect(() => {
     if (!posts || isChangingPage || posts.page === shownPage.current) return
     shownPage.current = posts.page

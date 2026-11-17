@@ -99,7 +99,6 @@ export interface StackPostsApiState {
 let counter = 0
 const uuid = (prefix: string) => `${prefix}-0000-4000-8000-${String(++counter).padStart(12, "0")}`
 
-/** A stored feed row. */
 export function storedFeed(overrides: Partial<StoredFeed> = {}): StoredFeed {
   return { id: uuid("a0000000"), url: FEED_A, label: "React posts", createdAt: NOW, lastReadAt: NOW, failure: null, ...overrides }
 }
