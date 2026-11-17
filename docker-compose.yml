@@ -25,6 +25,17 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    # The official entrypoint starts as root to chown a fresh PGDATA and then drops to
+    # postgres (uid 70) through gosu: exactly these five capabilities, nothing else.
+    # Everything it writes outside PGDATA is on the two tmpfs mounts below (the socket
+    # directory pg_isready and clients connect through, and Postgres' temp files).
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /var/run/postgresql:uid=70,gid=70
+      - /tmp
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -47,6 +58,12 @@ services:
       # No default password: with DB_BACKUP_PASSWORD empty the role is created NOLOGIN.
       DB_BACKUP_ROLE: ${DB_BACKUP_ROLE:-}
       DB_BACKUP_PASSWORD: ${DB_BACKUP_PASSWORD:-}
+    # One-shot, node user, no writes outside /tmp: same hardening as the api below.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,6 +81,11 @@ services:
       # EPIC-0002 multi-candidate migration (0016-multi-candidate) binds the existing data to this owner, once; empty is fine on a fresh install.
       # Remove it from .env after that run; rebind later with `operator:rebind-sub` on the host.
       CANDIDATE_GOOGLE_SUB: ${CANDIDATE_GOOGLE_SUB:-}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
     depends_on:
       provision-roles:
         condition: service_completed_successfully
@@ -108,6 +130,20 @@ services:
       - candidate-data:/data/candidates
     ports:
       - "127.0.0.1:${API_HOST_PORT:-3000}:3000"
+    # node user; the only persistent write is the candidate-data volume above. /tmp
+    # covers what the parser and Node write there (no app code writes elsewhere).
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
+    # 2 resume extraction children at most (EXTRACTION_CONCURRENCY, SEC-201) on top of
+    # this process: 3 Node processes, each with its V8/libuv threads, is ~35 threads.
+    # 128 leaves room for short-lived helpers without allowing a fork bomb. No
+    # mem_limit: the children are capped at 384 MB rss each in code, but nothing in
+    # the code or docs bounds the api process itself, so any cgroup cap here would be
+    # invented and an OOM kill would restart the api instead of refusing one upload.
+    pids_limit: 128
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -167,6 +203,18 @@ services:
       # The egress proxy's per-attempt allowlist (read-only in egress).
       - egress-allowlist:/data/egress
     networks: [default, browser-net]
+    # node user; writes go to the three volumes above and to /app/run (the heartbeat
+    # file, SEC-211: its own tmpfs, not the shared /tmp), plus /tmp for libraries.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /app/run:uid=1000,gid=1000,mode=0700
+      - /tmp
+    # Same budget as the api: resume extraction children run here too, and the browser
+    # is an HTTP client to the browser service, not a process this container spawns.
+    # No mem_limit for the same reason as the api: nothing bounds this process.
+    pids_limit: 128
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -199,6 +247,11 @@ services:
       - resume-data:/data/resumes
       - document-data:/data/documents
       - candidate-data:/data/candidates
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -213,6 +266,11 @@ services:
     volumes:
       - submission-uploads:/data/uploads
       - egress-allowlist:/data/egress
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
     restart: "no"
 
   # ADR 0008: Playwright MCP over Streamable HTTP. Only on browser-net (internal:
