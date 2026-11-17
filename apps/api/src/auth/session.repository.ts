@@ -28,6 +28,8 @@ export class SessionRepository {
         csrf_token: session.csrfToken,
         candidate_id: session.candidateId,
         google_sub: session.googleSub,
+        // From the app clock, not the column default: the absolute lifetime is measured against it.
+        created_at: session.lastActiveAt,
         last_active_at: session.lastActiveAt,
       })
       .execute()
@@ -37,9 +39,11 @@ export class SessionRepository {
    * Records activity on a session still active after `cutoff`, in one statement,
    * so a concurrent request cannot revive a session that has already expired.
    * A session also stops resolving once its Candidate is no longer `active`
-   * (revoked or deleting): revoking someone ends their access on the next request.
+   * (revoked or deleting): revoking someone ends their access on the next request,
+   * and once it was created before `createdAfter` (the absolute lifetime), however
+   * recently it was used.
    */
-  async touchIfActive(idHash: string, now: Date, cutoff: Date): Promise<StoredSession | undefined> {
+  async touchIfActive(idHash: string, now: Date, cutoff: Date, createdAfter: Date): Promise<StoredSession | undefined> {
     const row = await this.db
       .updateTable("dashboard_session")
       .from("candidate")
@@ -48,6 +52,7 @@ export class SessionRepository {
       .where("candidate.state", "=", "active")
       .where("dashboard_session.id_hash", "=", idHash)
       .where("dashboard_session.last_active_at", ">", cutoff)
+      .where("dashboard_session.created_at", ">", createdAfter)
       .returning(["dashboard_session.csrf_token", "dashboard_session.google_sub", "dashboard_session.candidate_id"])
       .executeTakeFirst()
     return row && { csrfToken: row.csrf_token, googleSub: row.google_sub, candidateId: row.candidate_id }
