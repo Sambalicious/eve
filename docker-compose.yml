@@ -220,7 +220,7 @@ services:
   # Pinned by digest (@playwright/mcp 0.0.83). Upgrade only after the wrapper
   # contract tests pass on the fixture forms.
   browser:
-    image: mcr.microsoft.com/playwright/mcp@sha256:690763cbb437ee7233f538a953bb5390bf03791eb5c965b471e59d17a6132fcb
+    image: mcr.microsoft.com/playwright/mcp@sha256:8ca417ff2a3660b770d7dd4a293bd179d0f3c29d0d5fb5bc43d3be617b1566a2
     # Appended to the image entrypoint (tini -- node cli.js --headless --browser chromium --no-sandbox).
     command:
       - --isolated
