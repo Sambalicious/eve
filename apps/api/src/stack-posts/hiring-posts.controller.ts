@@ -1,17 +1,18 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Headers, Post, Put, Query } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Header, HttpCode, Post, Put, UseGuards } from "@nestjs/common"
 import {
   type HiringAlertFeedsResponse,
   type HiringPostsResponse,
   type RegisterAlertFeedResponse,
-  alertFeedVerificationRequestSchema,
+  type AlertFeedVerificationRequest,
+  type RegisterAlertFeedRequest,
   registerAlertFeedRequestSchema,
 } from "@eve/contracts"
 
-import { ApiException } from "../http/api-exception.js"
+import { JsonBodyGuard } from "../http/json-body.guard.js"
 import { UuidParam } from "../http/uuid-param.js"
-import { parsePage, registrationFieldErrors, verificationFieldErrors } from "./field-errors.js"
+import { ParsedQuery, ZodBody } from "../http/zod-request.js"
 import { HiringPostsService } from "./hiring-posts.service.js"
-import { requireJson } from "./require-json.js"
+import { VerificationBodyPipe, pageOrRefuse, refuseRegistration } from "./stack-posts-request.js"
 
 /**
  * EPIC-0007 Phase 3 routes (contract v1.20.0). The global guard requires the
@@ -30,25 +31,20 @@ export class HiringPostsController {
     return this.service.feeds()
   }
 
-  /** The caller's own record. Every field error at once; a non-object body or an unknown key is a plain 400. */
+  /** The caller's own record. JSON only; every field error at once; a non-object body or an unknown key is a plain 400. */
   @Put("hiring-feeds/verification")
+  @UseGuards(JsonBodyGuard)
   @Header("cache-control", "no-store")
-  async saveVerification(@Body() body: unknown, @Headers("content-type") contentType: string | undefined): Promise<HiringAlertFeedsResponse> {
-    requireJson(contentType)
-    const fieldErrors = verificationFieldErrors(body, this.service.today())
-    const parsed = alertFeedVerificationRequestSchema.safeParse(body)
-    if (!parsed.success || fieldErrors.length > 0) throw ApiException.badRequestWithFieldErrors(fieldErrors)
-    return this.service.saveVerification(parsed.data)
+  async saveVerification(@Body(VerificationBodyPipe) body: AlertFeedVerificationRequest): Promise<HiringAlertFeedsResponse> {
+    return this.service.saveVerification(body)
   }
 
   @Post("hiring-feeds")
+  @UseGuards(JsonBodyGuard)
   @HttpCode(201)
   @Header("cache-control", "no-store")
-  async register(@Body() body: unknown, @Headers("content-type") contentType: string | undefined): Promise<RegisterAlertFeedResponse> {
-    requireJson(contentType)
-    const parsed = registerAlertFeedRequestSchema.safeParse(body)
-    if (!parsed.success) throw ApiException.badRequestWithFieldErrors(registrationFieldErrors(body))
-    return this.service.register(parsed.data)
+  async register(@ZodBody(registerAlertFeedRequestSchema, refuseRegistration) body: RegisterAlertFeedRequest): Promise<RegisterAlertFeedResponse> {
+    return this.service.register(body)
   }
 
   @Delete("hiring-feeds/:id")
@@ -60,9 +56,7 @@ export class HiringPostsController {
 
   @Get("hiring-posts")
   @Header("cache-control", "no-store")
-  async posts(@Query("page") page: unknown): Promise<HiringPostsResponse> {
-    const parsed = parsePage(page)
-    if (parsed === null) throw ApiException.badRequestWithFieldErrors([{ field: "page", position: null, problem: "invalid" }])
-    return this.service.posts(parsed)
+  async posts(@ParsedQuery("page", pageOrRefuse) page: number): Promise<HiringPostsResponse> {
+    return this.service.posts(page)
   }
 }

@@ -1,17 +1,18 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Headers, Post, Put, Query } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Header, HttpCode, Post, Put, UseGuards } from "@nestjs/common"
 import {
   type AlertFeedsResponse,
   type HiringSearchInputsResponse,
   type RegisterAlertFeedResponse,
   type StackPostsResponse,
-  alertFeedVerificationRequestSchema,
+  type AlertFeedVerificationRequest,
+  type RegisterAlertFeedRequest,
   registerAlertFeedRequestSchema,
 } from "@eve/contracts"
 
-import { ApiException } from "../http/api-exception.js"
+import { JsonBodyGuard } from "../http/json-body.guard.js"
 import { UuidParam } from "../http/uuid-param.js"
-import { parsePage, registrationFieldErrors, verificationFieldErrors } from "./field-errors.js"
-import { requireJson } from "./require-json.js"
+import { ParsedQuery, ZodBody } from "../http/zod-request.js"
+import { VerificationBodyPipe, pageOrRefuse, refuseRegistration } from "./stack-posts-request.js"
 import { StackPostsService } from "./stack-posts.service.js"
 
 /**
@@ -27,10 +28,8 @@ export class StackPostsController {
 
   @Get()
   @Header("cache-control", "no-store")
-  posts(@Query("page") page: unknown): Promise<StackPostsResponse> {
-    const parsed = parsePage(page)
-    if (parsed === null) throw ApiException.badRequestWithFieldErrors([{ field: "page", position: null, problem: "invalid" }])
-    return this.service.posts(parsed)
+  posts(@ParsedQuery("page", pageOrRefuse) page: number): Promise<StackPostsResponse> {
+    return this.service.posts(page)
   }
 
   /** v1.19.0: `{ hintTerms }` from the session Candidate's Job Preferences. Session only (safe method); no parameters. */
@@ -46,27 +45,24 @@ export class StackPostsController {
     return this.service.feeds()
   }
 
+  /**
+   * SEC-E8-02 (v1.23.1): JSON only, as the Hiring verification PUT; a form or text body is a plain 400 with no write
+   * (`JsonBodyGuard`). CR-E5-01: the future-date rule sits with the other field rules, so one 400 lists every bad field.
+   */
   @Put("alert-feeds/verification")
+  @UseGuards(JsonBodyGuard)
   @Header("cache-control", "no-store")
-  async saveVerification(@Body() body: unknown, @Headers("content-type") contentType: string | undefined): Promise<AlertFeedsResponse> {
-    // SEC-E8-02 (v1.23.1): JSON only, as the Hiring verification PUT; a form or text body is a plain 400 with no write.
-    requireJson(contentType)
-    // CR-E5-01: the future-date rule sits with the other field rules, so one 400 lists every bad field.
-    const fieldErrors = verificationFieldErrors(body, this.service.today())
-    const parsed = alertFeedVerificationRequestSchema.safeParse(body)
-    if (!parsed.success || fieldErrors.length > 0) throw ApiException.badRequestWithFieldErrors(fieldErrors)
-    return this.service.saveVerification(parsed.data)
+  async saveVerification(@Body(VerificationBodyPipe) body: AlertFeedVerificationRequest): Promise<AlertFeedsResponse> {
+    return this.service.saveVerification(body)
   }
 
+  /** SEC-E8-02b: JSON only, as the Hiring registration; a form body is a plain 400 before validation, no request, no write. */
   @Post("alert-feeds")
+  @UseGuards(JsonBodyGuard)
   @HttpCode(201)
   @Header("cache-control", "no-store")
-  register(@Body() body: unknown, @Headers("content-type") contentType: string | undefined): Promise<RegisterAlertFeedResponse> {
-    // SEC-E8-02b: JSON only, as the Hiring registration; a form body is a plain 400 before validation, no request, no write.
-    requireJson(contentType)
-    const parsed = registerAlertFeedRequestSchema.safeParse(body)
-    if (!parsed.success) throw ApiException.badRequestWithFieldErrors(registrationFieldErrors(body))
-    return this.service.register(parsed.data)
+  register(@ZodBody(registerAlertFeedRequestSchema, refuseRegistration) body: RegisterAlertFeedRequest): Promise<RegisterAlertFeedResponse> {
+    return this.service.register(body)
   }
 
   @Delete("alert-feeds/:id")

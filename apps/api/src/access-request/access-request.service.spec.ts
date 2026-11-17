@@ -3,13 +3,17 @@ import { describe, expect, it, vi } from "vitest"
 import { accessRequestKeys } from "./access-request-keys.js"
 import type { AccessRequestRepository, SubmissionInput, SubmissionOutcome } from "./access-request.repository.js"
 import { AccessRequestService } from "./access-request.service.js"
+import { accessRequestOrRefuse } from "./access-request-request.js"
 import { issueProof } from "./fill-proof.js"
 import type { AppConfig } from "../config/env.js"
 
 const NOW = new Date("2026-10-21T10:00:00.000Z")
 const keys = accessRequestKeys("unit-test-access-request-secret-000000")
 const config = (trustProxy = 1) => ({ accessRequest: { trustProxy, limits: { perIpHour: 3, perIpDay: 10, globalDay: 50 }, keys } }) as unknown as AppConfig
-const body = (overrides: Record<string, unknown> = {}) => ({ email: "ada@example.com", proof: issueProof(NOW.getTime() - 5_000, keys.proofKey()), kiwi: "", ...overrides })
+const raw = (overrides: Record<string, unknown> = {}) => ({ email: "ada@example.com", proof: issueProof(NOW.getTime() - 5_000, keys.proofKey()), kiwi: "", ...overrides })
+
+/** The request as the controller's body pipe hands it to the service. */
+const body = (overrides: Record<string, unknown> = {}) => accessRequestOrRefuse(raw(overrides))
 
 function service(submit: (input: SubmissionInput) => Promise<SubmissionOutcome>, trustProxy = 1) {
   const repository = { submit: vi.fn(submit) } as unknown as AccessRequestRepository & { submit: ReturnType<typeof vi.fn> }
@@ -40,10 +44,8 @@ describe("AccessRequestService", () => {
     for (let i = 0; i < 3; i++) await expect(svc.submit(body(), "198.51.100.1")).rejects.toMatchObject({ code: "service_unavailable" })
   })
 
-  it("an invalid body never reaches the repository", async () => {
-    const { svc, repository } = service(async () => accepted)
-    await expect(svc.submit({ email: "bad" }, "198.51.100.1")).rejects.toMatchObject({ code: "access_request_invalid", fields: ["email.format"] })
-    expect(repository.submit).not.toHaveBeenCalled()
+  it("an invalid body is refused by the pipe before it can reach the service or the repository", () => {
+    expect(() => accessRequestOrRefuse({ email: "bad" })).toThrowError(expect.objectContaining({ code: "access_request_invalid", fields: ["email.format"] }))
   })
 
   it("passes the drop reason: honeypot first, then fill time", async () => {
