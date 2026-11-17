@@ -69,6 +69,21 @@ import { renderDocx, renderPdf, verifyPdfText, wordIntegrity } from "./render.js
 
 export type GenerationOutcome = "ready" | "blocked" | "failed" | "busy"
 
+/** Every structured event this module logs; each is one JSON line with `event` first. */
+type DocumentsEvent =
+  | "documents.meaning_check_failed"
+  | "documents.meaning_checked"
+  | "documents.sentence_check_failed"
+  | "documents.sentences_checked"
+  | "documents.hard_fail"
+  | "documents.letter_sentences_dropped"
+  | "documents.lines_fell_back"
+  | "documents.direction_used"
+  | "documents.letter_keyword_cap"
+  | "documents.keyword_density"
+  | "documents.headline_unsupported"
+  | "documents.ats_scored"
+
 @Injectable()
 export class DocumentsService implements OnApplicationBootstrap {
   private readonly logger = new Logger(DocumentsService.name)
@@ -259,23 +274,20 @@ export class DocumentsService implements OnApplicationBootstrap {
       cost: { action: "document generation", haltOnGlobalPause: true },
     })
     if (!result.ok) {
-      this.logger.log(JSON.stringify({ event: "documents.meaning_check_failed", applicationId, failure: result.failure }))
+      this.logEvent("documents.meaning_check_failed", { applicationId, failure: result.failure })
       return { supported: new Set(), failed: true }
     }
     const supported = supportedTexts(items, result.object)
     const postingTermItems = items.filter((item) => item.postingTerms.length > 0)
     const postingTermSupported = postingTermItems.filter((item) => supported.has(meaningKey(item.line.text, item.line.factIds))).length
-    this.logger.log(
-      JSON.stringify({
-        event: "documents.meaning_checked",
-        applicationId,
-        checked: items.length,
-        supported: supported.size,
-        refused: items.length - supported.size,
-        postingTermLines: this.flags.bridges ? postingTermItems.length : 0,
-        postingTermSupported: this.flags.bridges ? postingTermSupported : 0,
-      })
-    )
+    this.logEvent("documents.meaning_checked", {
+      applicationId,
+      checked: items.length,
+      supported: supported.size,
+      refused: items.length - supported.size,
+      postingTermLines: this.flags.bridges ? postingTermItems.length : 0,
+      postingTermSupported: this.flags.bridges ? postingTermSupported : 0,
+    })
     return { supported, failed: false }
   }
 
@@ -321,12 +333,17 @@ export class DocumentsService implements OnApplicationBootstrap {
       cost: { action: "document generation", haltOnGlobalPause: true },
     })
     if (!result.ok) {
-      this.logger.log(JSON.stringify({ event: "documents.sentence_check_failed", applicationId, failure: result.failure }))
+      this.logEvent("documents.sentence_check_failed", { applicationId, failure: result.failure })
       return null
     }
     const supported = supportedTexts(items, result.object)
-    this.logger.log(JSON.stringify({ event: "documents.sentences_checked", applicationId, checked: items.length, supported: supported.size, refused: items.length - supported.size }))
+    this.logEvent("documents.sentences_checked", { applicationId, checked: items.length, supported: supported.size, refused: items.length - supported.size })
     return new Set([...judged, ...supported])
+  }
+
+  /** One structured log line: `{"event": name, ...fields}`. Fields are counts and ids only, never line text. */
+  private logEvent(event: DocumentsEvent, fields: Readonly<Record<string, unknown>>): void {
+    this.logger.log(JSON.stringify({ event, ...fields }))
   }
 
   /** Waits for generations started by this process. Used by tests. */
@@ -410,7 +427,7 @@ export class DocumentsService implements OnApplicationBootstrap {
     // counts only, never line text, facts or posting words.
     const hardFails = hardFailCounts(draftResume, draftLetter, facts, letterTarget, contact, postingTermsGuard, wording)
     const hardFailTotal = Object.values(hardFails).reduce((sum, count) => sum + count, 0)
-    if (hardFailTotal > 0) this.logger.log(JSON.stringify({ event: "documents.hard_fail", applicationId: id, total: hardFailTotal, reasons: hardFails }))
+    if (hardFailTotal > 0) this.logEvent("documents.hard_fail", { applicationId: id, total: hardFailTotal, reasons: hardFails })
     const meaning = await this.checkMeaning(id, draftResume, draftLetter, facts, wording, letterTarget, contact, postingTermsGuard)
     // A refused paragraph is asked about sentence by sentence, so one unsupported sentence no longer takes its
     // neighbours down with it. Null (nothing to ask, or that call failed) leaves the paragraph verdicts alone.
@@ -424,8 +441,8 @@ export class DocumentsService implements OnApplicationBootstrap {
     // nothing about the Candidate, so it is dropped unless it is the letter's last body paragraph.
     const orphaned = dropOrphanDirection(tailoredLetter.letter, postingTermsGuard)
     const letterSentencesDropped = tailoredLetter.dropped + orphaned.dropped
-    if (letterSentencesDropped > 0) this.logger.log(JSON.stringify({ event: "documents.letter_sentences_dropped", applicationId: id, count: letterSentencesDropped }))
-    if (tailoredResume.replaced > 0) this.logger.log(JSON.stringify({ event: "documents.lines_fell_back", applicationId: id, count: tailoredResume.replaced }))
+    if (letterSentencesDropped > 0) this.logEvent("documents.letter_sentences_dropped", { applicationId: id, count: letterSentencesDropped })
+    if (tailoredResume.replaced > 0) this.logEvent("documents.lines_fell_back", { applicationId: id, count: tailoredResume.replaced })
     // EPIC-0012 Revision 2, 2.3: one direction-use record per letter, only when the flag is on and the prompt
     // offered at least one quote (the quotes not naming the employer or role). Flags and counts only.
     if (this.flags.direction && direction.length > 0) {
@@ -433,7 +450,7 @@ export class DocumentsService implements OnApplicationBootstrap {
       if (offered > 0) {
         const draftUsed = directionParagraphCount(draftLetter, postingTermsGuard) > 0
         const used = directionParagraphCount(orphaned.letter, postingTermsGuard) > 0 ? 1 : 0
-        this.logger.log(JSON.stringify({ event: "documents.direction_used", applicationId: id, offered, used, judgedSupported: draftUsed ? used === 1 : null, orphan: orphaned.orphan ? 1 : 0 }))
+        this.logEvent("documents.direction_used", { applicationId: id, offered, used, judgedSupported: draftUsed ? used === 1 : null, orphan: orphaned.orphan ? 1 : 0 })
       }
     }
     // EPIC-0012 rule 3 (Revision 2, R14): the letter holds at most three mentions of one keyword. From the
@@ -444,16 +461,13 @@ export class DocumentsService implements OnApplicationBootstrap {
     const cappedLetter = capLetterKeywords(orphaned.letter, keywords)
     const settledLetter = settleCappedLetter(cappedLetter, facts, letterTarget, contact, judgedLetter, postingTermsGuard, wording)
     if (cappedLetter.dropped > 0 || settledLetter.paragraphsDropped > 0 || cappedLetter.overCap || settledLetter.restored > 0) {
-      this.logger.log(
-        JSON.stringify({
-          event: "documents.letter_keyword_cap",
-          applicationId: id,
-          mentions: cappedLetter.mentions,
-          dropped: cappedLetter.dropped,
-          paragraphsDropped: settledLetter.paragraphsDropped,
-          overCap: cappedLetter.overCap || settledLetter.restored > 0,
-        })
-      )
+      this.logEvent("documents.letter_keyword_cap", {
+        applicationId: id,
+        mentions: cappedLetter.mentions,
+        dropped: cappedLetter.dropped,
+        paragraphsDropped: settledLetter.paragraphsDropped,
+        overCap: cappedLetter.overCap || settledLetter.restored > 0,
+      })
     }
     // A paragraph the cap trimmed keeps the verdict of the paragraph it came from: the remaining sentences
     // are a subset of judged sentences. Hard fails still run on the trimmed text in the validation below.
@@ -465,19 +479,19 @@ export class DocumentsService implements OnApplicationBootstrap {
     if (density.lineIds.length > 0) {
       const repaired = repairDenseLines(finalResume, density.lineIds, wording)
       finalResume = repaired.resume
-      this.logger.log(JSON.stringify({ event: "documents.keyword_density", applicationId: id, flagged: density.lineIds.length, repeated: density.repeated.length, crowded: density.crowdedLineIds.length, repaired: repaired.replaced }))
+      this.logEvent("documents.keyword_density", { applicationId: id, flagged: density.lineIds.length, repeated: density.repeated.length, crowded: density.crowdedLineIds.length, repaired: repaired.replaced })
     }
     // EPIC-0012 rule 1: the headline is backend text, set here and never written by the model. It prints the
     // posting's role title only when one approved experience title holds every meaningful word of it. Partial
     // overlap prints nothing; only the count of words the profile does not support is logged.
     const headline = headlineDecision(application.role_title, sections.filter((section) => section.kind === "experience").map((section) => section.title))
     if (headline.headline === null && headline.missing > 0) {
-      this.logger.log(JSON.stringify({ event: "documents.headline_unsupported", applicationId: id, missing: headline.missing }))
+      this.logEvent("documents.headline_unsupported", { applicationId: id, missing: headline.missing })
     }
     finalResume = { ...finalResume, headline: headline.headline }
     // Scored on exactly what will be stored and printed, after every check.
     const ats = scoreAts(keywords, plainTextOf(finalResume, contact).join("\n"), profileText)
-    this.logger.log(JSON.stringify({ event: "documents.ats_scored", applicationId: id, score: ats.score, total: ats.total, missing: ats.missing.length, gaps: ats.gaps.length }))
+    this.logEvent("documents.ats_scored", { applicationId: id, score: ats.score, total: ats.total, missing: ats.missing.length, gaps: ats.gaps.length })
     const documents: Array<[DocumentKind, DocumentContent]> = [
       ["resume", { ...finalResume, ats }],
       ["cover_letter", settledLetter.letter],
