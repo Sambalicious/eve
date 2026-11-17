@@ -142,7 +142,6 @@ export interface ControlStateTable {
   singleton: Generated<boolean>
   global_paused: Generated<boolean>
   cost_paused: Generated<boolean>
-  // Migration 0010 (slice 7).
   cost_paused_at: Generated<Date | null>
   /** `date` column (first of the WAT month), read as text. */
   cost_paused_month: ColumnType<string | null, string | null | undefined, string | null>
@@ -453,7 +452,6 @@ export interface ApplicationTable {
   declined_reason: Generated<string | null>
   manual_completed_at: Generated<Date | null>
   queued_for_local_day: Generated<string | null>
-  // Migration 0007.
   declined_at: Generated<Date | null>
   marked_not_submitted_at: Generated<Date | null>
   blocked_question: Generated<string | null>
@@ -730,7 +728,7 @@ export interface CandidateTable {
   revoked_at: Date | null
 }
 
-/** EPIC-0002 A1 (0018): current Job Preferences per Candidate. Read by no code until slice B. */
+/** EPIC-0002 A1 (0018): current Job Preferences per Candidate. */
 export interface JobPreferencesTable {
   candidate_id: string
   version: number
@@ -746,7 +744,7 @@ export interface JobPreferencesVersionTable {
   saved_at: Generated<Date>
 }
 
-/** Shared, immutable AI provider terms versions (0018, from the slice 2 approval). Read by no code until slice C. */
+/** Shared, immutable AI provider terms versions (0018, from the slice 2 approval). */
 export interface AiTermsRecordTable {
   version: number
   provider: "anthropic"

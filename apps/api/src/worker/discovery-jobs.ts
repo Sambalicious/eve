@@ -83,12 +83,6 @@ export class DiscoveryJobs implements OnApplicationBootstrap {
   }
 
   /**
-   * r2: the cost pause clears at 00:00 WAT on the 1st. r4: once it is off
-   * (rollover or a raised ceiling), postings saved during the pause are
-   * evaluated, each through its own reservation, so evaluating them can pause
-   * paid automation again before the month goes over its ceiling.
-   */
-  /**
    * One `evaluate.posting` job, through CandidateJobRunner as the worker runs
    * it: the runner refuses a missing, malformed, unknown, revoked or deleting
    * Candidate before the handler (TM-01).
@@ -110,6 +104,12 @@ export class DiscoveryJobs implements OnApplicationBootstrap {
     await this.evaluator.evaluate(postingId)
   }
 
+  /**
+   * r2: the cost pause clears at 00:00 WAT on the 1st. r4: once it is off
+   * (rollover or a raised ceiling), postings saved during the pause are
+   * evaluated, each through its own reservation, so evaluating them can pause
+   * paid automation again before the month goes over its ceiling.
+   */
   async spendTick(): Promise<number> {
     return this.tenant.asOperator(() => this.releaseWaiting())
   }

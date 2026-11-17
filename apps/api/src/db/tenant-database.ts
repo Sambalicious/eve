@@ -192,7 +192,6 @@ function guardedHandle<T extends object>(target: T, allowed: ReadonlySet<string>
   })
 }
 
-/** Whether the scope already failed, and whether a compiled text may run. */
 type Refuser = Readonly<{ refuseIfTampered(): void; checkText(text: unknown): void }>
 
 /**

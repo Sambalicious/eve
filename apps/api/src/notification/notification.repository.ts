@@ -140,8 +140,7 @@ export class NotificationRepository {
     return result !== undefined
   }
 
-  /** `C-NOTIFY-1`: the latest final failure, unless a later email was sent. */
-  /** The latest final failure among `kinds`, unless a later email (of any kind) sent. */
+  /** `C-NOTIFY-1`: the latest final failure among `kinds`, unless a later email (of any kind) sent. */
   async latestFailure(kinds: readonly NotificationKind[]) {
     return this.tenant.run(async (tx, candidateId) => {
       const failed = await tx

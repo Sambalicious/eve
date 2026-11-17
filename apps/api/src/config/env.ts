@@ -8,10 +8,6 @@ const DEFAULT_PORT = 3000
 
 export const RETIRED_SUB_MESSAGE = "CANDIDATE_GOOGLE_SUB must be removed after the multi-candidate migration"
 
-/**
- * The Anthropic key is optional. Compose passes `${ANTHROPIC_API_KEY:-}`, so an
- * unset key arrives as an empty string; blank means unset (F-QA5-02).
- */
 const wholeNumber = (min: number, fallback: number) =>
   z
     .string()
@@ -50,6 +46,7 @@ export function invalidKeysMessage(issues: readonly Readonly<{ path: readonly Pr
   return { keys, message: retired.length > 0 ? `${retired.join("; ")}; invalid keys: ${keys.join(", ")}` : base }
 }
 
+/** Compose passes `${ANTHROPIC_API_KEY:-}`, so an unset key arrives as an empty string; blank means unset (F-QA5-02). */
 export const optionalApiKeySchema = z.preprocess((value) => (typeof value === "string" && value.trim() === "" ? undefined : value), z.string().trim().min(1).optional())
 
 /** Tailoring writes what employers read, so it gets a stronger model than scoring. */
