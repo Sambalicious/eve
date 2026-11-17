@@ -115,12 +115,18 @@ jobs:
       # It takes no external database URL, so there is no service container.
       - run: pnpm --filter @eve/api test:int
 
-  e2e:
-    name: e2e (Playwright)
+  # The suite runs serially against one database, so it is split by test file across
+  # runners; every shard starts its own Postgres, api and Vite (global-setup.ts).
+  e2e-shard:
+    name: e2e shard ${{ matrix.shard }}/4
     needs: changes
     if: needs.changes.outputs.e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -136,17 +142,32 @@ jobs:
         run: pnpm --filter @eve/e2e exec playwright install --with-deps chromium
       # Global setup (apps/e2e/support/global-setup.ts) runs postgres:17-alpine with
       # `docker run`, builds and starts the api and starts Vite on port 5199.
-      - run: pnpm turbo run e2e
+      - run: pnpm turbo run e2e -- --shard=${{ matrix.shard }}/4
       - name: Upload the Playwright report and traces
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: playwright-report-${{ github.run_attempt }}
+          name: playwright-report-${{ matrix.shard }}-${{ github.run_attempt }}
           path: |
             apps/e2e/playwright-report/
             apps/e2e/test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+  # The required status check. It keeps the name "e2e (Playwright)" so the branch ruleset
+  # does not change: green when every shard passed or e2e was not needed for this change.
+  e2e:
+    name: e2e (Playwright)
+    needs: [changes, e2e-shard]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: All e2e shards must pass
+        env:
+          RESULT: ${{ needs.e2e-shard.result }}
+        run: |
+          echo "shards: $RESULT"
+          [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
 
   # The checks job tests the api on the .nvmrc Node (24); production runs the
   # apps/api/Dockerfile image on node:22. This job builds that image and boots it
