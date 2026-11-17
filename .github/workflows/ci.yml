@@ -79,6 +79,9 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      # Runtime dependencies only; fails on a known high or critical advisory, which also stops a
+      # Dependabot bump that pulls one in from auto-merging.
+      - run: pnpm audit --prod --audit-level=high
       # TURBO_FILTER is empty on a full run, else --filter=<pkg> per affected package.
       - run: pnpm turbo run typecheck lint $TURBO_FILTER
       # Every affected package's tests except the api integration project, which
