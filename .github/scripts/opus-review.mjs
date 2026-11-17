@@ -16,6 +16,7 @@ import { MAX_DIFF_CHARS, REVIEW_CONTEXT, humanReviewReasons, readReport, require
 
 const MODEL = "claude-opus-5-5"
 const MARKER = "<!-- opus-review -->"
+const MARKER_MERGE = "<!-- opus-review-merge -->"
 const { MODE, PR_NUMBER, REPO, ANTHROPIC_API_KEY, HEAD_SHA } = process.env
 if (!PR_NUMBER || !REPO || (MODE !== "review" && MODE !== "merge")) throw new Error("MODE (review|merge), PR_NUMBER and REPO are required")
 
@@ -38,6 +39,13 @@ function tryMerge(sha) {
   const required = rules.flatMap((rule) => (rule.type === "required_status_checks" ? rule.parameters.required_status_checks.map((check) => check.context) : []))
   const runs = api(`commits/${sha}/check-runs?per_page=100`).check_runs
   if (!requiredChecksPassed(required, runs)) return console.log("Not merging: the required checks have not all passed yet.")
+  // The reader must see the review before the merge: refuse to merge without the review
+  // comment for this exact commit, and say so on the PR before merging.
+  const reviewed = api(`issues/${PR_NUMBER}/comments?per_page=100`, ["--paginate", "--slurp"]).flat().some(
+    (item) => item.user?.type === "Bot" && item.body?.startsWith(MARKER) && item.body.includes(`reviewed-sha:${sha}`)
+  )
+  if (!reviewed) return console.log("Not merging: no Opus review comment on the PR for this commit.")
+  gh(["pr", "comment", PR_NUMBER, "--repo", REPO, "--body-file", "-"], `${MARKER_MERGE}\nMerging \`${sha.slice(0, 7)}\` now: Opus 5.5 reviewed it (comment above), it needs no person, and every required check passed.`)
   gh(["pr", "merge", PR_NUMBER, "--repo", REPO, "--merge", "--match-head-commit", sha])
   console.log(`Merged #${PR_NUMBER} at ${sha}`)
   // A merge made with GITHUB_TOKEN starts no push workflows, so main would get no CI run.
@@ -122,8 +130,8 @@ function comment(body) {
   else gh(["pr", "comment", PR_NUMBER, "--repo", REPO, "--body-file", "-"], text)
 }
 
-function render(reasons, report, mergeable) {
-  const lines = [`### Opus review (${MODEL})`, ""]
+function render(sha, reasons, report, mergeable) {
+  const lines = [`### Opus review (${MODEL})`, "", `Commit \`${sha.slice(0, 7)}\`<!-- reviewed-sha:${sha} -->`, ""]
   if (report.findings.length === 0) lines.push("No findings.")
   for (const finding of report.findings) {
     lines.push(`- **${finding.severity}** \`${finding.file}\`: ${finding.summary}`)
@@ -167,7 +175,7 @@ try {
   const latest = api(`pulls/${PR_NUMBER}`)
   const current = latest.head.sha === reviewedSha && latest.state === "open" && !latest.draft
   const mergeable = report.clean && reasons.length === 0 && current
-  comment(render(reasons, report, mergeable))
+  comment(render(reviewedSha, reasons, report, mergeable))
   if (!mergeable) {
     const why = reasons.length > 0 ? "needs a person" : report.clean ? "head moved" : "issues found"
     setStatus(reviewedSha, "failure", `Opus review: ${why}`)
