@@ -5,7 +5,9 @@
 # The PR is merged (a plain merge commit, never the admin bypass) only when ALL hold:
 #   - Opus reported no high or medium finding;
 #   - it touches no auth, session, money, database, config, CI, deploy or dependency file
-#     (see .github/scripts/review-gate.mjs) and is at most 400 changed lines;
+#     (see .github/scripts/review-gate.mjs) and is at most 400 changed lines. The one
+#     exception: a Dependabot bump (author and every commit verified as Dependabot's) that
+#     changes only package.json files and the lockfile, with no line limit;
 #   - the status is on the PR's current head, and every check the branch ruleset requires
 #     has finished green on that same commit.
 # Anything else keeps its comment and waits for a person. A new push has no status, so it
@@ -34,12 +36,12 @@ permissions: {}
 jobs:
   review:
     name: opus review
-    # Forks and Dependabot get no secrets here; Dependabot has its own workflow.
+    # Forks get no secrets here. Dependabot PRs run too; its secret store must hold
+    # ANTHROPIC_API_KEY too (Dependabot-triggered runs read that store, not Actions').
     if: >-
       github.event_name == 'pull_request_target' &&
       github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.user.login != 'dependabot[bot]'
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:

@@ -34,6 +34,15 @@ const SENSITIVE_PATHS = [
   /^apps\/extension\/manifest\.json$/,
 ]
 
+// A Dependabot version bump edits only these. They are sensitive for everyone else, but a
+// bump that changes nothing else is reviewed by Opus and the required checks, not a person.
+const DEPENDENCY_FILES = [/^pnpm-lock\.yaml$/, /^(apps|packages)\/[^/]+\/package\.json$/, /^package\.json$/]
+
+/** @param {string} path */
+export function isDependencyFile(path) {
+  return DEPENDENCY_FILES.some((pattern) => pattern.test(path))
+}
+
 /** @param {string} path */
 export function isSensitivePath(path) {
   return SENSITIVE_PATHS.some((pattern) => pattern.test(path)) || SENSITIVE_WORDS.test(path)
@@ -41,18 +50,22 @@ export function isSensitivePath(path) {
 
 /**
  * @param {{ filename: string, previous_filename?: string }[]} files
- * @param {{ truncated: boolean, changedLines: number }} diff
+ * @param {{ truncated: boolean, changedLines: number, dependabot?: boolean }} diff
+ *   `dependabot` must be true only when the PR author and every commit are Dependabot's: the
+ *   dependency manifests and the lockfile then stop being sensitive, and the line limit is
+ *   waived (a lockfile diff is large), but every other gate still holds.
  * @returns {string[]} why a person must review; empty when none of the gates applies
  */
 export function humanReviewReasons(files, diff) {
   const reasons = []
-  const sensitive = files.filter((file) => isSensitivePath(file.filename) || (file.previous_filename && isSensitivePath(file.previous_filename)))
+  const sensitiveFor = (path) => isSensitivePath(path) && !(diff.dependabot && isDependencyFile(path))
+  const sensitive = files.filter((file) => sensitiveFor(file.filename) || (file.previous_filename && sensitiveFor(file.previous_filename)))
   if (sensitive.length > 0) {
     const shown = sensitive.slice(0, 5).map((file) => file.filename)
     const more = sensitive.length > shown.length ? ` and ${sensitive.length - shown.length} more` : ""
     reasons.push(`touches auth, money, database, config, CI or dependency files: ${shown.join(", ")}${more}`)
   }
-  if (diff.changedLines > MAX_CHANGED_LINES) reasons.push(`changes ${diff.changedLines} lines (limit ${MAX_CHANGED_LINES})`)
+  if (!diff.dependabot && diff.changedLines > MAX_CHANGED_LINES) reasons.push(`changes ${diff.changedLines} lines (limit ${MAX_CHANGED_LINES})`)
   if (diff.truncated) reasons.push("part of the diff could not be sent to the model, so it was not reviewed in full")
   return reasons
 }
