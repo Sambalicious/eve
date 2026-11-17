@@ -161,7 +161,11 @@ try {
   let diff = files.map((file) => `--- ${file.previous_filename ?? file.filename}\n+++ ${file.filename}\n${file.patch ?? "(no textual patch: binary or too large)"}`).join("\n\n")
   const truncated = diff.length > MAX_DIFF_CHARS || files.length !== pr.changed_files || files.some((file) => file.patch === undefined)
   if (diff.length > MAX_DIFF_CHARS) diff = diff.slice(0, MAX_DIFF_CHARS)
-  const reasons = humanReviewReasons(files, { truncated, changedLines: pr.additions + pr.deletions })
+  // Dependabot's own bump: the author and every commit must be the bot, so nobody else's
+  // change rides on the dependency exemption.
+  const commits = api(`pulls/${PR_NUMBER}/commits`, ["--paginate"])
+  const dependabot = pr.user?.login === "dependabot[bot]" && commits.length > 0 && commits.every((commit) => commit.author?.login === "dependabot[bot]" && commit.commit?.verification?.verified === true)
+  const reasons = humanReviewReasons(files, { truncated, changedLines: pr.additions + pr.deletions, dependabot })
 
   const boundary = randomBytes(8).toString("hex")
   const prompt = [

@@ -103,3 +103,13 @@ test("every required check must be finished and green, judged by its latest run"
   assert.equal(requiredChecksPassed(required, [run(1, "a", "completed", "success"), run(2, "b", "completed", "success"), run(3, "b", "completed", "failure")]), false)
   assert.equal(requiredChecksPassed([], []), false)
 })
+
+test("a Dependabot bump of manifests and the lockfile needs no person, anything else in it still does", () => {
+  const bump = [file("pnpm-lock.yaml"), file("apps/api/package.json"), file("package.json")]
+  const big = { truncated: false, changedLines: 5000 }
+  assert.deepEqual(humanReviewReasons(bump, { ...big, dependabot: true }), [])
+  assert.equal(humanReviewReasons(bump, { ...big, dependabot: false }).length, 2)
+  assert.equal(humanReviewReasons([...bump, file(".github/workflows/ci.yml")], { ...big, dependabot: true }).length, 1)
+  assert.equal(humanReviewReasons([file("pnpm-workspace.yaml")], { ...big, dependabot: true }).length, 1)
+  assert.equal(humanReviewReasons(bump, { truncated: true, changedLines: 5000, dependabot: true }).length, 1)
+})
