@@ -9,6 +9,13 @@ import { CLOCK, type Clock } from "../shared/clock.js"
 import { SPEND_CONFIG } from "./spend-config.js"
 import { type SpendConfig, watMonth, wouldCross } from "./spend-math.js"
 
+/**
+ * A reservation older than this was never settled or released: its attempt died
+ * (a failed release, a crashed worker, a lost job). Six hours is far beyond any
+ * attempt, so a live one can never be reaped.
+ */
+export const STALE_RESERVATION_MS = 6 * 60 * 60 * 1000
+
 /** E4 `{action label}`: what the refused paid action was. */
 export type CostAction = "discovery run" | "document generation" | "Eligibility and Match check" | "form filling" | "Career Profile drafting"
 
@@ -140,6 +147,27 @@ export class SpendLedger {
     await this.tenant.forShared((tx) =>
       tx.updateTable("spend_entry").set({ status: "released", settled_at: this.clock.now() }).where("id", "=", id).where("status", "=", "reserved").execute()
     )
+  }
+
+  /**
+   * Releases reservations that never reached a settle or a release, so a lost
+   * one cannot hold the ceiling for the rest of the month: `reserved` counts
+   * toward the month until it is settled or released. Only rows older than
+   * `STALE_RESERVATION_MS` are touched; a settled or released row never is.
+   * Returns how many it released.
+   */
+  async reapStale(): Promise<number> {
+    const now = this.clock.now()
+    const cutoff = new Date(now.getTime() - STALE_RESERVATION_MS)
+    const result = await this.tenant.forShared((tx) =>
+      tx
+        .updateTable("spend_entry")
+        .set({ status: "released", settled_at: now })
+        .where("status", "=", "reserved")
+        .where("created_at", "<", cutoff)
+        .executeTakeFirst()
+    )
+    return Number(result.numUpdatedRows)
   }
 
   /**
