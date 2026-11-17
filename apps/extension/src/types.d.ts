@@ -5,36 +5,43 @@
  *
  * This file has no imports or exports on purpose: every other source file is a
  * classic script, because Chrome injects `files` as classic scripts.
+ *
+ * The shapes that cross the wire to `POST /v1/extension/fill` are defined once,
+ * in `@eve/contracts` (`extension-fill.ts`), and aliased below with an inline
+ * `import("@eve/contracts")` type. That form is type-only and keeps this file
+ * ambient; it emits nothing, so zod never reaches the extension's output. Every
+ * other type here is the extension's own (page API, bridge results, the popup
+ * protocol, the stored run) and has no counterpart on the server.
  */
 
-type EveFieldKind = "text" | "textarea" | "select" | "radio" | "checkbox" | "file"
+// --- Wire shapes: owned by @eve/contracts. -----------------------------------
 
-/** The prepared documents the extension may attach (contract `extensionFillDocumentKindSchema`). */
-type EveDocumentKind = "resume" | "cover_letter"
+type EveFieldKind = import("@eve/contracts").ExtensionFillFieldKind
+
+/** The prepared documents the extension may attach. */
+type EveDocumentKind = import("@eve/contracts").ExtensionFillDocumentKind
 
 /** One document answer Eve planned for a file input, as the API returns it. */
-interface EveFillDocument {
-  ref: string
-  document: EveDocumentKind
-}
+type EveFillDocument = import("@eve/contracts").ExtensionFillDocument
 
-/** One control as the employer page's reader saw it (the API's `extensionFillFieldSchema`). */
-interface EvePageField {
-  ref: string
-  label: string
-  kind: EveFieldKind
-  required: boolean
-  options?: string[]
-  /** A text input that offers choices (role=combobox, aria-autocomplete or a datalist). */
-  combobox?: boolean
-}
+/** One control as the employer page's reader saw it. */
+type EvePageField = import("@eve/contracts").ExtensionFillField
 
 /** One value Eve planned, and the kind of control it belongs to. */
-interface EvePageValue {
-  ref: string
-  value: string
-  kind: EveFieldKind
-}
+type EvePageValue = import("@eve/contracts").ExtensionFillValue
+
+/** A control Eve could not answer, with the Candidate-facing reason. */
+type EvePageUnanswered = import("@eve/contracts").ExtensionFillUnanswered
+
+/** `POST /v1/extension/fill` body. */
+type EveFillBody = import("@eve/contracts").ExtensionFillRequest
+
+type EveFillApplication = import("@eve/contracts").ExtensionFillApplication
+
+/** `POST /v1/extension/fill` response. */
+type EveFillResponseBody = import("@eve/contracts").ExtensionFillResponse
+
+// --- Extension-internal. -----------------------------------------------------
 
 /** One planned value as the popup reviews it: the page's own label for the ref, and the value Eve would type. */
 interface EveFillPlanValue extends EvePageValue {
@@ -52,13 +59,6 @@ interface EvePageDocument {
   name: string
   type: string
   base64: string
-}
-
-/** A control Eve could not answer, with the Candidate-facing reason when Eve sent one. */
-interface EvePageUnanswered {
-  ref: string
-  label: string
-  detail?: string | null
 }
 
 interface EvePageFillPayload {
@@ -93,25 +93,6 @@ interface EvePageApi {
   attachFile(document: EvePageDocument): Promise<boolean>
   finish(): EvePageFinishResult
   fill(payload: EvePageFillPayload): Promise<EvePageFillResult>
-}
-
-/** `POST /v1/extension/fill` body and response, as the bridge exchanges them. */
-interface EveFillBody {
-  url: string
-  fields: EvePageField[]
-}
-
-interface EveFillApplication {
-  id: string
-  company: string | null
-  roleTitle: string | null
-}
-
-interface EveFillResponseBody {
-  application: EveFillApplication | null
-  values: EvePageValue[]
-  documents: EveFillDocument[]
-  unanswered: EvePageUnanswered[]
 }
 
 type EveBridgeError = "unauthorized" | "session" | "csrf" | "fill" | "download" | "network" | "forbidden" | "not_available" | "too_large"
