@@ -20,7 +20,7 @@
     "storage:migrate": "node dist/db/storage-migrate.cli.js"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "4.0.82",
+    "@ai-sdk/anthropic": "4.0.105",
     "@eve/contracts": "workspace:*",
     "@fastify/cookie": "^11.1.5",
     "@fastify/multipart": "10.1.8",
