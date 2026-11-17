@@ -340,6 +340,7 @@ test.describe("Limit, duplicate and the other list (HAF:94 to :164, :254 to :294
     await expect(hiring.feedUrlField()).toHaveValue(HFEED_B)
     await expect(hiring.feedLabelField()).toHaveValue("Eleventh")
     await expect(hiring.addFeedButton()).toBeEnabled()
+    // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
     await page.waitForTimeout(500)
     expect(browserRequests.filter((r) => r.method() === "POST" && new URL(r.url()).pathname === HIRING_FEEDS_PATH)).toHaveLength(0)
     expect(await feedRequests(HFEED_B)).toHaveLength(0)

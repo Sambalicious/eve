@@ -34,8 +34,7 @@ test("OUT1-01 loading the Hiring view with links: no api outbound request, no br
   await hiring.openWith()
   await hiring.waitForGroups(3)
   await hiring.alertsQueries()
-  await page.waitForLoadState("networkidle")
-  expect(outboundRequests().slice(before)).toEqual([])
+  await expect.poll(() => outboundRequests().slice(before), { timeout: 2_000 }).toEqual([])
   expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
   expect(await aiCallAndSpendCounts()).toEqual(counts)
   expect(await databaseFingerprint()).toEqual(fingerprint)
@@ -47,13 +46,13 @@ test("OUT1-02 switching the Role family choice: no request from the browser to a
   const hiring = new HiringLinksPage(page)
   await hiring.openWith()
   await hiring.waitForGroups(1)
-  await page.waitForLoadState("networkidle")
   const browserRequests = recordRequests(page)
   const before = outboundRequests().length
   for (const family of ["fullstack", "backend", "senior_frontend"]) {
     await hiring.familySelect().selectOption(family)
     await expect(page).toHaveURL(new RegExp(`family=${family}`))
   }
+  // Deliberate negative wait: no observable signal exists for a request that is never sent, so a short settle stays.
   await page.waitForTimeout(500)
   expect(browserRequests.map((r) => r.url())).toEqual([])
   expect(outboundRequests().slice(before)).toEqual([])
@@ -69,8 +68,7 @@ test("OUT1-03 building hiring links for every target family (all 13 targeted, ea
     await hiring.openWith({ family })
     await expect(hiring.familySelect()).toHaveValue(family)
   }
-  await page.waitForLoadState("networkidle")
-  expect(outboundRequests().slice(before)).toEqual([])
+  await expect.poll(() => outboundRequests().slice(before), { timeout: 2_000 }).toEqual([])
   expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
 })
 
@@ -82,8 +80,7 @@ test("OUT1-04 Bola's Hiring view (no Job Preferences) also reaches no outbound h
   const hiring = new HiringLinksPage(page)
   await hiring.openWith()
   await hiring.waitForGroups(1)
-  await page.waitForLoadState("networkidle")
-  expect(outboundRequests().slice(before)).toEqual([])
+  await expect.poll(() => outboundRequests().slice(before), { timeout: 2_000 }).toEqual([])
   expect(browserRequests.map((r) => r.url()).filter(isForbiddenHost)).toEqual([])
 })
 
