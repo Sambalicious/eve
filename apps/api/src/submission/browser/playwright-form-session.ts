@@ -1,6 +1,9 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { basename, join } from "node:path"
 
+import { Logger } from "@nestjs/common"
+
+import { swallowAndLog } from "../../shared/swallow-and-log.js"
 import type { StoredDocument } from "../stored-document.js"
 
 import { BrowserUnavailableError, type EvidenceStage, type FormControl, type FormRead, type FormSession, type FormSessionFactory, OffOriginError, type PageAfterSubmit } from "../form-session.js"
@@ -56,6 +59,7 @@ export class PlaywrightFormSessions implements FormSessionFactory {
 }
 
 class PlaywrightFormSession implements FormSession {
+  private readonly logger = new Logger(PlaywrightFormSession.name)
   private applicationHost: string | null = null
   private controls = new Map<string, FormControl>()
   private clicked = false
@@ -155,10 +159,10 @@ class PlaywrightFormSession implements FormSession {
   }
 
   async close(): Promise<void> {
-    await this.mcp.call("browser_close", {}).catch(() => undefined)
-    await this.mcp.close().catch(() => undefined)
+    await this.mcp.call("browser_close", {}).catch(swallowAndLog(this.logger, "browser_close"))
+    await this.mcp.close().catch(swallowAndLog(this.logger, "mcp.close"))
     await rm(this.uploadDir, { recursive: true, force: true })
-    await this.clearOwnAllowlist().catch(() => undefined)
+    await this.clearOwnAllowlist().catch(swallowAndLog(this.logger, "clearOwnAllowlist"))
   }
 
   private get allowlistOwner(): string {

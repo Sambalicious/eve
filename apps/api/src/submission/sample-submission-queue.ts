@@ -6,6 +6,7 @@ import { APP_CONFIG } from "../config/config.module.js"
 import type { SharedRuntimeConfig } from "../config/env.js"
 import { CandidateScope } from "../db/candidate-scope.js"
 import type { Database } from "../db/schema.js"
+import { swallowAndLog } from "../shared/swallow-and-log.js"
 
 /**
  * F-QA5-01: the queue an approved Activation Gate sample waits in until the
@@ -39,8 +40,8 @@ export class SampleSubmissionQueue implements OnApplicationShutdown {
 
   async onApplicationShutdown(): Promise<void> {
     if (!this.started) return
-    await this.started.catch(() => undefined)
-    await this.boss.stop({ graceful: true }).catch(() => undefined)
+    await this.started.catch(swallowAndLog(this.logger, "queue start"))
+    await this.boss.stop({ graceful: true }).catch(swallowAndLog(this.logger, "queue stop"))
   }
 
   async enqueue(trx: Transaction<Database>, applicationId: string): Promise<void> {
