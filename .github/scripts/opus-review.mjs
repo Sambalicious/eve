@@ -12,18 +12,21 @@
 import { execFileSync } from "node:child_process"
 import { randomBytes } from "node:crypto"
 
+import { fixFindings } from "./opus-fix.mjs"
 import { MAX_DIFF_CHARS, REVIEW_CONTEXT, humanReviewReasons, readReport, requiredChecksPassed, reviewPassed } from "./review-gate.mjs"
 
 const MODEL = "claude-opus-5-5"
 const MARKER = "<!-- opus-review -->"
 const MARKER_MERGE = "<!-- opus-review-merge -->"
-const { MODE, PR_NUMBER, REPO, ANTHROPIC_API_KEY, HEAD_SHA } = process.env
+const { MODE, PR_NUMBER, REPO, ANTHROPIC_API_KEY, HEAD_SHA, FIX_PUSH_TOKEN } = process.env
 if (!PR_NUMBER || !REPO || (MODE !== "review" && MODE !== "merge")) throw new Error("MODE (review|merge), PR_NUMBER and REPO are required")
 
-function gh(args, input) {
-  return execFileSync("gh", args, { encoding: "utf8", input, maxBuffer: 64 * 1024 * 1024 })
+function gh(args, input, token) {
+  const env = token ? { ...process.env, GH_TOKEN: token } : process.env
+  return execFileSync("gh", args, { encoding: "utf8", input, env, maxBuffer: 64 * 1024 * 1024 })
 }
-const api = (path, extra = []) => JSON.parse(gh(["api", ...extra, `repos/${REPO}/${path}`]))
+const api = (path, extra = [], token) => JSON.parse(gh(["api", ...extra, `repos/${REPO}/${path}`], undefined, token))
+const post = (path, method, body, token) => JSON.parse(gh(["api", "-X", method, `repos/${REPO}/${path}`, "--input", "-"], JSON.stringify(body), token))
 
 function setStatus(sha, state, description) {
   gh(["api", "-X", "POST", `repos/${REPO}/statuses/${sha}`, "-f", `state=${state}`, "-f", `context=${REVIEW_CONTEXT}`, "-f", `description=${description.slice(0, 140)}`])
@@ -183,6 +186,13 @@ try {
   if (!mergeable) {
     const why = reasons.length > 0 ? "needs a person" : report.clean ? "head moved" : "issues found"
     setStatus(reviewedSha, "failure", `Opus review: ${why}`)
+    // Low and medium findings on a PR a person must merge anyway: push a small fix commit, which
+    // the next review and CI run then judge. Never reached for a PR that merges.
+    await fixFindings({
+      pr: { head: latest.head, title: pr.title, number: Number(PR_NUMBER) },
+      report, files, dependabot, merged: false, apiKey: ANTHROPIC_API_KEY, pushToken: FIX_PUSH_TOKEN, api, post,
+      comment: (body) => gh(["pr", "comment", PR_NUMBER, "--repo", REPO, "--body-file", "-"], body),
+    }).catch((error) => console.log(`Automatic fix failed: ${error.message}`))
     process.exit(0)
   }
   setStatus(reviewedSha, "success", "Opus review: no issues")
