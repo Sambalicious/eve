@@ -256,8 +256,11 @@ jobs:
       - name: All e2e shards must pass
         env:
           RESULT: ${{ needs.e2e-shard.result }}
+          PLAN: ${{ needs.changes.result }}
         run: |
-          echo "shards: $RESULT"
+          echo "plan: $PLAN, shards: $RESULT"
+          # If the plan job itself failed, the shards were skipped by accident, not by design.
+          [ "$PLAN" = "success" ] || exit 1
           [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
 
   # The checks job tests the api on the .nvmrc Node (24); production runs the

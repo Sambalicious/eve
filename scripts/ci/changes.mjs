@@ -226,7 +226,15 @@ function parseArgs(argv) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const d = decide(parseArgs(process.argv.slice(2)));
+  const args = parseArgs(process.argv.slice(2));
+  let d;
+  try {
+    d = decide(args);
+  } catch (error) {
+    // Fail safe: if detection itself breaks, run everything rather than skip silently.
+    console.log(`::warning::change detection failed, running everything: ${error.message}`);
+    d = { mode: 'full', reason: `change detection failed (${error.message.split('\n')[0]})`, head: args.head };
+  }
   const out = { mode: d.mode, base: d.base ?? '', head: d.head, ...jobs(d) };
   const text = Object.entries(out).map(([key, value]) => `${key}=${value}`).join('\n');
   console.log(`${d.reason}${d.files ? ` (${d.files.length} files)` : ''}`);
