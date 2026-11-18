@@ -227,9 +227,11 @@ jobs:
           [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
 
   # The suite runs serially against one database, so it is split by test file across
-  # runners; every shard starts its own Postgres, api and Vite (global-setup.ts).
+  # runners; every shard starts its own Postgres, api and Vite (global-setup.ts). Files are
+  # assigned by recorded duration (apps/e2e/support/spec-shards.ts), not by Playwright's
+  # --shard, which balances test counts and left shards 250 to 360 s apart.
   e2e-shard:
-    name: e2e shard ${{ matrix.shard }}/4
+    name: e2e shard ${{ matrix.shard }}/6
     needs: changes
     if: needs.changes.outputs.e2e == 'true'
     runs-on: ubuntu-latest
@@ -237,7 +239,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -261,7 +263,16 @@ jobs:
       - run: pnpm --filter @eve/e2e exec playwright install chromium
       # Global setup (apps/e2e/support/global-setup.ts) runs postgres:17-alpine with
       # `docker run`, builds and starts the api and starts Vite on port 5199.
-      - run: pnpm turbo run e2e -- --shard=${{ matrix.shard }}/4
+      - name: Pick this shard's spec files
+        id: specs
+        run: |
+          files="$(node apps/e2e/support/spec-shards.ts ${{ matrix.shard }} 6)"
+          # An empty list would make Playwright run every spec on this shard.
+          [ -n "$files" ] || { echo "no spec files for shard ${{ matrix.shard }}/6"; exit 1; }
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+      - run: pnpm turbo run e2e -- $SPEC_FILES
+        env:
+          SPEC_FILES: ${{ steps.specs.outputs.files }}
       - name: Upload the Playwright report and traces
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
