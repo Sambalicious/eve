@@ -12,10 +12,8 @@ import type { Database } from "../../src/db/schema.js"
  * Paths, codes, messages and the table name are retyped from
  * epics/active/EPIC-0008-stack-feeds-per-user/api-contract.md (v1.22.0), not
  * imported from @eve/contracts or the app, so a wrong product constant fails
- * the tests instead of passing with them. The new table is not in the Kysely
- * `Database` type at authoring time, and the contract removes the legacy table
- * from it, so both are reached through raw SQL as the bootstrap superuser
- * (`database.db`), which RLS does not bind.
+ * the tests instead of passing with them. Both tables are reached through raw
+ * SQL as the bootstrap superuser (`database.db`), which RLS does not bind.
  */
 export const ALERT_FEEDS_PATH = "/v1/stack-posts/alert-feeds"
 export const ALERT_FEED_VERIFICATION_PATH = "/v1/stack-posts/alert-feeds/verification"

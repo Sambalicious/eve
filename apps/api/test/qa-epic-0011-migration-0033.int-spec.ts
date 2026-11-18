@@ -17,7 +17,6 @@ import { rolesFor, urlFor } from "./support/postgres-cluster.js"
  * else off, no detection logic), UPG:48 (idempotent, never overwrites a user's flag), UPG:92 (automatic values
  * unchanged), AC-7.3 (note due for existing non-Operators). Each case builds a database at 0032 provisioned like
  * production, then runs 0033 as the migration owner role (FORCE row-level security binds it).
- * Expected red until 0033 exists.
  */
 const OWNER_SUB = "google-sub-ada-0033"
 const ALL = migrationsFor({ operatorGoogleSub: OWNER_SUB })

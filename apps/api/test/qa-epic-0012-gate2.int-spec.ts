@@ -173,9 +173,9 @@ describe("QA EPIC-0012 gate 2: bypasses fixed in Revision 2, end to end (fake mo
     expect(FakeAnthropic.promptOf(anthropic.requests[1]!)).not.toContain(LED_LINE)
     const resume = (await stored(application.id, "resume")) as ResumeContent
     const letter = (await stored(application.id, "cover_letter")) as CoverLetterContent
-    // Fixed QA2-B1a: "Supported" may not become "Led" just because the employer is named "Lead Bank".
+    // "Supported" may not become "Led" just because the employer is named "Lead Bank".
     expect(resume.experience[0]?.bullets.map((bullet) => bullet.text)).not.toContain(LED_LINE)
-    // Fixed QA2-B4: the goal-as-met sentence is not stored (R11: a completion word outside the quote is a hard fail).
+    // The goal-as-met sentence is not stored (R11: a completion word outside the quote is a hard fail).
     expect(letter.paragraphs.map((paragraph) => paragraph.text)).not.toContain(GOAL_MET)
   })
 

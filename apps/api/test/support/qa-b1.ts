@@ -180,8 +180,6 @@ export async function versionCount(db: Kysely<Database>, candidateId: string): P
   return (await db.selectFrom("job_preferences_version").select("version").where("candidate_id", "=", candidateId).execute()).length
 }
 
-// ── Postings ────────────────────────────────────────────────
-
 export type PostingSeed = Readonly<{
   title?: string | null
   family?: string | null

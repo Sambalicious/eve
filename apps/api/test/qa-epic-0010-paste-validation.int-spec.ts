@@ -21,8 +21,7 @@ import {
 /**
  * QA test authoring, step [5e], EPIC-0010 run, task qa-tests. Contract v1.27.0
  * `POST /v1/job-postings/links` "Processing order" steps 1 to 5, through the real
- * route and Postgres. Written before the implementation: expected red until the
- * integrated candidate lands.
+ * route and Postgres.
  *
  * Covers paste-description.feature (PD): PD:91 (api part), PD:99, PD:112, PD:133,
  * PD:146, PD:161, PD:175, PD:181, PD:191, PD:205, PD:211, PD:217, PD:222, PD:227,

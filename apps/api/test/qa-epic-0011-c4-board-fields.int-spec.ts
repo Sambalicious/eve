@@ -15,7 +15,7 @@ import { TestClock } from "./support/test-clock.js"
  * Gherkin: applications-board.r1.feature BRD:202 ("Only the Application list carries the board fields"),
  * BRD:53 placement table inputs (AC-6.2), BRD:273 list-row-only. The placement itself is derived
  * on the web (covered in the unit tests and the e2e board journeys); here the API supplies
- * the five fields correctly. Expected red until C4 lands.
+ * the five fields correctly.
  */
 let database: TestDatabase
 let google: FakeGoogle

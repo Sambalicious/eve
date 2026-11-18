@@ -24,8 +24,7 @@ import { LEGACY_TABLE, OWN_TABLE, epic8MigrationName } from "./support/qa-stack-
  * The migration is found by name suffix, so a D19 renumber at merge keeps the
  * tests valid. It is targeted by name (Migrator.migrateTo), never "to latest",
  * so migrations merged after it (0025-apply-anyway onward) do not change what
- * these cases apply. Before the migration exists every test here fails on the
- * "migration exists" assertion, which is the expected red.
+ * these cases apply.
  */
 const OWNER_SUB = "100000000000000000001"
 const ALL = migrationsFor({ operatorGoogleSub: OWNER_SUB })

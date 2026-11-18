@@ -24,8 +24,7 @@ import {
 /**
  * QA test authoring, step [5e], EPIC-0010. Contract v1.27.0 "Store" table and every
  * `descriptionOutcome`, through the real route, Postgres and the in-process evaluation
- * (model calls answered by FakeAnthropic; ATS public APIs by msw). Expected red until
- * the integrated candidate lands.
+ * (model calls answered by FakeAnthropic; ATS public APIs by msw).
  *
  * Covers: PD:58 (api), PD:73, PD:262, PD:271, PD:284; EV:28, EV:34, EV:101 (api part),
  * EV:149 (api), EV:188; RP:46, RP:88, RP:96, RP:113, RP:120, RP:130, RP:139, RP:148,
