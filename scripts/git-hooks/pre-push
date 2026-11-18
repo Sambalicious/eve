@@ -5,10 +5,12 @@
 # dependencies installed, no origin/main), because CI is the real gate.
 # Turbo caches results, so a repeat push with no new changes returns at once.
 
-# Deleting a remote branch has nothing to check.
+# Deleting a remote branch has nothing to check; exit only when every ref is a deletion.
+pushing=0
 while read -r _ local_sha _ _; do
-  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && exit 0
+  [ "$local_sha" != "0000000000000000000000000000000000000000" ] && pushing=1
 done
+[ "$pushing" = 1 ] || exit 0
 
 root=$(git rev-parse --show-toplevel) || exit 0
 cd "$root" || exit 0
