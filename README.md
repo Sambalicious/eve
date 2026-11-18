@@ -62,7 +62,7 @@ A first job, `what changed` (`scripts/ci/changes.mjs`), decides which other jobs
 | Lockfile, root build config, `.github/` or `scripts/ci/`                                                | everything                                                                                                                                   |
 | Nightly                                                                                                 | everything, when `main` changed in the last day                                                                                              |
 
-Check what a branch would run with `node scripts/ci/changes.mjs --base origin/main`, and start a full run from the Actions tab (`workflow_dispatch`).
+If change detection itself errors, it logs a warning and runs everything; if the `what changed` job fails outright, `e2e (Playwright)` fails rather than passing on skipped shards. Check what a branch would run with `node scripts/ci/changes.mjs --base origin/main`, and start a full run from the Actions tab (`workflow_dispatch`).
 
 You can run the jobs locally with Node 24 (`.nvmrc`) and Docker running:
 

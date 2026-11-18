@@ -194,3 +194,13 @@ test('a root manifest change to agent scripts alone selects no package', () => {
     r.rm();
   }
 });
+
+test('a failure inside change detection runs everything instead of skipping', () => {
+  const out = execFileSync(process.execPath, [join(process.cwd(), 'scripts/ci/changes.mjs'), '--head', 'no-such-rev'], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+  assert.match(out, /mode=full/);
+  assert.match(out, /checks=true/);
+  assert.match(out, /e2e=true/);
+});
