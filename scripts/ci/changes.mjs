@@ -189,6 +189,7 @@ export function decide({ event = '', base = '', head = 'HEAD', full = false }) {
 // ---- eve: which jobs run --------------------------------------------------
 
 const API = '@eve/api';
+const EXTENSION = '@eve/extension';
 const filters = names => names.map(name => `--filter=${name}`).join(' ');
 
 export function jobs(d) {
@@ -205,8 +206,9 @@ export function jobs(d) {
     nonapi_tests: nonApi.length > 0,
     // Integration tests and the api image smoke: the api or what it depends on.
     api: d.affected.has(API),
-    // Playwright drives the real api and web, so any package change runs it.
-    e2e: names.length > 0,
+    // Playwright drives the real api and web, so any package change runs it, except a change
+    // confined to the extension, which no Playwright spec loads.
+    e2e: names.some(name => name !== EXTENSION),
     agents: d.other,
     turbo_filter: filters(names),
     test_filter: filters(nonApi),
