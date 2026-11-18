@@ -66,3 +66,5 @@ agent configuration and run artifacts, and publishes an allowlisted slice on eac
 Practically: your pull request is welcome and will be merged into the private tree, then appears in
 the next release. Nothing you see here is overwritten by hand; if a file looks odd or stale, open an
 issue rather than editing it in a release branch.
+
+<!-- proof -->
