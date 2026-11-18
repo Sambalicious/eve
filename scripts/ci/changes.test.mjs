@@ -47,6 +47,19 @@ test('a web-only change skips api integration and the image smoke', () => {
   assert.equal(plan.agents, false);
 });
 
+test('an extension-only change skips e2e but still runs its own checks and tests', () => {
+  const plan = jobs({ mode: 'scoped', affected: new Set(['@eve/extension']), other: false });
+  assert.equal(plan.e2e, false);
+  assert.equal(plan.checks, true);
+  assert.equal(plan.nonapi_tests, true);
+  assert.equal(plan.api, false);
+});
+
+test('an extension change next to a web change still runs e2e', () => {
+  const plan = jobs({ mode: 'scoped', affected: new Set(['@eve/extension', '@eve/web']), other: false });
+  assert.equal(plan.e2e, true);
+});
+
 test('an api-only change has no non-api unit tests to run', () => {
   const plan = jobs({ mode: 'scoped', affected: new Set(['@eve/api']), other: false });
   assert.equal(plan.api, true);
