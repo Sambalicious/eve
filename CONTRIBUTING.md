@@ -45,6 +45,14 @@ rationale, a workaround, or a contract the signature does not show. It never res
 line does and never narrates the change (moved, now, no longer, previously). Delete commented-out
 code; git keeps it. Prefer a better name over a comment that explains a bad one.
 
+## Looking at the running app (agents)
+
+An agent can check a UI change in a real browser with the `agent-browser` skill (the CLI must be installed: `npm i -g agent-browser && agent-browser install`). It looks and clicks; it asserts nothing and is not a test. Regression guards stay in Playwright (`apps/e2e`).
+
+- Start the stack with `docker compose up --build` (see the README; never `docker compose down -v`), or the web app alone with `pnpm --filter @eve/web dev` (Vite).
+- Sign-in is Google OAuth, which an agent cannot complete. Use the e2e harness's synthetic session (`apps/e2e/support/db.ts`) against a local or throwaway database, and never point an agent at production or at real credentials.
+- Save screenshots under the run's evidence directory, not in the repo.
+
 ## Pull requests
 
 State what changed, why, and how you verified it. Include the test counts, and name anything you did
