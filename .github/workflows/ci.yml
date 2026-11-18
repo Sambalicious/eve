@@ -209,22 +209,48 @@ jobs:
       # Testcontainers (apps/api/test/support/postgres-cluster.ts) on the runner's
       # Docker, creates the owner and runtime roles and migrates a template.
       # It takes no external database URL, so there is no service container.
-      - run: pnpm --filter @eve/api test:int --shard=${{ matrix.shard }}/4
+      # The latency-budget spec runs alone in api-performance below: next to other files
+      # on a shared runner its p95 swung past the 300 ms budget (CPU contention).
+      - run: pnpm --filter @eve/api test:int --shard=${{ matrix.shard }}/4 --exclude '**/performance.epic-0006.int-spec.ts'
+
+  # The p95 latency budget (300 ms, unchanged) is only meaningful without other test files
+  # competing for CPU, so this spec has its own job and file-level parallelism is off.
+  api-performance:
+    name: api performance budget
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm turbo run build --filter=@eve/contracts
+      - run: pnpm --filter @eve/api exec vitest run --project integration --no-file-parallelism test/performance.epic-0006.int-spec.ts
 
   # The required status check. It keeps the name "api integration tests" so the branch
   # ruleset does not change: green when every shard passed or the api was not affected.
   api-integration:
     name: api integration tests
-    needs: [changes, api-integration-shard]
+    needs: [changes, api-integration-shard, api-performance]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: All api integration shards must pass
+      - name: All api integration shards and the performance budget must pass
         env:
-          RESULT: ${{ needs.api-integration-shard.result }}
+          RESULTS: ${{ needs.api-integration-shard.result }} ${{ needs.api-performance.result }}
         run: |
-          echo "shards: $RESULT"
-          [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
+          echo "results: $RESULTS"
+          for r in $RESULTS; do
+            [ "$r" = "success" ] || [ "$r" = "skipped" ] || exit 1
+          done
 
   # The suite runs serially against one database, so it is split by test file across
   # runners; every shard starts its own Postgres, api and Vite (global-setup.ts).
