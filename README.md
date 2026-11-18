@@ -68,13 +68,13 @@ You can run the jobs locally with Node 24 (`.nvmrc`) and Docker running:
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm turbo run typecheck lint           # job "typecheck, lint, test"
-pnpm turbo run test --filter='!@eve/api'
-pnpm --filter @eve/api test:unit
+pnpm turbo run typecheck lint           # job "typecheck + lint"
+pnpm turbo run test --filter='!@eve/api'   # jobs "unit tests (packages)" and "unit tests (web N/4)"
+pnpm --filter @eve/api test:unit        # job "unit tests (api)"
 pnpm turbo run build --filter=@eve/contracts
-pnpm --filter @eve/api test:int         # job "api integration tests"
+pnpm --filter @eve/api test:int         # jobs "api integration tests shard N/4" and "api performance budget"
 pnpm --filter @eve/e2e exec playwright install chromium
-pnpm turbo run e2e                      # job "e2e (Playwright)"
+pnpm turbo run e2e                      # jobs "e2e shard N/6", gated by "e2e (Playwright)"
 scripts/ci/api-image-smoke.sh           # job "api image smoke (node:22)"
 pnpm agents:check && pnpm agents:test  # job "agent rules"
 ```
@@ -82,6 +82,7 @@ pnpm agents:check && pnpm agents:test  # job "agent rules"
 - The api integration tests start their own `postgres:17-alpine` with Testcontainers, so they need Docker but no database settings.
 - The e2e global setup (`apps/e2e/support/global-setup.ts`) starts Postgres in Docker, the built api and the Vite dev server on port 5199 (set `E2E_WEB_PORT` to use another port; setup stops if anything already listens on it). When a run fails, CI uploads `apps/e2e/playwright-report/` and `apps/e2e/test-results/` as an artifact.
 - The dev toolchain needs Node 24.15 or later. On Node 22, jsdom's `Blob` and Node's `Blob` differ and one web test fails. The api image runs on the same Node major (`apps/api/Dockerfile`, node:24), so the `api image smoke` job builds that image and checks that it provisions, migrates and answers `GET /v1/health` against a throwaway Postgres.
+- The required checks keep their names through small aggregate jobs: `typecheck, lint, test` (typecheck + lint and the unit jobs), `api integration tests` (four shards plus the performance budget) and `e2e (Playwright)` (six shards, split by recorded spec duration in `apps/e2e/support/spec-durations.json`). A job skipped by design counts as passing; a failed or cancelled one fails the aggregate.
 - Concurrency: a newer push to a pull request cancels the older run. Pushes to `main` queue, so every `main` commit gets a result.
 - On a loaded machine add `--concurrency=1`. Timing budgets in some tests can still fail under heavy load; rerun those files alone.
 
