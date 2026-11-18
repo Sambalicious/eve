@@ -26,9 +26,8 @@ export function isRulesDrop(status: string, skipReason: string | null): boolean 
 }
 
 /**
- * The queued-Application rules and the sample returns, split out of
- * `SubmissionRepository` (which delegates to this class, one instance per
- * facade): what may be submitted, and why a queued Application is dropped.
+ * The queued-Application rules and the sample returns: what may be submitted,
+ * and why a queued Application is dropped.
  *
  * Every statement runs in the scope's Candidate's `CandidateTx` and names its
  * `candidate_id`; methods that take a `trx` run inside the caller's `run`
@@ -37,10 +36,6 @@ export function isRulesDrop(status: string, skipReason: string | null): boolean 
 export class SubmissionQueueRepository {
   constructor(private readonly tenant: TenantDatabase) {}
 
-  /**
-   * Queued automatic Applications with what ranking needs (AC 6.2: carried-over
-   * Applications are re-ranked with the day's new ones).
-   */
   /** Queued Applications with their ranking inputs, and the Candidate's tier map (EPIC-0002 B1), read in one transaction. */
   queuedForRanking() {
     return this.tenant.run(async (tx, candidateId) => ({

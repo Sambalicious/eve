@@ -26,7 +26,6 @@ interface HelpPopoverProps {
   onOpenChange?: (open: boolean) => void
   /** Where focus goes on close. Default: back to the trigger. */
   finalFocus?: PopupProps["finalFocus"]
-  /** Extra classes for the trigger. */
   className?: string
 }
 

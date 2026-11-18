@@ -66,20 +66,6 @@ const INCOMPLETE_DETAIL = {
 }
 
 /**
- * One submission attempt (architecture r1 journey 2, ADR 0005, ADR 0008).
- * Backend code reads the form, detects blocks, assigns answers, claims a slot,
- * fills, verifies every value, commits `submitting`, clicks submit once, and
- * parses the result. Global pause is checked before the claim and after every
- * browser call until `submitting` is committed. There is no retry path.
- *
- * Deterministic-first: code fills every field it can answer; only required
- * free-text questions with no matching Approved Answer go to the form agent,
- * only when SUBMISSION_FORM_AGENT_ENABLED=1 (off by default) and an AI provider
- * is approved. Choice fields never go to the agent (repair wave 3, SEC-515). A leftover the agent leaves empty
- * blocks as Missing Approved Answer; an exhausted agent budget blocks with the
- * seventh reason's `budget` sub-reason.
- */
-/**
  * The browser opens `apply_url`, but automatic mode was decided from `application_url`
  * (the one `locateAts` accepted). Lever and Ashby take `apply_url` from board JSON, so a
  * hostile board could name another host and have it allowlisted. Open it only when both
@@ -94,6 +80,20 @@ export function isAutomaticTarget(posting: Readonly<{ apply_mode: string; apply_
   }
 }
 
+/**
+ * One submission attempt (architecture r1 journey 2, ADR 0005, ADR 0008).
+ * Backend code reads the form, detects blocks, assigns answers, claims a slot,
+ * fills, verifies every value, commits `submitting`, clicks submit once, and
+ * parses the result. Global pause is checked before the claim and after every
+ * browser call until `submitting` is committed. There is no retry path.
+ *
+ * Deterministic-first: code fills every field it can answer; only required
+ * free-text questions with no matching Approved Answer go to the form agent,
+ * only when SUBMISSION_FORM_AGENT_ENABLED=1 (off by default) and an AI provider
+ * is approved. Choice fields never go to the agent (repair wave 3, SEC-515). A leftover the agent leaves empty
+ * blocks as Missing Approved Answer; an exhausted agent budget blocks with the
+ * seventh reason's `budget` sub-reason.
+ */
 @Injectable()
 export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name)
@@ -502,8 +502,8 @@ export class SubmissionService {
       if (want === undefined ? actual !== "" : actual !== want) throw new IncompleteError("value_mismatch", INCOMPLETE_DETAIL.mismatch(control.label || null))
       if (control.required && actual === "") throw new IncompleteError("value_mismatch", INCOMPLETE_DETAIL.mismatch(control.label || null))
     }
-    // Two different failures used to share one sentence here, so a block page and a button-count mismatch looked
-    // identical. Keep the page block's own words (login, CAPTCHA, assessment) and record the count otherwise.
+    // Keep the page block's own words (login, CAPTCHA, assessment) and record the count otherwise, so a block page
+    // and a button-count mismatch never read the same.
     const pageBlock = detectPageBlock(form.text)
     if (pageBlock) throw new IncompleteError(null, pageBlock.detail)
     if (form.submitControls !== 1) throw new IncompleteError(null, INCOMPLETE_DETAIL.submitControls(form.submitControls))

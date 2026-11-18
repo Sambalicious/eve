@@ -53,9 +53,7 @@ export type MatchedApplicationRow = Readonly<{ id: string; company: string | nul
  */
 @Injectable()
 export class SubmissionRepository {
-  /** The claim, outcome writes and daily counts (`submission-attempts.repository.ts`). */
   private readonly attempts: SubmissionAttemptsRepository
-  /** The queued-Application rules and sample returns (`submission-queue.repository.ts`). */
   private readonly queue: SubmissionQueueRepository
 
   constructor(private readonly tenant: TenantDatabase) {
@@ -63,7 +61,7 @@ export class SubmissionRepository {
     this.attempts = new SubmissionAttemptsRepository(tenant, this.queue)
   }
 
-  /** One transaction for the scope's Candidate (replaces the raw `database` handle). */
+  /** One transaction, scoped to the scope's Candidate. */
   run<T>(work: (tx: CandidateTx, candidateId: string) => Promise<T>): Promise<T> {
     return this.tenant.run(work)
   }
@@ -316,10 +314,6 @@ export class SubmissionRepository {
     return this.attempts.hasOtherActiveAtCompany(db, applicationId, company)
   }
 
-  /**
-   * Queued automatic Applications with what ranking needs (AC 6.2: carried-over
-   * Applications are re-ranked with the day's new ones).
-   */
   /** Queued Applications with their ranking inputs, and the Candidate's tier map (EPIC-0002 B1), read in one transaction. */
   queuedForRanking() {
     return this.queue.queuedForRanking()

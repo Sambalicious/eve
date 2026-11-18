@@ -8,8 +8,8 @@ import type { CandidateTx } from "../db/tenant-database.js"
  * EPIC-0007 Phase 1 (contract v1.19.0, architecture r1 SA-4): the three Job
  * Preferences booleans the hiring search links read. Non-strict: every other
  * key (pay floor, hours, countries, industries, employment types, seniority)
- * is ignored, so none of them adds a term (AC 2.6). The keys are 0018's and
- * provisional until EPIC-0002 slice B1; a rename fails `hiring-hints.spec.ts`.
+ * is ignored, so none of them adds a term (AC 2.6). A key renamed in the
+ * stored preferences fails `hiring-hints.spec.ts`.
  */
 const hintPreferencesSchema = z.object({
   remoteAccepted: z.boolean(),

@@ -1,6 +1,6 @@
 /**
- * EPIC-0012 QA gate 4 (step 6a, after repair wave 3, the last). Adversarial unit tests by an independent QA
- * session. Test files only; no product code changed. Report: epics/active/EPIC-0012-tailoring-rules/test-plan.r4.md.
+ * EPIC-0012 QA gate 4 (step 6a, after repair wave 3, the last). Adversarial unit tests.
+ * Report: epics/active/EPIC-0012-tailoring-rules/test-plan.r4.md.
  *
  * Convention, as in the gate-1, 2 and 3 specs: `it` asserts behaviour the candidate shows and the design
  * requires. `it.fails` asserts REQUIRED behaviour the candidate does not show: each one is a blocker QA4-Bn or a
@@ -149,9 +149,6 @@ const WIND_SENTENCE = "I built wind farm financial models for offshore projects,
 const JEST = [kw("Jest")]
 const REACT = [kw("React")]
 
-// ---------------------------------------------------------------------------------------------------------
-// 1. QA3-B1 (R17): the letter cap never blocks and never waves trimmed text through. Fresh inputs.
-// ---------------------------------------------------------------------------------------------------------
 describe("1. QA3-B1 / R17: the cap never blocks a true letter (fresh variants)", () => {
   const reactForms = ["login", "signup", "billing"].map((n) => line(`I tested React ${n} forms.`, "QA"))
 
@@ -219,9 +216,6 @@ describe("1. QA3-B1 / R17: the cap never blocks a true letter (fresh variants)",
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 2. QA3-B2 (R20): completion words in other forms, direction on. Fresh forms.
-// ---------------------------------------------------------------------------------------------------------
 describe("2. QA3-B2 / R20: completion forms after a direction quote (direction on)", () => {
   const QUOTE = "Your plan to “halve operational emissions by 2030” is clear."
   const stored = (tie: string, judge: Judge = RUBBER_STAMP) => {
@@ -274,9 +268,6 @@ describe("2. QA3-B2 / R20: completion forms after a direction quote (direction o
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 3. QA3-B3 (R18): the headline prints only a title the Candidate held. Fresh variants.
-// ---------------------------------------------------------------------------------------------------------
 describe("3. QA3-B3 / R18: the headline (both flags off; no flag gates it)", () => {
   const P = "Head of Finance"
   it.each([
@@ -365,9 +356,6 @@ describe("3. QA3-B3 / R18: the headline (both flags off; no flag gates it)", () 
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 4. QA3-B4 (R19): a quotation must come from somewhere. Fresh variants, both flags off and on.
-// ---------------------------------------------------------------------------------------------------------
 describe("4. QA3-B4 / R19: quotation provenance", () => {
   const FAB = "double revenue within the decade"
   const letterWith = (frame: string, posting: PostingGuard) => finish(emptyResume, letterOf(line(`${frame} ${WIND_SENTENCE}`, "WIND"), MENT_P), { posting })
@@ -484,9 +472,6 @@ describe("4. QA3-B4 / R19: quotation provenance", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 5. QA3-M2 (M2): the mechanical key drops every sentence's leading "I". Fresh variants.
-// ---------------------------------------------------------------------------------------------------------
 describe("5. QA3-M2: 'I' + fact sentences stay mechanical with the judge down", () => {
   it("three 'I' sentences, one after '!' and one lower-case 'i', with the judge down: kept, no provider error", () => {
     const p = line("I wrote Jest tests for the checkout! i wrote Jest tests for the cart. I wrote Jest tests for search.", "J1", "J2", "J3")
@@ -505,9 +490,6 @@ describe("5. QA3-M2: 'I' + fact sentences stay mechanical with the judge down", 
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 6. A judge that approves everything, in each flag state: what code still stops (fresh lines).
-// ---------------------------------------------------------------------------------------------------------
 describe("6. rubber-stamp judge in every flag state", () => {
   const RESUME = resumeOf(
     [line("Spearheaded the payments migration", "PAY"), line("Built wind farm financial models for offshore projects in SNOWFLAKE", "WIND")],
@@ -544,9 +526,6 @@ describe("6. rubber-stamp judge in every flag state", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 7. Regressions: QA2-B1..B8 and R8..R16, fresh inputs.
-// ---------------------------------------------------------------------------------------------------------
 describe("7. regressions R8 to R16 (fresh inputs)", () => {
   it("R8: 'I helmed' / 'Steered' / 'Fronted' for 'Supported…': hard fail or judge, never stored when refused", () => {
     for (const text of ["Steered the payments migration", "Fronted the payments migration", "Headed up the payments migration"]) {

@@ -164,12 +164,12 @@ describe("QA EPIC-0012 truth-guard bypasses, end to end (fake model)", () => {
     expect(FakeAnthropic.promptOf(anthropic.requests[1]!)).not.toContain(GOAL_AS_DONE)
     const resume = (await stored(application.id, "resume")) as ResumeContent
     const letter = (await stored(application.id, "cover_letter")) as CoverLetterContent
-    // Fixed QA-B1: the Candidate supported the migration, so the line falls back to the fact's own wording.
+    // The Candidate supported the migration, so the line falls back to the fact's own wording.
     const bullets = resume.experience[0]?.bullets.map((bullet) => bullet.text) ?? []
     expect(bullets).not.toContain(LED_LINE)
     expect(bullets).toContain("Supported a payments migration led by the platform team")
-    // Fixed QA-B4: the employer's goal is no longer presented as met by the Candidate's models. Its only
-    // sentence fails in code (a word outside the span is not a frame word), so the paragraph is dropped.
+    // The employer's goal is not presented as met by the Candidate's models: its only sentence fails in
+    // code (a word outside the span is not a frame word), so the paragraph is dropped.
     expect(letter.paragraphs.map((paragraph) => paragraph.text)).not.toContain(GOAL_AS_DONE)
     expect(letter.paragraphs.map((paragraph) => paragraph.text)).toContain("I built wind farm financial models for offshore projects, forecasting revenue and cost.")
   })

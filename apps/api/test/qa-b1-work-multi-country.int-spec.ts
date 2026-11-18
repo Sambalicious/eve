@@ -223,7 +223,7 @@ const QUALIFIED_UNCLEAR: ReadonlyArray<readonly [authorized: readonly Country[],
   [["NG", "US"], NEW_ENGLAND],
   // Hyphenated qualifier before `canada`.
   [["NG", "US"], NW_CANADA],
-  // [NG]: the guard applies in every context. Was "No" in slice 5, now unclear (never a false answer).
+  // [NG]: the guard applies in every context, so the answer is unclear, never a false one.
   [["NG"], NEW_MEXICO],
 ]
 

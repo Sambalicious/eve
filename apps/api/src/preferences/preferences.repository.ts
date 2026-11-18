@@ -144,10 +144,6 @@ async function lastTimeZoneChangeAt(trx: CandidateTx, candidateId: string): Prom
   return rows[0]?.saved_at ?? null
 }
 
-/**
- * A stored value read back. It was validated on write, so a failure here is
- * corrupt data: a 500 whose log names no stored value (TM-B1 corrupt-value case).
- */
 /** A history row read back: the current shape, or the 0018 shape upgraded in memory; anything else is corrupt (500, no value logged). */
 function historyValues(value: unknown): PreferencesValues {
   const values = readHistoryValues(value)
@@ -155,6 +151,7 @@ function historyValues(value: unknown): PreferencesValues {
   return values
 }
 
+/** A stored value read back. It was validated on write, so a failure here is corrupt data: a 500 whose log names no stored value (TM-B1 corrupt-value case). */
 function storedValues(value: unknown): PreferencesValues {
   const parsed = preferencesValuesSchema.safeParse(value)
   if (!parsed.success) throw new Error("Stored Job Preferences do not match the v1.25.0 shape")

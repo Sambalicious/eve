@@ -1,6 +1,6 @@
 /**
  * EPIC-0012 QA gate 6 (after owner-approved repair wave 5: R23, quotation provenance by content, the envelope rule).
- * Adversarial unit tests by an independent QA session. Test files only; no product code changed. Report:
+ * Adversarial unit tests. Report:
  * epics/active/EPIC-0012-tailoring-rules/test-plan.r6.md.
  *
  * Convention, as in the gate-1 to 5 specs: `it` asserts behaviour the candidate shows and the design requires.
@@ -8,9 +8,9 @@
  * it turns red when the defect is fixed (then it becomes `it`). "OBSERVATION" tests pin a class the design accepts,
  * leaves to the judge, or that the report raises as a minor; they pass today.
  *
- * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper, copied
- * unchanged through gate 5: it replays documents.service.ts generate() in the service's order. Fresh inputs only:
- * no row repeats a gate-5 or Revision 5 (N1-N16, L1-L8, C1-C6) input.
+ * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper: it
+ * replays documents.service.ts generate() in the service's order. Fresh inputs only: no row repeats a gate-5 or
+ * Revision 5 (N1-N16, L1-L8, C1-C6) input.
  */
 import { describe, expect, it } from "vitest"
 
@@ -153,9 +153,6 @@ const letterWith = (frame: string, posting: PostingGuard, judge: Judge = RUBBER_
   finish(emptyResume, letterOf(line(`${frame} ${WIND_SENTENCE}`, "WIND", "AWARD"), MENT_P), { posting, judge })
 const quotedStored = (frame: string, posting: PostingGuard) => letterTexts(letterWith(frame, posting)).join(" ").toLowerCase().includes("revenue within")
 
-// ---------------------------------------------------------------------------------------------------------
-// 1. R23 holes: text the employer never wrote, stored as a quotation with both flags off and a rubber stamp.
-// ---------------------------------------------------------------------------------------------------------
 describe("1. R23: fabricated quotations that still reach storage", () => {
   // QA6-B1. isQuoteLike (company-direction.ts:182-186) tests the code point as written, against QUOTE_LOOK_ALIKES
   // (:157-167) and Pi/Pf/Ps/Pe. Nothing normalises first. Three characters are CANONICALLY equivalent (NFC) to marks
@@ -248,9 +245,6 @@ describe("1. R23: fabricated quotations that still reach storage", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 2. QA5-B1, B2, B3 closed: fresh variants R23 must and does refuse, every flag state, rubber stamp.
-// ---------------------------------------------------------------------------------------------------------
 describe("2. R23 holds against fresh nesting, doubling, gluing, families and sentence shapes", () => {
   describe.each(STATES)("%s", (_state, flags) => {
     const posting = guardFor(flags)
@@ -293,7 +287,6 @@ describe("2. R23 holds against fresh nesting, doubling, gluing, families and sen
       ["Ꞌ…ꞌ saltillo, upper and lower", `Your plan to Ꞌ${FAB}ꞌ is clear.`],
       ["mixed: Pi opened, Ps closed", `Your plan to “${FAB}「 is clear.`],
       ["both marks the same left mark", `Your plan to “${FAB}“ is clear.`],
-      // padding, digits, scripts
       ["NBSP padded", `Your plan to “\u00a0${FAB}\u00a0” is clear.`],
       ["ideographic-space padded", `Your plan to 「\u3000${FAB}\u3000」 is clear.`],
       ["Cyrillic о inside the words", `Your plan to “dоuble revenue within the decade” is clear.`],
@@ -302,7 +295,6 @@ describe("2. R23 holds against fresh nesting, doubling, gluing, families and sen
       ["hyphenated variant of a stored quote", `Your plan to “halve operational-emissions by 2030” is clear.`],
       ["combining mark on the opener", `Your plan to “\u0301${FAB}” is clear.`],
       ["ellipsis inside", `Your plan to “…${FAB}…” is clear.`],
-      // sentences
       ["a quotation split by a sentence break", `Your plan to “Halve costs. Double revenue within the decade” is clear.`],
       ["a long sentence, quote at the end", `Having read the posting twice and spoken to two people who know the team well, and after reviewing the annual report, the sustainability report and the investor presentation, I can see your plan to “${FAB}” is clear.`],
       ["two sentences, the fabricated one second", `Your aim is “to halve operational emissions by 2030”. Your plan to “${FAB}” is clear.`],
@@ -344,9 +336,6 @@ describe("2. R23 holds against fresh nesting, doubling, gluing, families and sen
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 3. False positives: legitimate sentences still pass (fresh), costs C1-C6 behave as accepted, new costs pinned.
-// ---------------------------------------------------------------------------------------------------------
 describe("3. legitimate text", () => {
   it.each([
     ["I can’t wait to help."], ["We’d love that."], ["It’s Acme’s best model."], ["I’ve shipped O’Reilly’s app."], ["I led the ’22–’23 rollout."],
@@ -427,9 +416,6 @@ describe("3. legitimate text", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 4. Rubber-stamp judge, every flag state, fresh adversarial draft; then regressions with fresh inputs.
-// ---------------------------------------------------------------------------------------------------------
 describe("4. rubber-stamp judge and regressions", () => {
   const RESUME = resumeOf(
     [line("Built wind farm financial models for offshore projects with Snowflake", "WIND"), line("Built wind farm financial models, «‹the finest in the North Sea›»", "WIND")],

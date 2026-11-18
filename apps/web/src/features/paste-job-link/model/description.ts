@@ -11,7 +11,6 @@ import type { PasteRequest } from "@/entities/job-posting"
 import { jobLinkProblem } from "./job-link"
 import { pasteCopy } from "./paste-copy"
 
-/** What the open panel holds. */
 export interface PasteFields {
   readonly link: string
   readonly description: string

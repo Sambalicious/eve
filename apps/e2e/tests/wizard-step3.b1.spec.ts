@@ -12,7 +12,7 @@ import { BOLA } from "../support/stack.ts"
  * step 3 scenario to slice C (no invite flow or wizard shell exists before C),
  * and B1 proves the shared form in Settings (job-preferences-settings.b1.spec.ts).
  *
- * These journeys are written now so slice C inherits them unchanged. They run
+ * Slice C reuses these journeys unchanged. They run
  * only with E2E_SLICE_C=1; in a B1 gate they are reported as skipped, never as a
  * pass. Slice C must seed Bola as an invitee with steps 1 and 2 done before
  * these run (no onboarding state exists to seed before C).

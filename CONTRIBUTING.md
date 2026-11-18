@@ -38,6 +38,13 @@ pnpm turbo run e2e
 - **Copy comes from the copy deck**, not from the pull request. If a string needs to change, say so
   and let it land in the deck.
 
+## Code comments
+
+A comment states why: the reason for a choice, a constraint, an invariant, a security or tenancy
+rationale, a workaround, or a contract the signature does not show. It never restates what the next
+line does and never narrates the change (moved, now, no longer, previously). Delete commented-out
+code; git keeps it. Prefer a better name over a comment that explains a bad one.
+
 ## Pull requests
 
 State what changed, why, and how you verified it. Include the test counts, and name anything you did

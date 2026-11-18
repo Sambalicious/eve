@@ -1,6 +1,6 @@
 /**
  * EPIC-0012 QA gate 8 (after owner-approved repair wave 7: R25, closed by category and balance). HARD-STOP gate.
- * Adversarial unit tests by an independent QA session. Test files only; no product code changed. Report:
+ * Adversarial unit tests. Report:
  * epics/active/EPIC-0012-tailoring-rules/test-plan.r8.md.
  *
  * Convention, as in the gate-1 to 7 specs: `it` asserts behaviour the candidate shows and the design requires.
@@ -8,9 +8,9 @@
  * it turns red when the defect is fixed (then it becomes `it`). "OBSERVATION" tests pin a class the design accepts
  * (C1-C15, residuals i-iv), leaves to the judge, or that the report raises as a minor; they pass today.
  *
- * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper, copied
- * unchanged through gates 5 to 7: it replays documents.service.ts generate() in the service's order. Fresh inputs
- * only: no row repeats a gate-7 input or a Revision 7 row (QA7 rows, V1-V18, P1-P15, the C11-C15 pins).
+ * The judge is a plain function (rubber stamp = `() => true`), not a model. `finish` is the gate-4 helper: it
+ * replays documents.service.ts generate() in the service's order. Fresh inputs only: no row repeats a gate-7
+ * input or a Revision 7 row (QA7 rows, V1-V18, P1-P15, the C11-C15 pins).
  */
 import { describe, expect, it } from "vitest"
 
@@ -157,9 +157,6 @@ const letterWith = (frame: string, posting: PostingGuard, judge: Judge = RUBBER_
 const storedLower = (outcome: Outcome) => allText(outcome).toLowerCase()
 const quotedStored = (frame: string, posting: PostingGuard) => storedLower(letterWith(frame, posting)).includes("revenue within")
 
-// ---------------------------------------------------------------------------------------------------------
-// 1. QA8-B1: a quotation spanning sentences whose two ends are both "trusted" apostrophe shapes.
-// ---------------------------------------------------------------------------------------------------------
 /**
  * R25 B reads only ACTIVE marks, sentence by sentence. A rule f mark (a leading mark before an elision or a two-digit
  * number: ‘Til, ‘Cause, ‘90s, '30) opens only, and a rule e mark (after s, x, z, "in" or a number: costs’, 2030')
@@ -198,9 +195,6 @@ describe("1. QA8-B1: a fabricated sentence between a trusted opener and a truste
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 2. QA8-B2: a verbatim fact sentence with an unbalanced spaced mark inside a paragraph (fixed by R26).
-// ---------------------------------------------------------------------------------------------------------
 /**
  * QA8-B2 pinned a verbatim fact sentence whose spaced marks do not balance as a block: narrowed S0 failed it
  * inside a paragraph, though U0 passes it alone. R26 (owner-approved repair wave 8, cost C13) reads U0 on each
@@ -255,9 +249,6 @@ describe("2. QA8-B2: a verbatim fact sentence with an unbalanced spaced mark, in
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 3. QA7-B1/B2/B3 closed against fresh inputs; no new bypass of unsourcedQuotationIn.
-// ---------------------------------------------------------------------------------------------------------
 /** One or more characters per Unicode category edge the brief names; each is used as both marks of a quotation. */
 const CATEGORY_EDGES: readonly (readonly [string, string])[] = [
   ["Lm ʹ U+02B9", "ʹ"], ["Lm ˮ U+02EE", "ˮ"], ["Lm ꞈ U+A788", "ꞈ"], ["Lm ₐ U+2090", "ₐ"], ["Lm ߴ U+07F4", "ߴ"],
@@ -367,9 +358,6 @@ describe("3. QA7-B1, B2, B3 and the R25 rules hold against fresh inputs", () => 
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 4. Never a block from R25's quotation check, and normalisation never rewrites stored text.
-// ---------------------------------------------------------------------------------------------------------
 describe("4. fallback and storage", () => {
   it.each([["DASH"], ["LAT"], ["SVC"], ["SHY"], ["NAME"], ["AWARD"], ["CJK"]])("%s: the fact's own wording passes, so a refused bullet falls back and the resume is valid", (id) => {
     expect(unsourcedQuotationIn(WORDING.get(id)!, [FACTS.get(id)!])).toBeNull()
@@ -395,9 +383,6 @@ describe("4. fallback and storage", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 5. False positives: legitimate text still passes (fresh).
-// ---------------------------------------------------------------------------------------------------------
 describe("5. legitimate text", () => {
   it.each([
     ["They’d’ve shipped it."], ["We’ve met at 9 o'clock."], ["Hawai'i and O'ahu teams joined."], ["Thanks, ma'am; y'all helped."],
@@ -456,9 +441,6 @@ describe("5. legitimate text", () => {
   })
 })
 
-// ---------------------------------------------------------------------------------------------------------
-// 6. Rubber-stamp judge, every flag state, fresh draft; regressions with fresh inputs.
-// ---------------------------------------------------------------------------------------------------------
 describe("6. rubber-stamp judge and regressions", () => {
   const RESUME = resumeOf(
     [line("Built wind farm financial models for offshore projects in Power BI", "WIND"), line("Built wind farm financial models, “ᏴᏞᎬ the finest”", "WIND")],

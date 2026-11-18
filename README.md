@@ -81,7 +81,7 @@ pnpm agents:check && pnpm agents:test  # job "agent rules"
 
 - The api integration tests start their own `postgres:17-alpine` with Testcontainers, so they need Docker but no database settings.
 - The e2e global setup (`apps/e2e/support/global-setup.ts`) starts Postgres in Docker, the built api and the Vite dev server on port 5199 (set `E2E_WEB_PORT` to use another port; setup stops if anything already listens on it). When a run fails, CI uploads `apps/e2e/playwright-report/` and `apps/e2e/test-results/` as an artifact.
-- The dev toolchain needs Node 24.15 or later. On Node 22, jsdom's `Blob` and Node's `Blob` differ and one web test fails. The api image still runs on Node 22 (`apps/api/Dockerfile`), so the `api image smoke` job builds that image and checks that it provisions, migrates and answers `GET /v1/health` against a throwaway Postgres.
+- The dev toolchain needs Node 24.15 or later. On Node 22, jsdom's `Blob` and Node's `Blob` differ and one web test fails. The api image runs on the same Node major (`apps/api/Dockerfile`, node:24), so the `api image smoke` job builds that image and checks that it provisions, migrates and answers `GET /v1/health` against a throwaway Postgres.
 - Concurrency: a newer push to a pull request cancels the older run. Pushes to `main` queue, so every `main` commit gets a result.
 - On a loaded machine add `--concurrency=1`. Timing budgets in some tests can still fail under heavy load; rerun those files alone.
 

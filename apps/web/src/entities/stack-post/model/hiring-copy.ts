@@ -12,7 +12,6 @@ const NEW_TAB = "(opens in a new tab)"
  * C-SP-ALERTQ-OPEN, C-SP-COPY, C-SP-COPIED and C-SP-COPY-ERR from `stackPostsCopy`.
  */
 export const hiringCopy = {
-  // View frame
   /** C-HP-VIEW-STACK. */
   viewStack: "Stack posts",
   /** C-HP-VIEW-HIRING. */
@@ -22,7 +21,6 @@ export const hiringCopy = {
   /** C-HP-DOC-TITLE. */
   docTitle: "Hiring · Stack posts",
 
-  // Hiring search links (Phase 1)
   /** C-HP-LINKS-TITLE. */
   linksTitle: "Hiring search links",
   /** C-HP-LINKS-EDIT. */
@@ -111,7 +109,6 @@ export const hiringCopy = {
   /** C-HP-NOFAMILY-ACTION, to `/settings#job-criteria`. */
   noFamilyAction: "Choose role families",
 
-  // Check this job
   /** C-HP-CHECK-TITLE. */
   checkTitle: "Check this job",
   /** EPIC-0011: the button in the section that opens the check form in a dialog. */
@@ -133,7 +130,6 @@ export const hiringCopy = {
   /** C-HP-LI-WARN-SEND. */
   linkedInSend: "Save it anyway",
 
-  // Hiring alert feeds (Phase 3)
   /** C-HP-FEEDS-SEC-TITLE. */
   feedsSectionTitle: "Hiring alert feeds",
   /** C-HP-FEEDS-DESC. */
@@ -197,7 +193,6 @@ export const hiringCopy = {
   dataRetentionPosts:
     "Eve deletes posts from your field and Hiring posts 90 days after it first finds them, and keeps no more than your newest 2,000 of each.",
 
-  // Hiring posts (Phase 3)
   /** C-HP-POSTS-TITLE. */
   postsTitle: "Hiring posts",
   /** C-HP-POSTS-DESC. */

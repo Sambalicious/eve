@@ -71,9 +71,7 @@ export async function isLive(db: Db, applicationId: string): Promise<boolean> {
 }
 
 /**
- * The claim, the point of no return, the outcome writes and the daily counts,
- * split out of `SubmissionRepository` (which delegates to this class, one
- * instance per facade).
+ * The claim, the point of no return, the outcome writes and the daily counts.
  *
  * EPIC-0002 A1: the scope's Candidate's Applications, submission days, events
  * and outbox rows. Every statement runs in a `CandidateTx` and names its

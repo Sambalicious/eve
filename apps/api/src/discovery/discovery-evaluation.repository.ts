@@ -16,12 +16,11 @@ export const RETRY_ATTEMPTS_LIMIT = 2
 export const RETRY_BACKOFF_MINUTES = 10
 
 /**
- * The evaluation lifecycle of one Candidate's postings, split out of
- * `DiscoveryRepository` (which delegates to this class, one instance per
- * facade): the visibility gate, the checking/waiting/failed transitions, the
- * queues the worker drains, Check again and the scheduled stuck recovery.
+ * The evaluation lifecycle of one Candidate's postings: the visibility gate,
+ * the checking/waiting/failed transitions, the queues the worker drains,
+ * Check again and the scheduled stuck recovery.
  *
- * Like the facade, every statement runs in the scope's `CandidateTx` (EPIC-0002 A1).
+ * Every statement runs in the scope's `CandidateTx` (EPIC-0002 A1).
  */
 export class DiscoveryEvaluationRepository {
   constructor(private readonly tenant: TenantDatabase) {}

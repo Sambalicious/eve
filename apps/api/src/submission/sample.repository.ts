@@ -86,6 +86,11 @@ export class SampleRepository {
     return Number(row.count)
   }
 
+  /** EPIC-0002 B1: the Candidate's tier map, so samples follow the Ranked tab order. */
+  tierMap(db: Db) {
+    return tierMapIn(db, cid())
+  }
+
   /**
    * Sample candidates (AC 2.1, design F2): documents ready, not yet in
    * submission or sampling, an automatic posting that is ranked, eligible and a
@@ -94,11 +99,6 @@ export class SampleRepository {
    * for the scope Candidate under `ctx` (read from the criteria row this
    * transaction holds FOR SHARE).
    */
-  /** EPIC-0002 B1: the Candidate's tier map, so samples follow the Ranked tab order. */
-  tierMap(db: Db) {
-    return tierMapIn(db, cid())
-  }
-
   candidates(db: Db, ctx: VisibilityContext) {
     const candidateId = cid()
     return db

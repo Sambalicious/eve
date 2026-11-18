@@ -22,7 +22,6 @@ import {
  * description and manual-only enforcement (contract v1.27.0 `POST /v1/applications`,
  * `ApplicationSummary.pastedDescription`/`manualOnly`, `JobPostingDetail.pastedPrepareOffered`,
  * queue/sample/sample-approve `409 manual_application_only`). Real api and Postgres.
- * Expected red until the integrated candidate lands.
  *
  * Covers: DOC:25, DOC:44, DOC:59 (api flag), DOC:65, DOC:202, EV:174, MO:29, MO:46,
  * MO:170, MO:182, MO:192, RP:63 (manualOnly false for a readable ATS posting),

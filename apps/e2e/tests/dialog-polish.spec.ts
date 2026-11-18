@@ -108,8 +108,6 @@ async function scrollBodyToEnd(dialog: Locator, slot: string): Promise<void> {
   })
 }
 
-// ── the label row ─────────────────────────────────────────────
-
 async function labelRowGeometry(dialog: Locator) {
   return await dialog.evaluate((root) => {
     // The description's own label, not the link field's above it.
@@ -208,8 +206,6 @@ test.describe("the description panel's label row", () => {
     })
   }
 })
-
-// ── the textarea's cap against the visible viewport ───────────
 
 type CapMeasurement = Readonly<{
   maxHeight: string
@@ -362,8 +358,6 @@ test("the Check this job dialog caps its description the same way at 375x420", a
   expect(after.bodyScrollTop, "the dialog body scrolled, not the popup").toBeGreaterThan(0)
   expect(after.popup.top, "the popup stays put").toBeCloseTo(m.popup.top, 0)
 })
-
-// ── the title's reserved end ──────────────────────────────────
 
 type TitleMeasurement = Readonly<{
   hasCloseMark: boolean
@@ -542,8 +536,6 @@ test.describe("the title's reserved end at 375", () => {
     }
   })
 })
-
-// ── captures for the design review (CAPTURE=1) ────────────────
 
 test.describe("captures", () => {
   test.skip(!CAPTURE, "screenshots: run with CAPTURE=1")

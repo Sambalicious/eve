@@ -72,7 +72,6 @@ export const OUTREACH_MAILTO_MAX = 2000
 /** The longest subject the `mailto:` forms may produce, before encoding (architecture r1 G11). */
 export const OUTREACH_SUBJECT_MAX = 120
 
-/** One of the three Kinds. */
 export const outreachKindSchema = z.enum(OUTREACH_KINDS)
 export type OutreachKindValue = z.infer<typeof outreachKindSchema>
 

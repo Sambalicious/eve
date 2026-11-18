@@ -10,9 +10,6 @@ import { insertPostingFor } from "./candidate-posting.js"
  * gherkin/apply-anyway.feature). Fixtures and the exact copy the QA specs assert.
  * QA-authored and independent of the implementation: strings come from
  * copy-deck-apply-anyway.md byte for byte, not from the api or @eve/contracts.
- *
- * The v1.24.0 `override_*` columns are written and read with raw SQL so this
- * file type-checks before the backend adds them to `schema.ts`.
  */
 
 /** copy-deck-apply-anyway.md (api.error.* rows and the reused messages), byte for byte. */

@@ -60,7 +60,6 @@ describe("v1.18.0 shared schemas (AC-1.1, 1.2, 1.6, 2.1)", () => {
 
   it("posting_hidden is an error code after rate_limited_global", () => {
     const codes: readonly string[] = apiErrorCodeSchema.options
-    // Run a2e merge: EPIC-0002 A2's v1.21.0 `feature_not_yet_available` now follows it (me.spec.ts).
     const at = codes.indexOf("posting_hidden")
     expect(at).toBeGreaterThan(0)
     expect(codes[at - 1]).toBe("rate_limited_global")

@@ -22,8 +22,7 @@ import {
 /**
  * QA test authoring, step [5e], EPIC-0010. Candidate isolation of pasted-description
  * postings (ADR 0013, forced RLS on job_posting) and shared-row integrity, through the
- * real api and Postgres with two signed-in Candidates. Expected red until the
- * integrated candidate lands.
+ * real api and Postgres with two signed-in Candidates.
  *
  * Covers: EV:198, EV:207, EV:214, EV:221, RP:240, DOC:210, MO:207; threat-model.md
  * C-02, C-03, C-04, C-06, C-08 (evaluation of a private row), C-48.

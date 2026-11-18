@@ -203,7 +203,7 @@ export function jobs(d) {
   return {
     checks: names.length > 0,
     nonapi_tests: nonApi.length > 0,
-    // Integration tests and the node:22 image smoke: the api or what it depends on.
+    // Integration tests and the api image smoke: the api or what it depends on.
     api: d.affected.has(API),
     // Playwright drives the real api and web, so any package change runs it.
     e2e: names.length > 0,

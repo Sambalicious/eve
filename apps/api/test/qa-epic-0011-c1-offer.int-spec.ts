@@ -15,7 +15,6 @@ import { TestClock } from "./support/test-clock.js"
  * Gherkin: applications-board.r1.feature (BRD "The Outcome endpoints accept offer",
  * "An unknown Outcome type is still rejected", Closed-from-Interview/Offer),
  * status-words.r1.feature ST:158 ("only enum change is offer").
- * Expected red until the `offer` value and migration 0033 land.
  */
 let database: TestDatabase
 let google: FakeGoogle

@@ -48,7 +48,13 @@ export class SignInAttemptRepository {
     )
   }
 
-  async deleteCreatedBefore(cutoff: Date): Promise<void> {
-    await this.db.deleteFrom("sign_in_attempt").where("created_at", "<", cutoff).execute()
+  /**
+   * Hourly housekeeping (the worker's `auth.cleanup` job): removes the attempts
+   * the TTL has taken. `take` still refuses a presented attempt at use time, so
+   * this only stops abandoned rows accumulating. Returns how many rows went.
+   */
+  async deleteCreatedBefore(cutoff: Date): Promise<number> {
+    const result = await this.db.deleteFrom("sign_in_attempt").where("created_at", "<", cutoff).executeTakeFirst()
+    return Number(result.numDeletedRows)
   }
 }

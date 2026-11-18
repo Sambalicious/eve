@@ -90,8 +90,6 @@ function firstOfNextMonth(day: string): string {
 
 const applicationUrl = (base: string, id: string, anchor = "") => `${base}/applications/${id}${anchor}`
 
-// ── E1 ───────────────────────────────────────────────────────
-
 export type ConfirmedEmailInput = Readonly<{
   applicationId: string
   role: string
@@ -166,8 +164,6 @@ export function renderConfirmed(raw: ConfirmedEmailInput, base: string): Rendere
   )
 }
 
-// ── E2 ───────────────────────────────────────────────────────
-
 export type BlockedEmailInput = Readonly<{
   applicationId: string
   role: string
@@ -229,8 +225,6 @@ export function renderBlocked(raw: BlockedEmailInput, base: string): RenderedEma
     blocks
   )
 }
-
-// ── E3 ───────────────────────────────────────────────────────
 
 export type DailySummaryInput = Readonly<{
   watDay: string
@@ -516,8 +510,6 @@ export function renderDailySummary(input: DailySummaryInput, base: string): Rend
   return render(`Eve, ${formatWatDate(input.watDay)}: ${input.submitted.length} submitted, ${needYou} need you`, summaryLine, blocks, { textTail: { link: dashboardLink, summaryLine } })
 }
 
-// ── E4 ───────────────────────────────────────────────────────
-
 export type CostPauseEmailInput = Readonly<{
   /** First of the WAT month the pause belongs to. */
   month: string
@@ -620,8 +612,6 @@ export function renderAccessRequestCap(input: AccessRequestCapEmailInput): Rende
 function textOnly(subject: string, paragraphs: readonly string[], replyTo?: string): RenderedEmail {
   return { subject, preheader: paragraphs[0] ?? "", text: paragraphs.join("\n\n") + "\n", ...(replyTo ? { replyTo } : {}) }
 }
-
-// ── Rendering ────────────────────────────────────────────────
 
 /**
  * `textTail` (daily summary only, D-E5-14) ends the text part with the given

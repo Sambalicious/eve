@@ -146,7 +146,6 @@ async function runFixture(fixture: Fixture, runLabel: string, apiKey: string) {
   const outcome = await CandidateScope.run(CANDIDATE, () => service.generate("app-1"))
   Logger.overrideLogger(false)
 
-  // ---- analysis -------------------------------------------------------------------------------------------------
   const keywords = atsKeywords(posting.technologies, posting.ats_skills, fixture.company)
   const facts = new Map<string, string>()
   const wording = new Map<string, string>()

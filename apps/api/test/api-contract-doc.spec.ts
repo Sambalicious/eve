@@ -137,7 +137,6 @@ function operatorOnlyRoutes(): string[] {
 }
 
 // v1.25.0 (EPIC-0002 B1): PUT /v1/eligibility-settings is removed, so four Operator-only writes remain.
-// The code assertion is red until the B1 implementation deletes the route.
 describe("api-contract.md EPIC-0002 A2 Operator-only writes (D27, F-CR-10)", () => {
   const contract = hasContract ? readFileSync(CONTRACT, "utf8") : ""
   const paragraph = /^\*\*Operator-only shared catalog writes \(A2\)\.\*\*.*$/m.exec(contract)?.[0] ?? ""

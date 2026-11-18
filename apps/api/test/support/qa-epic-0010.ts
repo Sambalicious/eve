@@ -293,8 +293,6 @@ export function requestsWith(requests: readonly { body: Record<string, unknown> 
   return requests.filter((request) => JSON.stringify(request.body).includes(marker)).length
 }
 
-// ── Stack ──────────────────────────────────────────────────────────────────────
-
 export type PasteStack = Readonly<{
   database: TestDatabase
   google: FakeGoogle

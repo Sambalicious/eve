@@ -42,9 +42,6 @@ import { TestClock } from "./support/test-clock.js"
  * than imported from the product, so a drift in `@eve/contracts` or the api fails this file.
  * Outreach rows are seeded with SQL (contract section 12: "seed … through SQL under the
  * Candidate's binding when a test must bypass a writer"); no repository is mocked.
- *
- * The implementation does not exist in this worktree yet, so most tests fail at run time. That
- * is expected: they are the gate the implementation must satisfy.
  */
 
 type Kind = "referral_request" | "introduction" | "application_note"

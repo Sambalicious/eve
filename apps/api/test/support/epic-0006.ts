@@ -19,8 +19,7 @@ import { SignedInCandidate } from "./signed-in.js"
  * migration 0020-role-relevance adds (`posted_at`, `posted_date_kind`,
  * `seniority_marker`). Per-Candidate state goes to `candidate_posting`, whose
  * status check gains `not_checked`. Job criteria gain `target_role_families`
- * and `seniority_floor`. Raw SQL keeps these helpers compiling before
- * `schema.ts` knows the new columns.
+ * and `seniority_floor`. Raw SQL keeps the fixture writers on the stored columns.
  */
 
 /** The nine defaults, catalog order (AC-1.6). */

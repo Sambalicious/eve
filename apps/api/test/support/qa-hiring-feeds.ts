@@ -16,8 +16,7 @@ import { SignedInCandidate, signInCandidate } from "./signed-in.js"
  *
  * Paths and the problem set are retyped from api-contract.r1.md, not imported
  * from @eve/contracts, so a wrong product constant fails the tests instead of
- * passing with them. The Phase 3 tables are not in the Kysely `Database` type at
- * authoring time, so fixtures and assertions use raw SQL through the bootstrap
+ * passing with them. Fixtures and assertions use raw SQL through the bootstrap
  * superuser (`database.db`), which RLS does not bind.
  */
 export const HIRING_FEEDS_PATH = "/v1/stack-posts/hiring-feeds"
@@ -79,8 +78,7 @@ export async function hiringVerifications(db: Kysely<Database>): Promise<Verific
 }
 
 /**
- * EPIC-0008: the Candidate's own Stack posts record (replaces the shared-row setter that used to gate Stack posts).
- * `recorded: false` removes her row only.
+ * EPIC-0008: the Candidate's own Stack posts record. `recorded: false` removes her row only.
  */
 export async function setOwnStackVerification(db: Kysely<Database>, candidateId: string, recorded: boolean): Promise<void> {
   await sql`delete from alert_feed_candidate_verification where candidate_id = ${candidateId}::uuid`.execute(db)

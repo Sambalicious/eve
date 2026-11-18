@@ -228,11 +228,11 @@ function singular(word: string): string {
  * True when one profile segment supports the posting title (Revision 3, R18): the segment is a run of
  * step-down words followed by the posting title's tokens exactly, with nothing after them.
  *
- * Review fix (post-R26): the join rule is still applied on both sides ("frontend" is one run of "front end" and the
- * reverse), but it is no longer enumerated. Joining words only concatenates them, so one side's joined form is
+ * Review fix (post-R26): the join rule applies on both sides ("frontend" is one run of "front end" and the
+ * reverse). Joining words only concatenates them, so one side's joined form is
  * a string, and each side can always be joined whole: a match exists exactly when some token boundary of the
  * segment starts a suffix whose words concatenate to the wanted words concatenated. One backward pass, so the
- * cost is linear in the title length. The old enumeration grew like Fibonacci (a 34-token title was tens of
+ * cost is linear in the title length; enumerating the joins grew like Fibonacci (a 34-token title was tens of
  * millions of arrays and the api ran out of memory).
  */
 function supported(title: readonly string[], wanted: readonly string[]): boolean {

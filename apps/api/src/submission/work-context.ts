@@ -5,7 +5,7 @@ import { PLACES, REGION_MEMBERS, areasIn, escapeRegExp } from "../discovery/rule
  * EPIC-0002 B1 (architecture r4 "Work-authorization and sponsorship answers
  * under Job Preferences", AC 5.18, 5.19): the countries the work-question
  * classifier reads, built from the Candidate's Job Preferences version, never
- * from free text. `candidate_setting.work_authorization` is no longer read.
+ * from free text or `candidate_setting.work_authorization`.
  */
 export type WorkContext = Readonly<{
   home: string

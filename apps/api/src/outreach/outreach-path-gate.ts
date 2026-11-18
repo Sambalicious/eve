@@ -36,14 +36,11 @@ export function registerOutreachPathGate(app: NestFastifyApplication): void {
     if (route !== OUTREACH_WRITE_ROUTE && route !== OUTREACH_READER_NAME_ROUTE) return
     void reply.header("cache-control", "no-store")
 
-    // Step 1: the session, from the cookie the fastify-cookie plugin has already parsed.
     const lookup = await sessions().resume(request.cookies?.[SESSION_COOKIE])
     if (lookup.kind === "missing") throw new ApiException("unauthenticated")
     if (lookup.kind === "expired") throw new ApiException("session_expired")
-    // Step 2: CSRF on both state-changing routes, before the Application is touched and before the body.
     if (!hasMatchingCsrf(request, lookup.session)) throw new ApiException("csrf_invalid")
 
-    // Step 3 and the 404 rule: the path, then the Application as this Candidate may see it.
     const params = request.params as { id?: string; kind?: string }
     const applicationId = outreachUuid(params.id ?? "")
     outreachKind(params.kind ?? "")

@@ -17,7 +17,7 @@ import { TestClock } from "./support/test-clock.js"
  * Gherkin: applications-board.r1.feature BRD:76 to BRD:148 (AC-6.3). The safety-critical
  * guard split: the Draft path is open to every Candidate, the blocked path stays
  * Operator-only (risk 1 in the contract; Security reviews the split). Real api,
- * real runtime role under RLS. Expected red until C3 lands.
+ * real runtime role under RLS.
  */
 let database: TestDatabase
 let google: FakeGoogle
