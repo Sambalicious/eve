@@ -46,7 +46,6 @@ export class SignInService {
       const request = await this.google.createAuthorizationRequest()
       const attemptId = generateSecureToken()
       const now = this.clock.now()
-      await this.attempts.deleteCreatedBefore(new Date(now.getTime() - SIGN_IN_ATTEMPT_TTL_MS))
       await this.attempts.insert(hashToken(attemptId), {
         state: request.state,
         nonce: request.nonce,

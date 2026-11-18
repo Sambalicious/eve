@@ -58,6 +58,20 @@ export class SessionRepository {
     return row && { csrfToken: row.csrf_token, googleSub: row.google_sub, candidateId: row.candidate_id }
   }
 
+  /**
+   * Hourly housekeeping (the worker's `auth.cleanup` job): removes the sessions
+   * `touchIfActive` would refuse if their cookie came back — idle since before
+   * `idleCutoff`, or created before `createdCutoff` (the absolute lifetime).
+   * Returns how many rows went.
+   */
+  async deleteExpired(idleCutoff: Date, createdCutoff: Date): Promise<number> {
+    const result = await this.db
+      .deleteFrom("dashboard_session")
+      .where((eb) => eb.or([eb("last_active_at", "<", idleCutoff), eb("created_at", "<", createdCutoff)]))
+      .executeTakeFirst()
+    return Number(result.numDeletedRows)
+  }
+
   /** Returns true when a row was deleted. */
   async delete(idHash: string): Promise<boolean> {
     const result = await this.db

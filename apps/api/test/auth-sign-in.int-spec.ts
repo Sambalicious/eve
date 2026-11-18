@@ -84,6 +84,30 @@ describe("Private dashboard: Google sign-in", () => {
     expect(line).toMatch(/Max-Age=600/)
   })
 
+  // The hourly worker job owns the sweep (auth-cleanup.int-spec.ts): sign-in start pays for no DELETE.
+  it("starting a sign-in leaves a stored attempt past the TTL for the worker's cleanup", async () => {
+    const staleHash = "f".repeat(64)
+    await database.db
+      .insertInto("sign_in_attempt")
+      .values({
+        id_hash: staleHash,
+        state: "state",
+        nonce: "nonce",
+        code_verifier: "verifier",
+        return_path: "/dashboard",
+        created_at: new Date(clock.now().getTime() - 60 * 60 * 1000),
+      })
+      .execute()
+
+    await browser.startSignIn()
+
+    const hashes = (await database.db.selectFrom("sign_in_attempt").select("id_hash").execute()).map(
+      (row) => row.id_hash
+    )
+    expect(hashes).toContain(staleHash)
+    expect(hashes).toHaveLength(2)
+  })
+
   // dashboard.feature @happy @ac-9.1 "The Candidate signs in with the Google account bound at installation"
   it("The Candidate signs in with the Google account bound at installation", async () => {
     expect(await countSessions()).toBe(0)
