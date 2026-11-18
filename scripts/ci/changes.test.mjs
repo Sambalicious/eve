@@ -196,9 +196,11 @@ test('a root manifest change to agent scripts alone selects no package', () => {
 });
 
 test('a failure inside change detection runs everything instead of skipping', () => {
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GITHUB_')));
   const out = execFileSync(process.execPath, [join(process.cwd(), 'scripts/ci/changes.mjs'), '--head', 'no-such-rev'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
+    env,
   });
   assert.match(out, /mode=full/);
   assert.match(out, /checks=true/);
