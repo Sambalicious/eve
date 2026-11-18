@@ -1,0 +1,28 @@
+#!/bin/sh
+# Opt-in pre-push gate: typecheck and lint only the packages that differ from
+# origin/main (plus their dependents). Install with `pnpm hooks:install`; skip one
+# push with `git push --no-verify`. It never blocks when it cannot run (no
+# dependencies installed, no origin/main), because CI is the real gate.
+# Turbo caches results, so a repeat push with no new changes returns at once.
+
+# Deleting a remote branch has nothing to check; exit only when every ref is a deletion.
+pushing=0
+while read -r _ local_sha _ _; do
+  [ "$local_sha" != "0000000000000000000000000000000000000000" ] && pushing=1
+done
+[ "$pushing" = 1 ] || exit 0
+
+root=$(git rev-parse --show-toplevel) || exit 0
+cd "$root" || exit 0
+
+if [ ! -x node_modules/.bin/turbo ]; then
+  echo "pre-push: dependencies not installed (run pnpm install); skipping local checks." >&2
+  exit 0
+fi
+if ! git rev-parse --verify --quiet origin/main >/dev/null; then
+  echo "pre-push: origin/main not found (git fetch origin); skipping local checks." >&2
+  exit 0
+fi
+
+echo "pre-push: typecheck + lint on packages changed vs origin/main (git push --no-verify to skip)" >&2
+exec node_modules/.bin/turbo run typecheck lint "--filter=...[origin/main]" --output-logs=errors-only
