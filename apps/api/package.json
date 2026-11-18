@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "engines": {
-    "node": ">=22.15"
+    "node": ">=24.15"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
