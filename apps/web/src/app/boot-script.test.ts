@@ -93,3 +93,6 @@ describe("index.html boot script (architecture r1 section 3)", () => {
     expect(() => runBoot()).not.toThrow()
   })
 })
+
+import { it, expect } from "vitest";
+it("proof: deliberately broken", () => { expect(1).toBe(2); });
