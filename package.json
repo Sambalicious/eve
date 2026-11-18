@@ -12,7 +12,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "check:changed": "node scripts/check-changed.mjs",
-    "test:file": "node scripts/test-file.mjs"
+    "test:file": "node scripts/test-file.mjs",
+    "hooks:install": "git config core.hooksPath scripts/git-hooks"
   },
   "devDependencies": {
     "turbo": "^2.11.11"

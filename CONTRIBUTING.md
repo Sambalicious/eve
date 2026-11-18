@@ -26,6 +26,15 @@ pnpm --filter @eve/e2e exec playwright install chromium
 pnpm turbo run e2e
 ```
 
+### Optional pre-push hook
+
+`pnpm hooks:install` points git at `scripts/git-hooks`, so each `git push` first runs typecheck and
+lint on the packages that differ from `origin/main` and their dependents (turbo caches, so a repeat
+push is instant). It is opt-in and never installed automatically. Skip it for one push with
+`git push --no-verify`, or remove it with `git config --unset core.hooksPath`. It skips itself, and
+lets the push through, when dependencies are not installed or `origin/main` is not fetched. CI still
+runs the full checks.
+
 ## Rules that are not negotiable
 
 - **The claim guard.** Generated documents and outreach texts may only state what the approved Career
