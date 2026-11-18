@@ -10,7 +10,11 @@
 #     changes only package.json files and the lockfile, with no line limit;
 #   - the status is on the PR's current head, and every check the branch ruleset requires
 #     has finished green on that same commit.
-# Anything else keeps its comment and waits for a person. A new push has no status, so it
+# Anything else keeps its comment and waits for a person. When such a PR has only low or
+# medium findings, a cheaper model may push up to two small fix commits to its branch
+# (.github/scripts/opus-fix.mjs); each is reviewed and checked afresh and never merges
+# itself. That needs the FIX_PUSH_TOKEN secret (a fine-grained token with contents:write on
+# this repo; GITHUB_TOKEN's pushes start no workflows). Without it no fix is attempted. A new push has no status, so it
 # cannot inherit an approval.
 #
 # Setup: add the ANTHROPIC_API_KEY repository secret. Without it nothing is reviewed or
@@ -69,6 +73,7 @@ jobs:
           MODE: review
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIX_PUSH_TOKEN: ${{ secrets.FIX_PUSH_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REPO: ${{ github.repository }}
