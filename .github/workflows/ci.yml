@@ -181,12 +181,18 @@ jobs:
             [ "$r" = "success" ] || [ "$r" = "skipped" ] || exit 1
           done
 
-  api-integration:
-    name: api integration tests
+  # Split by test file with vitest's --shard (plain i/N, not duration-balanced); every
+  # shard is its own runner, so it starts its own Postgres container and cannot collide.
+  api-integration-shard:
+    name: api integration tests shard ${{ matrix.shard }}/4
     needs: changes
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 18 # p95 11.8 min + ~50%
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -203,7 +209,22 @@ jobs:
       # Testcontainers (apps/api/test/support/postgres-cluster.ts) on the runner's
       # Docker, creates the owner and runtime roles and migrates a template.
       # It takes no external database URL, so there is no service container.
-      - run: pnpm --filter @eve/api test:int
+      - run: pnpm --filter @eve/api test:int --shard=${{ matrix.shard }}/4
+
+  # The required status check. It keeps the name "api integration tests" so the branch
+  # ruleset does not change: green when every shard passed or the api was not affected.
+  api-integration:
+    name: api integration tests
+    needs: [changes, api-integration-shard]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: All api integration shards must pass
+        env:
+          RESULT: ${{ needs.api-integration-shard.result }}
+        run: |
+          echo "shards: $RESULT"
+          [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
 
   # The suite runs serially against one database, so it is split by test file across
   # runners; every shard starts its own Postgres, api and Vite (global-setup.ts).
