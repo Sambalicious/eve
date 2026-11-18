@@ -58,15 +58,17 @@ jobs:
           CI_EVENT: ${{ github.event_name }}
           CI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
 
-  checks:
-    name: typecheck, lint, test
+  # The old single "typecheck, lint, test" job ran everything in series (p50 487 s). It is
+  # now static + the unit jobs below, in parallel, and the `checks` aggregate keeps the
+  # required name.
+  static:
+    name: typecheck + lint
     needs: changes
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       TURBO_FILTER: ${{ needs.changes.outputs.turbo_filter }}
-      TEST_FILTER: ${{ needs.changes.outputs.test_filter }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -84,13 +86,101 @@ jobs:
       - run: pnpm audit --prod --audit-level=high
       # TURBO_FILTER is empty on a full run, else --filter=<pkg> per affected package.
       - run: pnpm turbo run typecheck lint $TURBO_FILTER
-      # Every affected package's tests except the api integration project, which
-      # has its own job: run together on one runner, its Postgres containers slowed
-      # the web tests past their 5 s timeout and the job past 30 minutes.
-      - if: needs.changes.outputs.nonapi_tests == 'true'
-        run: pnpm turbo run test $TEST_FILTER
-      - if: needs.changes.outputs.api == 'true'
-        run: pnpm --filter @eve/api test:unit
+
+  # Every affected package's tests except the api integration project, which has its own
+  # job (run together on one runner, its Postgres containers slowed the web tests past
+  # their 5 s timeout), and except web, which is the bulk of the time and is sharded.
+  unit-other:
+    name: unit tests (packages)
+    needs: changes
+    # Skipped when web is the only package in scope (a scoped filter never contains "!").
+    if: >-
+      needs.changes.outputs.nonapi_tests == 'true' &&
+      needs.changes.outputs.test_filter != '--filter=@eve/web'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TEST_FILTER: ${{ needs.changes.outputs.test_filter }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # No version input: the action reads "packageManager" from package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      # "!@eve/web" only subtracts: web runs in the unit-web shards.
+      - run: pnpm turbo run test $TEST_FILTER --filter=!@eve/web
+
+  unit-web:
+    name: unit tests (web ${{ matrix.shard }}/4)
+    needs: changes
+    if: >-
+      needs.changes.outputs.nonapi_tests == 'true' &&
+      (contains(needs.changes.outputs.test_filter, '@eve/web') ||
+      contains(needs.changes.outputs.test_filter, '!'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # No version input: the action reads "packageManager" from package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm turbo run test --filter=@eve/web -- --shard=${{ matrix.shard }}/4
+
+  unit-api:
+    name: unit tests (api)
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # No version input: the action reads "packageManager" from package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          # .nvmrc holds "24" (latest 24.x). See README.md "CI" for why not 22.
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm turbo run build --filter=@eve/contracts
+      - run: pnpm --filter @eve/api test:unit
+
+  # The required status check. It keeps the name "typecheck, lint, test" so the branch
+  # ruleset does not change: green when every job above passed or was not needed for this change.
+  checks:
+    name: typecheck, lint, test
+    needs: [changes, static, unit-other, unit-web, unit-api]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checks must pass
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "results: $RESULTS"
+          for r in $RESULTS; do
+            [ "$r" = "success" ] || [ "$r" = "skipped" ] || exit 1
+          done
+
   api-integration:
     name: api integration tests
     needs: changes
