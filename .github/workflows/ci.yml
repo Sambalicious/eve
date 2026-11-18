@@ -138,11 +138,15 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Install Chromium and its system dependencies
-        run: pnpm --filter @eve/e2e exec playwright install --with-deps chromium
+      # The runner image ships Google Chrome, so no browser or system package is downloaded here
+      # (that step took 4 to 7 minutes on most shards, as long as the tests).
+      - name: Show the preinstalled Chrome
+        run: google-chrome --version
       # Global setup (apps/e2e/support/global-setup.ts) runs postgres:17-alpine with
       # `docker run`, builds and starts the api and starts Vite on port 5199.
       - run: pnpm turbo run e2e -- --shard=${{ matrix.shard }}/4
+        env:
+          E2E_BROWSER_CHANNEL: chrome
       - name: Upload the Playwright report and traces
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
