@@ -927,7 +927,7 @@ describe("AC-1.8 @AC-1.8 evaluation changes a stored family only between technic
     // CR-1 trigger: a non-lead IC title whose evaluated duties are management-only.
     ["Senior Frontend Engineer", "senior_frontend", "Hiring, performance reviews and line management of 6 engineers"],
     ["Senior Backend Engineer", "backend", "Hiring, performance reviews and line management of 6 engineers"],
-  ] as const)("role-family-catalog:351 %s stored %s keeps its family after evaluation returns %j (management-only rows expected red pending CR-1)", async (title, family, duties) => {
+  ] as const)("role-family-catalog:351 %s stored %s keeps its family after evaluation returns %j", async (title, family, duties) => {
     const id = await evaluateStored(title, family, duties)
     expect((await factsOf(database.db, id)).role_family).toBe(family)
   })

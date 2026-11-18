@@ -128,7 +128,7 @@ describe("AC-3.10 @AC-3.10 hidden postings are left out of the daily summary's s
     expect(text).not.toContain("Hotline Paralegal")
   })
 
-  it("applications-and-links:221 the failure list holds 'Senior Frontend Engineer at Hooli' only (expected red pending Q3-2)", async () => {
+  it("applications-and-links:221 the failure list holds 'Senior Frontend Engineer at Hooli' only", async () => {
     await seedDay()
     const text = await sendSummary()
     const failures = section(text, "Failures")
