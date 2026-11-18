@@ -36,7 +36,11 @@ export function isRulesDrop(status: string, skipReason: string | null): boolean 
 export class SubmissionQueueRepository {
   constructor(private readonly tenant: TenantDatabase) {}
 
-  /** Queued Applications with their ranking inputs, and the Candidate's tier map (EPIC-0002 B1), read in one transaction. */
+  /**
+   * Queued Applications with their ranking inputs, and the Candidate's tier map
+   * (EPIC-0002 B1), read in one transaction. AC 6.2: carried-over Applications
+   * are re-ranked with the day's new ones.
+   */
   queuedForRanking() {
     return this.tenant.run(async (tx, candidateId) => ({
       tiers: await tierMapIn(tx, candidateId),
