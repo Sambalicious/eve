@@ -170,7 +170,8 @@ jobs:
           [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
 
   # The checks job tests the api on the .nvmrc Node (24); production runs the
-  # apps/api/Dockerfile image on node:22. This job builds that image and boots it
+  # apps/api/Dockerfile image on node:24 (the job keeps its old name "(node:22)" because the branch
+  # ruleset requires that exact check name). This job builds that image and boots it
   # against a throwaway Postgres, so a change that breaks the shipped image fails CI (QA F-1).
   api-image:
     name: api image smoke (node:22)

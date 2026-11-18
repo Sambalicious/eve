@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Builds the production api image (apps/api/Dockerfile, node:22) and smoke-tests it
+# Builds the production api image (apps/api/Dockerfile, node:24) and smoke-tests it
 # against a throwaway postgres:17-alpine: provision roles, migrate, run storage-migrate
 # (EPIC-0002 A2: the api refuses to start without its marker), start the api, expect
 # GET /v1/health to return 200 with database "ok". CI tests the source on the .nvmrc
-# Node (24); this job proves the image that ships still runs on node:22.
+# Node (24); this job proves the image that ships boots and migrates.
 # Run from the repository root: scripts/ci/api-image-smoke.sh
 # All credentials below are synthetic and exist only for the life of the containers.
 set -euo pipefail

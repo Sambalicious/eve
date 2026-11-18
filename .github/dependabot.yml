@@ -30,7 +30,7 @@ updates:
       npm-minor-patch:
         update-types: [minor, patch]
     ignore:
-      # @types/node tracks the Node the code runs on (engines >=22.15, .nvmrc 24), not the latest.
+      # @types/node tracks the Node the code runs on (engines >=24.15, .nvmrc 24), not the latest.
       - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
       # 4.0.105 makes the Anthropic model unassignable to Mastra (api tsc and image build fail).
@@ -47,7 +47,7 @@ updates:
       docker-minor-patch:
         update-types: [minor, patch]
     ignore:
-      # The shipped image stays on node 22 (see apps/api/Dockerfile); a new major is a deliberate upgrade.
+      # The shipped image stays on node 24 (see apps/api/Dockerfile); a new major is a deliberate upgrade.
       - dependency-name: node
         update-types: [version-update:semver-major]
 
