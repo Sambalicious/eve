@@ -138,15 +138,19 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      # The runner image ships Google Chrome, so no browser or system package is downloaded here
-      # (that step took 4 to 7 minutes on most shards, as long as the tests).
-      - name: Show the preinstalled Chrome
-        run: google-chrome --version
+      # Playwright's own Chromium (the tests assert on it: Google Chrome re-requests favicon.svg on history
+      # changes and breaks the "no request" tests). Cached per Playwright version, so most runs skip the
+      # download. System libraries come from the runner image, so no apt step (--with-deps took minutes).
+      - id: pw
+        run: echo "version=$(pnpm --filter @eve/e2e exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: pnpm --filter @eve/e2e exec playwright install chromium
       # Global setup (apps/e2e/support/global-setup.ts) runs postgres:17-alpine with
       # `docker run`, builds and starts the api and starts Vite on port 5199.
       - run: pnpm turbo run e2e -- --shard=${{ matrix.shard }}/4
-        env:
-          E2E_BROWSER_CHANNEL: chrome
       - name: Upload the Playwright report and traces
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

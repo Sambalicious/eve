@@ -32,9 +32,6 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${resolveWebPort()}`,
-    // CI sets E2E_BROWSER_CHANNEL=chrome to use the runner's preinstalled Chrome instead of downloading
-    // Playwright's Chromium and its system packages on every shard. Unset locally: the bundled Chromium.
-    channel: process.env.E2E_BROWSER_CHANNEL || undefined,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
