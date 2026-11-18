@@ -1,6 +1,5 @@
 /**
- * EPIC-0012 QA gate 2 (step 6a, after repair wave 1). These are fresh adversarial variants of QA-B1 to
- * QA-B6 and QA-R1, written by an independent QA session. Test file only; no product code changed.
+ * EPIC-0012 QA gate 2 (step 6a, after repair wave 1). Fresh adversarial variants of QA-B1 to QA-B6 and QA-R1.
  *
  * Convention, as in qa-epic-0012-truth-guard.spec.ts: `it` asserts required behaviour the candidate already
  * shows. `it.fails` asserts REQUIRED behaviour the candidate does not show yet: each one is a blocker in

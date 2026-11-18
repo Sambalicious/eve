@@ -28,7 +28,6 @@ const FACTS = new Map([
 ])
 
 const LINES: ReadonlyArray<readonly [string, string]> = [
-  // run4.mts "realistic" resume lines
   ["Full-stack engineer with 9 years of experience in TypeScript, Go and PostgreSQL", "SUM"],
   ["AWS Certified Solutions Architect – Associate, 2022", "AWS"],
   [PAYSTACK, "M14"],
@@ -43,12 +42,10 @@ const LINES: ReadonlyArray<readonly [string, string]> = [
   ["TypeScript, Go, Node.js, React, PostgreSQL, Redis, Kafka", "SK"],
   ["AWS (ECS, Lambda) and Terraform", "TF"],
   ["BEng Electrical Engineering, Obafemi Awolowo University, 2010–2015, Second Class Upper", "BENG"],
-  // run4.mts letter body lines
   ["At Paystack-like Payments Ltd I led the migration of 14 services from Heroku to AWS ECS, which cut hosting costs by 31%.", "M14"],
   ["I also mentored 6 engineers, and 3 of them were promoted to senior within 18 months.", "MEN"],
   ["Before that, at Kobo Logistics, I built route-optimisation APIs in Go serving 40,000 daily deliveries across 5 cities.", "ROUTE"],
   ["I reduced p95 latency from 820 ms to 190 ms with Redis caching and query tuning.", "P95"],
-  // run4.mts "r4" natural lines (F-QA4-07)
   ["My strongest work has been in payments infrastructure, where I led the migration of 14 services from Heroku to AWS ECS.", "M14"],
   ["I care about reliability: I designed an idempotent webhook pipeline handling about 2.5 million events per day.", "WH"],
   ["Mentoring matters to me; I mentored 6 engineers and 3 were promoted to senior within 18 months.", "MEN"],
@@ -57,7 +54,6 @@ const LINES: ReadonlyArray<readonly [string, string]> = [
   ["I work across TypeScript, Go, Node.js, React, PostgreSQL, Redis and Kafka.", "SK"],
   ["I hold a BEng in Electrical Engineering, Second Class Upper.", "BENG"],
   ["I am an AWS Certified Solutions Architect – Associate (2022).", "AWS"],
-  // document-claims.spec F-QA4-07 wider openers
   ["Recently, I led the migration of 14 services from Heroku to AWS ECS.", "M14"],
   ["Notably, I reduced p95 latency from 820 ms to 190 ms.", "P95"],
   ["Ultimately, 3 of the 6 engineers I mentored were promoted to senior.", "MEN"],

@@ -66,9 +66,9 @@ describe("resume headline support (EPIC-0012 rule 1)", () => {
     expect(headlineFor("Engineer", ["Lead Engineer"])).toBe("Engineer")
     expect(headlineFor("Consultant", ["Associate Consultant"])).toBeNull()
     expect(headlineFor("Consultant", ["Senior Associate Consultant"])).toBeNull()
-    // R21 changed case: with no relation cut, an entry that is exactly the posting title matches whole, so it
-    // prints. Only an entry that holds the title inside a longer phrase prints nothing (and an approved
-    // alternate is then the way out, 3h).
+    // With no relation cut, an entry that is exactly the posting title matches whole, so it prints. Only an
+    // entry that holds the title inside a longer phrase prints nothing (and an approved alternate is then the
+    // way out, 3h).
     expect(headlineFor("Assistant to the CFO", ["Assistant to the CFO"])).toBe("Assistant to the CFO")
     expect(headlineFor("Assistant to the CFO", ["Assistant to the CFO, EMEA"])).toBeNull()
     expect(headlineFor("Assistant to the CFO", [], ["Assistant to the CFO"])).toBe("Assistant to the CFO")

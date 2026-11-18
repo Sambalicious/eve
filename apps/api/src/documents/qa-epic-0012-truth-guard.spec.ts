@@ -1,6 +1,5 @@
 /**
- * EPIC-0012 QA gate (step 6a): adversarial tests of the tailoring truth guard, written by an independent
- * QA session. Test file only; no product code changed.
+ * EPIC-0012 QA gate (step 6a): adversarial tests of the tailoring truth guard.
  *
  * Convention: `it` asserts behaviour the design requires and the candidate already shows. `it.fails`
  * marks a case where the candidate lets through something the owner rules or design-decisions.md say must
