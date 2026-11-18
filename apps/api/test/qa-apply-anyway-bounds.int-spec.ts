@@ -1677,6 +1677,7 @@ describe("AA-4.6 emails mark an override Application", () => {
   })
 })
 
+// Run last: this block drops and re-adds columns on this file's database.
 describe("migration 0026-apply-anyway-bounds (AA-2.7, AA-7.6)", () => {
   type Module = { up: (db: unknown) => Promise<void>; down: (db: unknown) => Promise<void> }
   const NAME_PATTERN = /^\d{4}-apply-anyway-bounds$/
