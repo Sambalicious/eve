@@ -799,7 +799,7 @@ export const scenarios = {
     discovery: { postings: [afPosting()] },
     applications: [{ app: afFlagOffApp, submission: submission() }],
   },
-  "added-facts-sample": afScenario(afIds.sample, editableWithFacts(), "OD-16: an Activation Gate sample whose documents cite added facts (badge, read-only list, edit link)", {
+  "added-facts-sample": afScenario(afIds.sample, editableWithFacts(), "OD-16: a sample awaiting approval whose documents cite added facts (badge, read-only list, edit link)", {
     submission: submission(awaitingSample()),
   }),
   "added-facts-blocked": afScenario(afIds.blocked, editableWithFacts(), "AC 2.7: a blocked cover letter with unsupported terms; the alert's C-AF-44 opens free entry with C-AF-41", {
