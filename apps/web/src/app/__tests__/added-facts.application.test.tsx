@@ -26,6 +26,7 @@ import {
 } from "@/shared/testing/added-facts-fixtures"
 import { createAddedFactsApi } from "@/shared/testing/added-facts-api"
 import { apiErrorResponse, rankedPosting, server, strongMatch, submission, tailoredDocument } from "@/shared/testing"
+import { advance } from "./career-setup-helpers"
 import { openDocuments } from "./documents-helpers"
 
 const ATS = { score: 62, total: 9, matched: ["React", "TypeScript"], missing: [], gaps: ["Figma", "design systems"] }
@@ -58,12 +59,12 @@ function appWith(view: AddedFactsView, overrides: Partial<ApplicationDetail> = {
 }
 
 /** Opens the Application page with the added-facts view, its five MSW routes and the view in the detail. */
-function openWith(viewInput: AddedFactsView, appOverrides: Partial<ApplicationDetail> = {}) {
+function openWith(viewInput: AddedFactsView, appOverrides: Partial<ApplicationDetail> = {}, options: { fakeTimers?: boolean } = {}) {
   const view = citedOnly(viewInput)
   const app = appWith(view, appOverrides)
   const added = createAddedFactsApi({ views: { [ADDED_APPLICATION_ID]: view } })
   server.use(...added.handlers)
-  const opened = openDocuments(`/applications/${app.id}`, { applications: [app] })
+  const opened = openDocuments(`/applications/${app.id}`, { applications: [app] }, { fakeTimers: options.fakeTimers })
   return { ...opened, added, app }
 }
 
@@ -180,6 +181,67 @@ describe("FEAT-0017 ATS card: tick gap terms", () => {
     const keywords = within(card).getByText(/^In this resume:/)
     expect(score.compareDocumentPosition(stale) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(stale.compareDocumentPosition(keywords) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
+describe("FEAT-0017 generating: the view follows the Application in and out", () => {
+  it("regenerating freezes the Added section, and finishing makes it editable and fresh again with no reload", async () => {
+    const gaps = { available: true as const, terms: ["Figma", "design systems"] }
+    const before = citedOnly(addedFactsView({ postingGaps: gaps }))
+    // The api derives the view from the Application's state and the new documents: busy generating,
+    // then editable with the Figma skill now added and the gap list without it.
+    const after = citedOnly(
+      addedFactsView({
+        version: 1,
+        facts: [skillOnlyFact()],
+        counts: { oneLiner: 0, skillOnly: 1 },
+        postingGaps: { available: true, terms: ["design systems"] },
+      })
+    )
+    const app = appWith(before)
+    let generated = false
+    const added = createAddedFactsApi({ views: { [ADDED_APPLICATION_ID]: before } })
+    server.use(...added.handlers)
+    server.use(
+      http.get(applicationAddedFactsPath(ADDED_APPLICATION_ID), () =>
+        HttpResponse.json(addedFactsViewSchema.parse(generated ? after : app.state === "generating" ? busyGenerating({ postingGaps: gaps }) : before))
+      )
+    )
+    // The completion read writes documents the ATS card can score, as a real generation does.
+    const { user } = openDocuments(
+      `/applications/${app.id}`,
+      {
+        applications: [app],
+        nextGeneration: (current) => {
+          generated = true
+          return appWith(after, {
+            id: current.id,
+            addedFacts: after,
+            documents: [{ ...tailoredDocument(current.id, "resume"), ats: ATS }, tailoredDocument(current.id, "cover_letter")],
+          })
+        },
+      },
+      { fakeTimers: true }
+    )
+
+    const section = await openSection()
+    expect(within(section).getByRole("button", { name: "Add a fact" })).toBeVisible()
+    expect(within(await atsCard()).getByRole("checkbox", { name: "Figma, I have used this" })).toBeVisible()
+
+    await user.click(await screen.findByRole("button", { name: "Generate again" }))
+
+    // Generation starts: the detail learned it, so the Added view must freeze too.
+    expect(await within(section).findByText("Wait until the documents finish, then change facts.")).toBeVisible()
+    expect(within(section).queryByRole("button", { name: "Add a fact" })).not.toBeInTheDocument()
+
+    // Generation ends: the view comes back editable and shows what the generation recorded.
+    await advance(5000)
+    expect(await within(section).findByRole("button", { name: "Add a fact" })).toBeVisible()
+    expect(within(section).getByText("Figma")).toBeVisible()
+    expect(within(section).getByText("0 of 10 sentences")).toBeVisible()
+    const fresh = await atsCard()
+    expect(within(fresh).getByRole("checkbox", { name: "design systems, I have used this" })).toBeVisible()
+    expect(within(fresh).queryByRole("checkbox", { name: "Figma, I have used this" })).not.toBeInTheDocument()
   })
 })
 
