@@ -1,4 +1,5 @@
 import {
+  ADDED_FACTS_ERROR_MESSAGES,
   ADVANCED_ERROR_MESSAGES,
   apiErrorResponseSchema,
   APPLY_ANYWAY_ERROR_MESSAGES,
@@ -89,6 +90,8 @@ const ERROR_MESSAGES = {
   ...ADVANCED_ERROR_MESSAGES,
   // v1.31.0: EPIC-0014 outreach, byte for byte from the contracts package.
   ...OUTREACH_ERROR_MESSAGES,
+  // v1.32.0: FEAT-0017 added facts, byte for byte from the contracts package.
+  ...ADDED_FACTS_ERROR_MESSAGES,
 } as const satisfies Record<ApiErrorCode, string>
 
 const ERROR_STATUS = {
@@ -156,6 +159,14 @@ const ERROR_STATUS = {
   manual_application_only: 409,
   advanced_locked: 409,
   outreach_reader_name_invalid: 422,
+  added_facts_frozen: 409,
+  added_facts_busy: 409,
+  added_facts_conflict: 409,
+  added_facts_invalid: 422,
+  added_facts_limit: 422,
+  added_facts_not_lifted: 409,
+  added_facts_confirmation_required: 409,
+  documents_stale: 409,
 } as const satisfies Record<ApiErrorCode, number>
 
 /** The contract error envelope. `reason` is only valid with `resume_unreadable` (v1.3.0). */

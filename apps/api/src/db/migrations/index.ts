@@ -41,6 +41,7 @@ import * as leadPipeline from "./0038-lead-pipeline.js"
 import * as blockedClaimCause from "./0039-blocked-claim-cause.js"
 import * as outreachMessages from "./0040-outreach-messages.js"
 import * as leadPolicyBinding from "./0041-lead-policy-binding.js"
+import * as addedFacts from "./0042-added-facts.js"
 
 /** Migrations that need nothing from the environment. */
 const STATIC_MIGRATIONS: Record<string, Migration> = {
@@ -85,11 +86,12 @@ const STATIC_MIGRATIONS: Record<string, Migration> = {
  * EPIC-0009 blocked-claim cause and terms (`application.blocked_claim_cause`) is 0039.
  * EPIC-0014 Outreach messages (`outreach_message`) is 0040.
  * Lead policy binding (`lead_candidate` gains the 0022 binding) is 0041.
+ * FEAT-0017 Application added facts is 0042.
  * D19 (r5-addendum): no number is reserved, merge order decides, and a
  * migration that has run on production is never renamed.
  */
 export function migrationsFor(context: MultiCandidateContext): Record<string, Migration> {
-  return { ...STATIC_MIGRATIONS, "0016-multi-candidate": multiCandidateMigration(context), "0017-row-level-security": rowLevelSecurity, "0018-owner-preferences": ownerPreferences, "0019-candidate-posting": candidatePosting, "0020-role-relevance": roleRelevance, "0021-hiring-posts": hiringPosts, "0022-candidate-binding": candidateBinding, "0023-runtime-no-temporary": runtimeNoTemporary, "0024-alert-feed-candidate-verification": alertFeedCandidateVerification, "0025-apply-anyway": applyAnyway, "0026-apply-anyway-bounds": applyAnywayBounds, "0027-preferences-version": preferencesVersion, "0028-ats-skills": atsSkills, "0029-ats-fit": atsFit, "0030-ats-minimum": atsMinimum, "0031-pasted-description": pastedDescription, "0032-stuck-checking": stuckChecking, "0033-simplify-eve": simplifyEve, "0034-forward-statements": forwardStatements, "0035-manual-apply-lane": manualApplyLane, "0036-retry-failed-checks": retryFailedChecks, "0037-retry-backfill": retryBackfill, "0038-lead-pipeline": leadPipeline, "0039-blocked-claim-cause": blockedClaimCause, "0040-outreach-messages": outreachMessages, "0041-lead-policy-binding": leadPolicyBinding }
+  return { ...STATIC_MIGRATIONS, "0016-multi-candidate": multiCandidateMigration(context), "0017-row-level-security": rowLevelSecurity, "0018-owner-preferences": ownerPreferences, "0019-candidate-posting": candidatePosting, "0020-role-relevance": roleRelevance, "0021-hiring-posts": hiringPosts, "0022-candidate-binding": candidateBinding, "0023-runtime-no-temporary": runtimeNoTemporary, "0024-alert-feed-candidate-verification": alertFeedCandidateVerification, "0025-apply-anyway": applyAnyway, "0026-apply-anyway-bounds": applyAnywayBounds, "0027-preferences-version": preferencesVersion, "0028-ats-skills": atsSkills, "0029-ats-fit": atsFit, "0030-ats-minimum": atsMinimum, "0031-pasted-description": pastedDescription, "0032-stuck-checking": stuckChecking, "0033-simplify-eve": simplifyEve, "0034-forward-statements": forwardStatements, "0035-manual-apply-lane": manualApplyLane, "0036-retry-failed-checks": retryFailedChecks, "0037-retry-backfill": retryBackfill, "0038-lead-pipeline": leadPipeline, "0039-blocked-claim-cause": blockedClaimCause, "0040-outreach-messages": outreachMessages, "0041-lead-policy-binding": leadPolicyBinding, "0042-added-facts": addedFacts }
 }
 
 /** With no bound owner `sub`: enough for an empty database (a fresh install or a test template). */

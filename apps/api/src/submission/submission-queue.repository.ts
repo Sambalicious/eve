@@ -10,6 +10,9 @@ import { visibilityFactsOf } from "../discovery/discovery.repository.js"
 import { hiddenReason, visibilityContext } from "../discovery/visibility.js"
 import { dropDetail } from "../documents/override.js"
 import { postingState } from "../documents/override-reader.js"
+import { addedFactsDropDetail, confirmationRequired, documentsStale } from "../added-facts/added-facts-gate.js"
+import { recordedDocuments, toRecordedAddedFacts } from "../added-facts/document-records.js"
+import { readApplicationMatch } from "../added-facts/match-read.js"
 import { recheckEligibility } from "./eligibility-recheck.js"
 import { type Db, cid, shareCriteria, writeEvent } from "./submission-attempts.repository.js"
 
@@ -34,7 +37,11 @@ export function isRulesDrop(status: string, skipReason: string | null): boolean 
  * transaction.
  */
 export class SubmissionQueueRepository {
-  constructor(private readonly tenant: TenantDatabase) {}
+  constructor(
+    private readonly tenant: TenantDatabase,
+    /** FEAT-0017: the added-facts flag, read once by the owning repository. */
+    private readonly addedFactsEnabled = false
+  ) {}
 
   /** Queued Applications with their ranking inputs, and the Candidate's tier map (EPIC-0002 B1), read in one transaction. */
   queuedForRanking() {
@@ -136,13 +143,56 @@ export class SubmissionQueueRepository {
     const candidateId = cid()
     const app = await trx
       .selectFrom("application")
-      .select(["job_posting_id", "candidate_override_at", "override_created_at", "override_status", "override_skip_reason", "override_skip_detail", "override_violated_rules", "details_deleted_at"])
+      .select(["id", "requisition_id", "job_posting_id", "added_facts_version", "added_facts_confirmed_version", "candidate_override_at", "override_created_at", "override_status", "override_skip_reason", "override_skip_detail", "override_violated_rules", "details_deleted_at"])
       .where("candidate_id", "=", candidateId)
       .where("id", "=", applicationId)
       .executeTakeFirst()
     if (!app) return "not_ranked"
     const state = await postingState(trx, candidateId, app.job_posting_id, at)
-    return dropDetail(app, state)
+    const base = dropDetail(app, state)
+    // FEAT-0017: stale documents first, then the confirmation and the lift basis (both flag-gated) — one rule, shared
+    // with `queue`, `sample`, `sample/approve`, `requeueAtsHeld` and the view.
+    const documents = await recordedDocuments(trx, candidateId, applicationId)
+    const match = this.addedFactsEnabled && state !== null && state.decision.status !== "ranked" ? await readApplicationMatch(trx, candidateId, app, at) : null
+    return addedFactsDropDetail({
+      flagOn: this.addedFactsEnabled,
+      applicationVersion: app.added_facts_version,
+      confirmedVersion: app.added_facts_confirmed_version,
+      documents: toRecordedAddedFacts(documents),
+      postingStatus: state?.decision.status ?? "checking",
+      baseDrop: base,
+      match,
+    })
+  }
+
+  /** FEAT-0017: the stale-documents rule for `queue`, `sample` and `sample/approve` (both flag states, A-11 r1). */
+  async addedFactsDocumentsStale(trx: Db, applicationId: string): Promise<boolean> {
+    const candidateId = cid()
+    const app = await trx.selectFrom("application").select(["added_facts_version"]).where("candidate_id", "=", candidateId).where("id", "=", applicationId).executeTakeFirst()
+    if (!app) return false
+    const documents = await recordedDocuments(trx, candidateId, applicationId)
+    return documentsStale({ flagOn: this.addedFactsEnabled, applicationVersion: app.added_facts_version, documents: toRecordedAddedFacts(documents) })
+  }
+
+  /**
+   * FEAT-0017 `POST …/queue` refusals after the existing ones: `documents_stale`
+   * (both flag states) and `added_facts_confirmation_required` (flag on, lifted,
+   * not confirmed for the current counter).
+   */
+  async addedFactsQueueRefusal(trx: Db, applicationId: string, at: Date): Promise<"documents_stale" | "added_facts_confirmation_required" | null> {
+    const candidateId = cid()
+    const app = await trx
+      .selectFrom("application")
+      .select(["id", "requisition_id", "job_posting_id", "added_facts_version", "added_facts_confirmed_version", "details_deleted_at"])
+      .where("candidate_id", "=", candidateId)
+      .where("id", "=", applicationId)
+      .executeTakeFirst()
+    if (!app) return null
+    const documents = await recordedDocuments(trx, candidateId, applicationId)
+    if (documentsStale({ flagOn: this.addedFactsEnabled, applicationVersion: app.added_facts_version, documents: toRecordedAddedFacts(documents) })) return "documents_stale"
+    if (!this.addedFactsEnabled) return null
+    const match = await readApplicationMatch(trx, candidateId, app, at)
+    return confirmationRequired({ flagOn: true, applicationVersion: app.added_facts_version, confirmedVersion: app.added_facts_confirmed_version, match }) ? "added_facts_confirmation_required" : null
   }
 
   /**

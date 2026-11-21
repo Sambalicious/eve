@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
+import { ListPlus } from "lucide-react"
 import { useId } from "react"
 import { Link, useParams } from "react-router-dom"
 
 import { AppShell } from "@/components/app-shell"
 import { DocumentsViewer } from "@/components/application-record"
 import { EligibilityPanel, MatchPanel } from "@/components/posting-evidence"
+import { addedFactsCopy, SampleAddedFacts } from "@/features/added-facts"
 import {
   applicationCopy,
   applicationName,
@@ -32,6 +34,7 @@ import { hasErrorCode } from "@/shared/api"
 import { useDocumentTitle } from "@/shared/lib/use-document-title"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/shared/ui/breadcrumb"
 import { LoadErrorAlert } from "@/shared/ui/load-error-alert"
+import { Badge } from "@/shared/ui/badge"
 import { SampleReviewSkeleton } from "@/components/page-skeletons"
 
 const g = submissionCopy.gate
@@ -59,6 +62,9 @@ export function SampleReviewPage() {
   const company = app.data?.company ?? app.data?.requisitionId ?? ""
   const sample = submission.data?.sample
   const isAwaiting = sample?.state === "awaiting_review" && (!review.result || review.result.result === "not_submitted")
+  /** FEAT-0017 (OD-16): the sample's documents cited added facts; only then does the marker and list show. */
+  const added = app.data?.addedFacts
+  const citesAddedFacts = added !== undefined && added.addedFactsCited.length > 0 && sample?.state === "awaiting_review"
   // g9 (O6): while the sample is under review, say when its posting no longer meets the job criteria.
   const criteriaNoteId = useId()
   const criteriaReason = isAwaiting || review.submitting ? criteriaNoteReason(posting.data) : null
@@ -103,6 +109,12 @@ export function SampleReviewPage() {
               </h1>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                 {submission.data.state || isSampleSubmitting(submission.data) ? <SubmissionStatusBadge submission={submission.data} /> : <ApplicationStatusBadge state={app.data.state} />}
+                {citesAddedFacts && (
+                  <Badge variant="outline">
+                    <ListPlus aria-hidden="true" />
+                    {addedFactsCopy.sample.marker}
+                  </Badge>
+                )}
                 {app.data.careerProfileVersion !== null && <span>{applicationCopy.profileVersion(app.data.careerProfileVersion)}</span>}
                 {app.data.applicationUrl && <EmployerPageLink href={app.data.applicationUrl} />}
               </div>
@@ -124,6 +136,12 @@ export function SampleReviewPage() {
               review.submitting && <SampleOutcomeAlert outcome={{ title: null, line: sc.approving, countLine: null, link: null, tone: "neutral" }} />
             )}
             {review.stalled && <p className="text-sm text-muted-foreground">{sc.stillSubmitting}</p>}
+            {isAwaiting && added?.documentsStale === true && (
+              <p className="flex items-start gap-1.5 text-sm text-warning-text">
+                <ListPlus aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                <span>{addedFactsCopy.sample.voided}</span>
+              </p>
+            )}
             {criteriaReason && <SampleCriteriaNote id={criteriaNoteId} reason={criteriaReason} />}
             {isAwaiting && <MissingAnswerWarning applicationId={applicationId} />}
             {isAwaiting && <SampleActionBar review={review} company={company} approveDescribedBy={criteriaReason ? criteriaNoteId : undefined} />}
@@ -148,8 +166,11 @@ export function SampleReviewPage() {
                 <FormAnswersPanel applicationId={applicationId} company={company} />
               </div>
               <div className="flex min-w-0 flex-col gap-4 xl:col-span-5">
+                {citesAddedFacts && added !== undefined && <SampleAddedFacts applicationId={applicationId} cited={added.addedFactsCited} />}
                 {posting.data?.eligibility && <EligibilityPanel eligibility={posting.data.eligibility} employmentType={posting.data.employmentType} />}
-                {posting.data?.match && <MatchPanel match={posting.data.match} />}
+                {posting.data?.match && (
+                  <MatchPanel match={posting.data.match} added={added?.match ? { match: added.match, facts: added.facts } : null} />
+                )}
               </div>
             </div>
           </>

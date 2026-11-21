@@ -239,7 +239,7 @@ describe("the normal deploy (AC 5.7)", () => {
     const fresh = await databaseAt0023()
     await seedLegacy(fresh.admin)
     const applied = await migrateAndGrant(fresh.ownerUrl, fresh.runtimeRole, { operatorGoogleSub: OWNER_SUB })
-    expect(applied).toEqual(["0024-alert-feed-candidate-verification", "0025-apply-anyway", "0026-apply-anyway-bounds", "0027-preferences-version", "0028-ats-skills", "0029-ats-fit", "0030-ats-minimum", "0031-pasted-description", "0032-stuck-checking", "0033-simplify-eve", "0034-forward-statements", "0035-manual-apply-lane", "0036-retry-failed-checks", "0037-retry-backfill", "0038-lead-pipeline", "0039-blocked-claim-cause", "0040-outreach-messages", "0041-lead-policy-binding"])
+    expect(applied).toEqual(["0024-alert-feed-candidate-verification", "0025-apply-anyway", "0026-apply-anyway-bounds", "0027-preferences-version", "0028-ats-skills", "0029-ats-fit", "0030-ats-minimum", "0031-pasted-description", "0032-stuck-checking", "0033-simplify-eve", "0034-forward-statements", "0035-manual-apply-lane", "0036-retry-failed-checks", "0037-retry-backfill", "0038-lead-pipeline", "0039-blocked-claim-cause", "0040-outreach-messages", "0041-lead-policy-binding", "0042-added-facts"])
     expect((await rows(fresh.admin)).map((row) => row.candidate_id)).toEqual([fresh.operatorId])
     const grants = await sql<{ privilege_type: string }>`
       select privilege_type from information_schema.role_table_grants where table_name = ${TABLE} and grantee = ${fresh.runtimeRole} order by privilege_type`.execute(fresh.admin)

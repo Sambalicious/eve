@@ -14,9 +14,10 @@ import { STACK_FEED_VERIFICATION_TABLES } from "../src/db/migrations/0024-alert-
 import { SIMPLIFY_EVE_TABLES } from "../src/db/migrations/0033-simplify-eve.js"
 import { LEAD_TABLES } from "../src/db/migrations/0038-lead-pipeline.js"
 import { OUTREACH_TABLES } from "../src/db/migrations/0040-outreach-messages.js"
+import { ADDED_FACT_TABLES } from "../src/db/migrations/0042-added-facts.js"
 
-/** Every table with RLS: 0017's, plus the Candidate tables 0018, 0019, 0021, 0022 and 0040 create with their policy. */
-const RLS_TABLES: readonly string[] = [...RLS_TABLES_0017, ...OWNER_PREFERENCE_TABLES, ...CANDIDATE_POSTING_TABLES, ...HIRING_TABLES, ...STACK_FEED_VERIFICATION_TABLES, ...SIMPLIFY_EVE_TABLES, ...LEAD_TABLES, ...OUTREACH_TABLES]
+/** Every table with RLS: 0017's, plus the Candidate tables 0018, 0019, 0021, 0022, 0040 and 0042 create with their policy. */
+const RLS_TABLES: readonly string[] = [...RLS_TABLES_0017, ...OWNER_PREFERENCE_TABLES, ...CANDIDATE_POSTING_TABLES, ...HIRING_TABLES, ...STACK_FEED_VERIFICATION_TABLES, ...SIMPLIFY_EVE_TABLES, ...LEAD_TABLES, ...OUTREACH_TABLES, ...ADDED_FACT_TABLES]
 import type { Database } from "../src/db/schema.js"
 import { TenantDatabase } from "../src/db/tenant-database.js"
 import { Browser } from "./support/browser.js"
@@ -213,7 +214,7 @@ describe("RLS catalog (architecture r2, catalog test)", () => {
 
   it("every application table is classified, so a new table cannot skip the decision", async () => {
     const { rows } = await sql<{ name: string }>`select tablename as name from pg_tables where schemaname = 'public' order by tablename`.execute(database.db)
-    const classified = [...CANDIDATE_TABLES, ...OWNER_PREFERENCE_TABLES, ...CANDIDATE_POSTING_TABLES, ...HIRING_TABLES, ...STACK_FEED_VERIFICATION_TABLES, ...SIMPLIFY_EVE_TABLES, ...LEAD_TABLES, ...OUTREACH_TABLES, ...MIXED_TABLES, ...OWNER_SCOPED_TABLES, ...SHARED_TABLES, ...IDENTITY_TABLES, ...INSTALLATION_TABLES, ...BOOKKEEPING_TABLES].sort()
+    const classified = [...CANDIDATE_TABLES, ...OWNER_PREFERENCE_TABLES, ...CANDIDATE_POSTING_TABLES, ...HIRING_TABLES, ...STACK_FEED_VERIFICATION_TABLES, ...SIMPLIFY_EVE_TABLES, ...LEAD_TABLES, ...OUTREACH_TABLES, ...ADDED_FACT_TABLES, ...MIXED_TABLES, ...OWNER_SCOPED_TABLES, ...SHARED_TABLES, ...IDENTITY_TABLES, ...INSTALLATION_TABLES, ...BOOKKEEPING_TABLES].sort()
     expect(rows.map((row) => row.name)).toEqual(classified)
   })
 

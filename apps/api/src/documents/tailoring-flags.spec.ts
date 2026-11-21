@@ -63,7 +63,8 @@ describe("EPIC-0012 Revision 2 addendum, B: the service defaults", () => {
       {} as TenantDatabase,
       {} as SharedRuntimeConfig
     )
-    expect((service as unknown as { flags: Readonly<{ bridges: boolean; direction: boolean }> }).flags).toEqual({ bridges: false, direction: false })
+    // FEAT-0017 adds the third flag; it is off unless ADDED_FACTS_ENABLED=1.
+    expect((service as unknown as { flags: Readonly<{ bridges: boolean; direction: boolean; addedFacts: boolean }> }).flags).toEqual({ bridges: false, direction: false, addedFacts: false })
   })
 })
 

@@ -1,4 +1,5 @@
 import { factClaimsMissing, numbersIn, postingTermsIn, supportInflationVerb, unsupportedScopeVerbs } from "../career-profile/claim-check.js"
+import { addedFactFailure } from "./added-fact-claims.js"
 import { type DirectionAllowance, completionWordIn, sentencesOf, unsourcedQuotationIn, withoutDirectionQuote } from "./company-direction.js"
 import { containsContactDetail } from "./contact-detail.js"
 import { type DocumentContent, type DocumentLine } from "./document-model.js"
@@ -25,6 +26,10 @@ export function checkLine(
   const { facts, target, contact, meaningChecked, posting, wording } = ctx
   if (containsContactDetail(line.text, contact)) return { ok: false, reason: "contact_detail", claim: line.text, unsupported: [] }
   if (line.factIds.some((id) => !facts.has(id))) return { ok: false, reason: "unknown_fact", claim: line.text, unsupported: [] }
+  // FEAT-0017: a skill-only fact may be cited only by a Skills line or a skill-only letter paragraph, and no line may
+  // hedge an added fact. Both are hard fails, so no judge answer releases them. Null for every line with no added id.
+  const addedFact = addedFactFailure(line, kind, facts)
+  if (addedFact !== null) return addedFact
   if (target !== null && namesTarget(line.text, target)) return { ok: false, reason: "names_target", claim: line.text, unsupported: [], hardFail: "names_target" }
   // EPIC-0012 Revision 3, R19: a quotation must come from somewhere. Checked before the direction span is
   // stripped, on every kind the judge can see: an unsourced span is a hard fail, so no judge answer releases

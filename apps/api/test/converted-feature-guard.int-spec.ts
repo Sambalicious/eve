@@ -7,6 +7,7 @@ import { CONVERTED } from "../src/shared/converted-features.js"
 import { Browser } from "./support/browser.js"
 import { FakeGoogle } from "./support/fake-google.js"
 import { type TestDatabase, startMigratedDatabase } from "./support/postgres.js"
+import { insertApplication } from "./support/qa-epic-0011.js"
 import { SignedInCandidate, signInCandidate } from "./support/signed-in.js"
 import { TEST_CLIENT_ID, TEST_CLIENT_SECRET, createTestApp } from "./support/test-app.js"
 import { TestClock } from "./support/test-clock.js"
@@ -28,6 +29,8 @@ let app: INestApplication
 let ada: SignedInCandidate
 let kofi: SignedInCandidate
 let kofiId: string
+/** Kofi's own Application, for a guarded route whose path gate answers 404 for any other id before the guard. */
+let kofiApplication: string
 const clock = new TestClock("2026-10-21T09:00:00.000Z")
 const KOFI_SUB = "200000000000000000a21"
 const KOFI_EMAIL = "kofi.a2@example.test"
@@ -42,8 +45,8 @@ async function writeFingerprint(): Promise<string> {
   return JSON.stringify(counts)
 }
 
-function call(who: SignedInCandidate, method: string, path: string) {
-  const concrete = path.replace(":id", SOME_ID)
+function call(who: SignedInCandidate, method: string, path: string, owned = false) {
+  const concrete = path.replace(":id", owned ? kofiApplication : SOME_ID)
   switch (method) {
     case "GET":
       return who.get(concrete)
@@ -60,7 +63,7 @@ beforeAll(async () => {
   database = await startMigratedDatabase()
   google = await FakeGoogle.create(TEST_CLIENT_ID, TEST_CLIENT_SECRET)
   google.listen()
-  app = await createTestApp({ databaseUrl: database.url, clock })
+  app = await createTestApp({ databaseUrl: database.url, clock, config: { addedFactsEnabled: true } })
   ada = await signInCandidate(new Browser(app, google))
   kofiId = (await database.db.insertInto("candidate").values({ email: KOFI_EMAIL, google_sub: KOFI_SUB, role: "candidate" } as never).returning("id").executeTakeFirstOrThrow()).id
   // Slice C's onboarding writes an invitee's per-Candidate singletons; seeded here as A2 has no invite flow.
@@ -69,6 +72,7 @@ beforeAll(async () => {
   const { sessionCookie } = await browser.signIn({ sub: KOFI_SUB, email: KOFI_EMAIL, email_verified: true })
   const csrf = (await browser.getSession(sessionCookie).expect(200)).body.csrfToken as string
   kofi = new SignedInCandidate(browser, `${SESSION_COOKIE}=${sessionCookie}`, csrf, KOFI_EMAIL)
+  kofiApplication = await insertApplication(database.db, kofiId)
 })
 
 beforeEach(() => {
@@ -90,7 +94,7 @@ describe("CONVERTED in slice A (architecture r3)", () => {
 describe("a non-Operator gets 409 feature_not_yet_available on every guarded route and nothing is written", () => {
   it.each(GUARDED_ROUTES.map((route) => [`${route.method} ${route.path}`, route] as const))("%s", async (_name, route) => {
     const before = await writeFingerprint()
-    const response = await call(kofi, route.method, route.path)
+    const response = await call(kofi, route.method, route.path, route.owned === true)
     expect(response.status).toBe(409)
     expect(apiErrorResponseSchema.parse(response.body)).toEqual({
       error: { code: "feature_not_yet_available", message: "This feature isn't available for your account yet.", feature: route.feature },

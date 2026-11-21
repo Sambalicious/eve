@@ -3,6 +3,7 @@ import { useId } from "react"
 
 import { applicationCopy, type BlockedClaimCause, type DocumentKind } from "@/entities/application"
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert"
+import { Button } from "@/shared/ui/button"
 
 /** OD-1: the causes whose alert lists flagged terms. Mirrors `BLOCKED_CLAIM_TERMS_CAUSES`. */
 const TERMS_CAUSES: ReadonlySet<BlockedClaimCause> = new Set(["unsupported_terms", "number_order", "no_fact"])
@@ -15,6 +16,8 @@ const REASON: Record<BlockedClaimCause, (document: ReturnType<typeof documentLab
   names_target: applicationCopy.blocked.reason.namesTarget,
   unknown_fact: applicationCopy.blocked.reason.unknownFact,
   not_confirmed: applicationCopy.blocked.reason.notConfirmed,
+  skill_only_in_bullet: applicationCopy.blocked.reason.skillOnlyInBullet,
+  added_fact_hedge: applicationCopy.blocked.reason.addedFactHedge,
 }
 
 function documentLabel(kind: DocumentKind) {
@@ -28,6 +31,12 @@ export type DocumentBlockedProps = Readonly<{
   cause: BlockedClaimCause | null
   terms: readonly string[] | null
   moreTerms: number | null
+  /**
+   * v1.32.0 (FEAT-0017, PRD 2.7, OD-10, C-AF-44 / C-AF-45): the one action this alert may carry,
+   * offered only for `unsupported_terms` on an Editable Application that is not busy. The page
+   * decides that by passing the callback; the term is the first listed one, or null when none is.
+   */
+  onAddFact?: (term: string | null) => void
 }>
 
 /**
@@ -36,13 +45,15 @@ export type DocumentBlockedProps = Readonly<{
  * blocked text are model output, so they render as plain text: a `<bdi>` text node inside an `<li>`,
  * and a `<blockquote>`.
  */
-export function DocumentBlockedAlert({ document, claim, cause, terms, moreTerms }: DocumentBlockedProps) {
+export function DocumentBlockedAlert({ document, claim, cause, terms, moreTerms, onAddFact }: DocumentBlockedProps) {
   const labelId = useId()
   const label = documentLabel(document)
   const reason = cause === null ? applicationCopy.blocked.reason.fallback(label) : REASON[cause](label)
   const showsTerms = cause !== null && TERMS_CAUSES.has(cause)
   const listed = showsTerms && terms !== null ? terms : []
   const overflow = showsTerms && moreTerms !== null && moreTerms > 0 ? moreTerms : 0
+  const showsAddFact = cause === "unsupported_terms" && onAddFact !== undefined
+  const addFactTerm = listed.length > 0 ? listed[0]! : null
   const labelText =
     cause === "number_order"
       ? listed.length === 1
@@ -86,6 +97,20 @@ export function DocumentBlockedAlert({ document, claim, cause, terms, moreTerms 
           <p className="text-[13px]">
             {overflow === 1 ? applicationCopy.blocked.overflow.one(overflow) : applicationCopy.blocked.overflow.other(overflow)}
           </p>
+        )}
+        {showsAddFact && (
+          // Design review [6b] note: as plain red text it read as a label. The underline marks the
+          // ghost button as actionable; its hover and focus ring come from Button and stay.
+          <Button
+            id="document-blocked-add-fact"
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-fit underline underline-offset-4 pointer-coarse:min-h-11"
+            onClick={() => onAddFact?.(addFactTerm)}
+          >
+            {addFactTerm === null ? applicationCopy.blocked.addFact : applicationCopy.blocked.addFactAbout(addFactTerm)}
+          </Button>
         )}
         {claim && (
           <div className="flex flex-col gap-1.5">

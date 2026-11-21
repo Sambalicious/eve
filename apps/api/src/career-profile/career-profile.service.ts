@@ -4,9 +4,11 @@ import { Inject, Injectable, Logger, type OnApplicationBootstrap, type OnApplica
 import type {
   CareerProfileResponse,
   CareerProfileVersion,
+  ProfileSaveOutcome,
   ResumeMediaType,
   SaveCareerProfileDraftRequest,
 } from "@eve/contracts"
+import { CAREER_PROFILE_LIMITS } from "@eve/contracts"
 
 import { ModelGateway } from "../ai/model-gateway.js"
 import { AiProviderRepository } from "../ai/ai-provider.repository.js"
@@ -22,6 +24,7 @@ import { EXTRACTION_SYSTEM_PROMPT, buildVerifiedSections, extractedProfileSchema
 import { toProfileResponse, toVersion } from "./career-profile-view.js"
 import { CareerProfileRepository, type VersionRow } from "./career-profile.repository.js"
 import { applyDraftEdits } from "./draft-edits.js"
+import { type DraftFactEntry, DraftAppendError, appendFactsToSections, factKeys } from "./draft-append.js"
 import { storeResume } from "./resume-storage.js"
 import { CandidateFiles } from "../files/candidate-files.js"
 import { CandidateScope } from "../db/candidate-scope.js"
@@ -159,6 +162,57 @@ export class CareerProfileService implements OnApplicationBootstrap, OnApplicati
       })
     })
     return toVersion(row)
+  }
+
+  /**
+   * FEAT-0017 (OD-1, OD-6): append the Candidate's added facts to the draft as
+   * Candidate-written facts (`sourceQuote: null`), in the PRD's homes. Nothing is
+   * approved, `refreshAtsFit` is not called and the version in use does not change.
+   * Each entry's outcome is independent: a full draft keeps the facts that fit and
+   * reports `draft_full` for the rest; a malformed draft reports `failed`.
+   */
+  async addFactsToDraft(entries: readonly DraftFactEntry[]): Promise<Array<{ outcome: ProfileSaveOutcome; draftVersion: number | null }>> {
+    if (entries.length === 0) return []
+    const outcomes = new Array<{ outcome: ProfileSaveOutcome; draftVersion: number | null }>(entries.length)
+    try {
+      await this.repository.inVersionLock(async (trx) => {
+        if ((await this.repository.latestUpload(trx))?.status === "drafting") {
+          for (let index = 0; index < entries.length; index++) outcomes[index] = { outcome: "draft_unavailable", draftVersion: null }
+          return
+        }
+        const draft = await this.repository.findDraft(trx)
+        const approved = await this.repository.findApproved(trx)
+        const keys = factKeys([...(approved?.sections ?? []), ...(draft?.sections ?? [])])
+        let sections = (draft ?? approved)?.sections ?? []
+        let appended = 0
+        for (const [index, entry] of entries.entries()) {
+          const key = entry.text.trim().toLowerCase()
+          if (keys.has(key)) {
+            outcomes[index] = { outcome: "already_there", draftVersion: null }
+            continue
+          }
+          keys.add(key)
+          try {
+            const result = appendFactsToSections(sections, [entry], randomUUID, { sections: CAREER_PROFILE_LIMITS.sections, factsPerSection: CAREER_PROFILE_LIMITS.factsPerSection })
+            sections = result.sections
+            appended += 1
+            outcomes[index] = { outcome: "saved_to_draft", draftVersion: null }
+          } catch (error) {
+            if (!(error instanceof DraftAppendError)) throw error
+            outcomes[index] = { outcome: "draft_full", draftVersion: null }
+          }
+        }
+        if (appended === 0) return
+        const version = draft ? (await this.repository.replaceDraftSections(trx, draft.version, sections)).version : (await this.repository.insertDraft(trx, { version: await this.repository.nextVersion(trx), source: "edit", resumeUploadId: null, sections, rejectedFacts: 0, createdAt: this.clock.now() })).version
+        for (let index = 0; index < outcomes.length; index++) {
+          if (outcomes[index]?.outcome === "saved_to_draft") outcomes[index] = { outcome: "saved_to_draft", draftVersion: version }
+        }
+      })
+    } catch {
+      // The transaction rolled back, so the draft is unchanged; the Application's facts stay (PRD 6.3).
+      for (let index = 0; index < outcomes.length; index++) if (outcomes[index] === undefined) outcomes[index] = { outcome: "failed", draftVersion: null }
+    }
+    return outcomes.map((outcome) => outcome ?? { outcome: "failed", draftVersion: null })
   }
 
   async approveDraft(version: number): Promise<CareerProfileResponse> {

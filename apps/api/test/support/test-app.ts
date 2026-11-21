@@ -47,7 +47,7 @@ export function testAccessRequestConfig(overrides: Partial<Omit<AccessRequestCon
   }
 }
 
-type ConfigOverrides = Partial<Pick<AppConfig, "anthropic" | "candidateStorageDir" | "formAgentEnabled" | "documentBridgesEnabled" | "documentDirectionEnabled" | "statementTimeoutMs" | "accessRequest">>
+type ConfigOverrides = Partial<Pick<AppConfig, "anthropic" | "candidateStorageDir" | "formAgentEnabled" | "documentBridgesEnabled" | "documentDirectionEnabled" | "addedFactsEnabled" | "statementTimeoutMs" | "accessRequest">>
 
 /**
  * EPIC-0002 A2: a fresh per-Candidate file root under the OS temp directory,
@@ -85,6 +85,8 @@ export function testConfig(
     // EPIC-0012 (Revision 2, 2.4): both tailoring flags are off unless a test passes them on.
     documentBridgesEnabled: false,
     documentDirectionEnabled: false,
+    // FEAT-0017: off by default, as in compose.
+    addedFactsEnabled: false,
     accessRequest: testAccessRequestConfig(),
     // Off in tests: no log noise, and no x-request-id header on responses.
     accessLog: false,

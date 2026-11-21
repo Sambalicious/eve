@@ -169,7 +169,8 @@ describe("migration 0031: pasted descriptions", () => {
 
   it("down keeps every row (pasted become pasted_link, still manual), then up runs again", async () => {
     const before = (await sql<{ n: number }>`select count(*)::int as n from job_posting`.execute(admin)).rows[0]!.n
-    // 0032 to 0041 follow it: step off all ten first, then down 0031.
+    // 0032 to 0042 follow it: step off all eleven first, then down 0031.
+    expect((await migrator().migrateDown()).error).toBeUndefined()
     expect((await migrator().migrateDown()).error).toBeUndefined()
     expect((await migrator().migrateDown()).error).toBeUndefined()
     expect((await migrator().migrateDown()).error).toBeUndefined()

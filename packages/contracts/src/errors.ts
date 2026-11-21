@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { accessRequestFieldCodeSchema } from "./access-request.js"
+import { addedFactFieldErrorSchema } from "./added-facts.js"
 import { pasteFieldErrorSchema } from "./discovery.js"
 import { fieldErrorSchema } from "./job-criteria.js"
 import { convertedFeatureSchema } from "./me.js"
@@ -92,6 +93,15 @@ export const apiErrorCodeSchema = z.enum([
   "advanced_locked",
   // v1.31.0: EPIC-0014 outreach (422)
   "outreach_reader_name_invalid",
+  // v1.32.0: FEAT-0017 added facts
+  "added_facts_frozen",
+  "added_facts_busy",
+  "added_facts_conflict",
+  "added_facts_invalid",
+  "added_facts_limit",
+  "added_facts_not_lifted",
+  "added_facts_confirmation_required",
+  "documents_stale",
 ])
 export type ApiErrorCode = z.infer<typeof apiErrorCodeSchema>
 
@@ -120,6 +130,7 @@ export type ResumeRefusalReason = z.infer<typeof resumeRefusalReasonSchema>
  * only on `timezone_change_rate_limited`.
  * v1.27.0: `fieldErrors` is also present, with the `pasteFieldErrorSchema` shape, on the six
  * paste field codes (`job_description_*`, `job_title_*`, `company_*`) and on `employer_page_unreadable`.
+ * v1.32.0: also on `added_facts_invalid` and `added_facts_limit`, with the `addedFactFieldErrorSchema` shape.
  */
 export const apiErrorResponseSchema = z
   .object({
@@ -129,7 +140,10 @@ export const apiErrorResponseSchema = z
         message: z.string(),
         reason: resumeRefusalReasonSchema.optional(),
         fields: z.array(accessRequestFieldCodeSchema).optional(),
-        fieldErrors: z.array(z.union([fieldErrorSchema, stackPostsFieldErrorSchema, preferencesFieldErrorSchema, pasteFieldErrorSchema])).min(1).optional(),
+        fieldErrors: z
+          .array(z.union([fieldErrorSchema, stackPostsFieldErrorSchema, preferencesFieldErrorSchema, pasteFieldErrorSchema, addedFactFieldErrorSchema]))
+          .min(1)
+          .optional(),
         feature: convertedFeatureSchema.optional(),
         currentVersion: z.int().positive().nullable().optional(),
         timeZoneLockedUntil: z.iso.datetime({ offset: true }).optional(),
@@ -182,6 +196,21 @@ export const PASTE_DESCRIPTION_ERROR_MESSAGES = {
 /** v1.28.0 (EPIC-0011): the exact message of `advanced_locked`. The api sends it; MSW handlers import it. */
 export const ADVANCED_ERROR_MESSAGES = {
   advanced_locked: "Advanced stays on while automatic applying is on. Turn off automatic applying first.",
+} as const satisfies Partial<Record<ApiErrorCode, string>>
+
+/**
+ * v1.32.0 (FEAT-0017): the exact messages of the added-facts codes, byte for byte from
+ * the api contract's error table. The api sends these; the web and its MSW handlers import them.
+ */
+export const ADDED_FACTS_ERROR_MESSAGES = {
+  added_facts_frozen: "This Application was sent or closed, so its added facts can't change. Nothing changed.",
+  added_facts_busy: "Eve is writing or submitting this Application's documents. Wait until that finishes, then try again. Nothing changed.",
+  added_facts_conflict: "The added facts changed in another tab or request. Reload the list and try again. Nothing changed.",
+  added_facts_invalid: "Check the highlighted fields. Nothing was saved.",
+  added_facts_limit: "That would pass the limit of added facts for this Application. Nothing was saved.",
+  added_facts_not_lifted: "This Application's Match isn't strong with your added facts, so there's nothing to confirm. Nothing changed.",
+  added_facts_confirmation_required: 'Confirm "Submit with your added skills" on the Application page first. Nothing changed.',
+  documents_stale: "Your added facts changed after these documents were written. Generate them again first. Nothing changed.",
 } as const satisfies Partial<Record<ApiErrorCode, string>>
 
 /** v1.27.0: the message for each paste field problem, as the web shows it on that field. */

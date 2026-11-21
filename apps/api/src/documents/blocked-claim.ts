@@ -49,6 +49,11 @@ export function causeOf(validation: Extract<DocumentValidation, { ok: false }>):
         // R2-6: unreachable from today's validator, but the mapper must still be total.
         case "names_target":
           return "names_target"
+        // FEAT-0017 (A-8): each has its own cause, so the alert offers no "add a fact" action.
+        case "skill_only_in_bullet":
+          return "skill_only_in_bullet"
+        case "added_fact_hedge":
+          return "added_fact_hedge"
         default:
           return null
       }

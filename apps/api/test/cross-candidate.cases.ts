@@ -191,6 +191,13 @@ export const CROSS_CANDIDATE_CASES: readonly RegistryCase[] = [
   { method: "POST", path: "/v1/applications/:id/manual-complete", kind: "foreign-id", resource: "application", proof: "A's Application ID is 404 for B; A's Application is unchanged" },
   // v1.24.0 (AA-5, Gherkin apply-anyway.feature:1202): not guarded, so ownership answers first.
   { method: "POST", path: "/v1/applications/:id/remove-from-queue", kind: "foreign-id", resource: "application", proof: "A's Application ID is 404 for B; A's Application stays queued" },
+  // v1.32.0 (FEAT-0017): the five added-facts routes. Every one answers 404 for A's ID exactly as for an ID that never
+  // existed (the onRequest path gate answers before any body parser, so even the factId segment cannot leak).
+  { method: "GET", path: "/v1/applications/:id/added-facts", kind: "foreign-id", resource: "application", proof: "A's Application ID is 404 for B; A's added facts are unchanged" },
+  { method: "POST", path: "/v1/applications/:id/added-facts", kind: "foreign-id", resource: "application", body: () => ({ expectedVersion: 0, items: [{ kind: "skill_only", term: "Figma", affirmed: true }] }), proof: "A's Application ID is 404 for B; no fact is added" },
+  { method: "PATCH", path: "/v1/applications/:id/added-facts/:factId", kind: "foreign-id", resource: "application", body: () => ({ expectedVersion: 0, text: "Set up CI/CD at B", roleSectionId: "s" }), proof: "A's Application ID is 404 for B; A's fact is unchanged" },
+  { method: "DELETE", path: "/v1/applications/:id/added-facts/:factId", kind: "foreign-id", resource: "application", proof: "A's Application ID is 404 for B; A's fact stays" },
+  { method: "POST", path: "/v1/applications/:id/added-facts/confirm", kind: "foreign-id", resource: "application", guarded: true, status: 404, body: () => ({ expectedVersion: 0 }), proof: "A's Application ID is 404 for B; nothing is confirmed or queued" },
   { method: "GET", path: "/v1/existing-applications", kind: "own-scope", proof: "B's existing applications; none of A's" },
   { method: "POST", path: "/v1/existing-applications", kind: "own-scope", proof: "creates B's row only", send: { company: "B Co", roleTitle: "B Role", applicationUrl: "https://example.test/b", appliedOn: "2026-10-01" } },
   { method: "POST", path: "/v1/existing-applications/complete", kind: "own-scope", proof: "completes B's step only; A's activation row is unchanged" },

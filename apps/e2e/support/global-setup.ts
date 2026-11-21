@@ -141,6 +141,8 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
           E2E_OUTBOUND_LOG: outboundLog,
           ALERT_FEED_TEST_ORIGIN: feedStandInOrigin,
           ALERT_FEED_TEST_ORIGIN_ENABLED: "1",
+          // FEAT-0017: the added-facts journeys need the feature on; production keeps it off until the owner flips it.
+          ADDED_FACTS_ENABLED: "1",
         },
       })
     )

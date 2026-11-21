@@ -27,8 +27,8 @@ describe("migration numbers", () => {
     expect(duplicateNumbers([...names, "0011-another"])).toEqual(["0011"])
   })
 
-  it("numbers run 0001 to 0041 with no gap and in order", () => {
+  it("numbers run 0001 to 0042 with no gap and in order", () => {
     expect(names.map((name) => Number(name.slice(0, 4)))).toEqual(Array.from({ length: names.length }, (_, i) => i + 1))
-    expect(names.at(-1)).toBe("0041-lead-policy-binding")
+    expect(names.at(-1)).toBe("0042-added-facts")
   })
 })

@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { letterName } from "../career-profile/posting-name.js"
 import type { StoredSection } from "../db/schema.js"
+import { oneLinerId, skillOnlyId } from "./added-fact-ids.js"
 import { containsContactDetail } from "./contact-detail.js"
 import { namesTarget } from "./document-claims.js"
 import type { ContactHeader, CoverLetterContent, DocumentLine, ResumeContent, RoleHeading } from "./document-model.js"
@@ -53,7 +54,18 @@ export const BRIDGES_LINE = "Name the field. Read <posting> for the field, secto
 /** EPIC-0012 rule 4 (Revision 2 addendum, A4): on only with DOCUMENT_DIRECTION_ENABLED=1. */
 export const DIRECTION_LINE = "When <company_direction> is present, it holds the employer's own words about where it is going. In the cover letter you may write one direction sentence, in this form only: Your plan to “<three or more words copied exactly from one quote>” is clear. For the opening words you may use only: your, you, plan, aim, goal, target, ambition, commitment, mission, to, of, is, a, the, this, clear. That sentence is about the employer only. It holds no I, my, we or our, no verb of doing, and nothing about the Candidate, fit, trust or whether the work helps. Write the Candidate's facts in separate sentences after it, in the same paragraph, each restating cited facts only, and never refer back to the goal (no \"that\", \"this goal\", \"to support it\"). Write at most one direction sentence, never quote words the block does not hold, and never quote a direction in the resume. When <company_direction> is absent, write none."
 
-export type GenerationPromptOptions = Readonly<{ bridges: boolean; direction: boolean }>
+export type GenerationPromptOptions = Readonly<{ bridges: boolean; direction: boolean; addedFacts?: boolean }>
+
+/**
+ * FEAT-0017: the extra system-prompt lines, present only when at least one effective
+ * added fact exists, so every other Application sends the byte-identical prompt.
+ */
+export const ADDED_FACTS_LINES: readonly string[] = [
+  "<added_facts> holds facts the Candidate stated for this application only. Treat them as real experience the Candidate has done. Never write that the Candidate is learning, familiar with, interested in, planning, hoping or aspiring to any of them, and never present one as a study or a goal.",
+  "A [skill_only] fact is a tool or skill only. Name it in the Skills line, or in its own short cover-letter paragraph that cites skill-only facts only. Never put it in a summary, an experience heading, an experience bullet or education, and never credit it to an employer, a role, a period or an outcome.",
+  "A [one_liner] fact belongs to the role named beside it. Write it as a bullet under that role, or name it in the Skills line or the cover letter. Every technology, product, company, title, qualification and number in the bullet must appear in that fact's own text.",
+  "In the cover letter, a paragraph about added facts may cite skill-only facts only, with no employer, role, period, number, level or outcome. Cite an added fact by its alias exactly as listed.",
+]
 
 /**
  * The system prompt. Lines the flags do not gate are identical in every state, so the stable prefix caches.
@@ -76,6 +88,7 @@ export function generationSystemPrompt(options: GenerationPromptOptions): string
   "Write like a person, not a model (the unslop rules). No em dashes: use a period or a comma. Plain words: use, help, many, to (never leverage, utilize, facilitate, numerous, in order to). None of these words: additionally, crucial, delve, enhance, foster, garner, intricate, landscape, pivotal, showcase, seamless, robust, spearhead, synergy, testament, underscore, vibrant. No trailing -ing clause that only comments on the result (\"..., ensuring quality\", \"..., showcasing ...\"); state the result itself. No \"not just X, but Y\". Don't force ideas into threes. Prefer active verbs, cut adverbs, one idea per sentence.",
   "Cover letter voice: first person, direct and specific, with varied sentence length. Each paragraph makes one point from the facts, with its numbers. No opening or closing pleasantries, no claims about passion or fit; the backend writes the greeting, the opening and the closing.",
   ...(options.direction ? [DIRECTION_LINE] : []),
+  ...(options.addedFacts === true ? ADDED_FACTS_LINES : []),
   "Use only words the cited facts support. Don't add descriptions of the Candidate or their work that no fact states, such as strengths, passionate, excited, proven, expert or world-class. Backend code blocks any line with an unsupported word.",
   "Every experience heading must set factIds too: the ids of that role's facts.",
   "In the cover letter, never name the employer or the role you are applying for, not even in passing. Backend code blocks any cover-letter line that does.",
@@ -149,6 +162,40 @@ export function aliasFacts(sections: readonly StoredSection[]): Readonly<{ secti
   return { sections: aliased, realId: (alias) => real.get(alias) ?? alias }
 }
 
+/**
+ * FEAT-0017: the added facts alias numbering continues after the profile's (`F1..Fn`), never
+ * restarting, so a line cites one namespace of aliases. `realId` maps each alias back to its
+ * `added:s:`/`added:o:` id, which the validator reads for the placement rule.
+ */
+export type AddedFactForPrompt = Readonly<{
+  /** The row UUID. */
+  id: string
+  kind: "skill_only" | "one_liner"
+  text: string
+  role: { title: string; employer: string | null; period: string | null } | null
+  roleSectionId: string | null
+}>
+
+export type AliasedAddedFact = AddedFactForPrompt & Readonly<{ alias: string }>
+
+export function aliasAddedFacts(startAt: number, facts: readonly AddedFactForPrompt[]): Readonly<{ facts: AliasedAddedFact[]; realId: (alias: string) => string }> {
+  const real = new Map<string, string>()
+  let next = startAt
+  const aliased = facts.map((fact) => {
+    const alias = `F${next++}`
+    real.set(alias, fact.kind === "skill_only" ? skillOnlyId(fact.id) : oneLinerId(fact.id))
+    return { ...fact, alias }
+  })
+  return { facts: aliased, realId: (alias) => real.get(alias) ?? alias }
+}
+
+/** `<added_facts>` line for one fact: `F12 [skill_only]: Figma`, or its role beside a one-liner. */
+export function addedFactStatement(fact: AliasedAddedFact, neutral: (text: string) => string): string {
+  if (fact.kind === "skill_only") return `${fact.alias} [skill_only]: ${neutral(fact.text)}`
+  const role = fact.role === null ? "" : [fact.role.title, fact.role.employer, fact.role.period].filter((part): part is string => part !== null && part.trim() !== "").join(", ")
+  return `${fact.alias} [one_liner${role === "" ? "" : `, role: ${neutral(role)}`}]: ${neutral(fact.text)}`
+}
+
 /** The generated documents with every alias replaced by its real fact ID. */
 export function resolveFactIds(documents: GeneratedDocuments, realId: (alias: string) => string): GeneratedDocuments {
   const line = (value: Line): { text: string; factIds: string[] } => ({ text: value.text, factIds: value.factIds.map(realId) })
@@ -173,7 +220,7 @@ export type AtsTarget = Readonly<{ keyword: string; factIds: readonly string[] }
  * quoted employer name in a letter body would block the whole letter. No quotes
  * (or only dropped ones) leaves the `<company_direction>` block out.
  */
-export function buildGenerationPrompt(sections: readonly StoredSection[], posting: PostingForGeneration, themes: readonly EmphasisTheme[], atsTargets: readonly AtsTarget[] = [], companyDirection: readonly string[] = []): string {
+export function buildGenerationPrompt(sections: readonly StoredSection[], posting: PostingForGeneration, themes: readonly EmphasisTheme[], atsTargets: readonly AtsTarget[] = [], companyDirection: readonly string[] = [], addedFacts: readonly AliasedAddedFact[] = []): string {
   const neutral = (text: string) => text.replace(/</g, "‹").replace(/>/g, "›")
   const profile = sections
     .flatMap((section) => {
@@ -188,8 +235,13 @@ export function buildGenerationPrompt(sections: readonly StoredSection[], postin
     .filter((text) => !namesTarget(text, target))
     .map((text) => neutral(text.replace(/\s+/g, " ").trim()))
     .filter((text) => text !== "")
+  // FEAT-0017: the Candidate's own facts for this Application, in their own delimited block. Text passes the same
+  // angle-bracket neutraliser and whitespace collapse as profile text, so no closing tag can break out of the block.
+  const addedLines = addedFacts.map((fact) => addedFactStatement(fact, (text) => neutral(text.replace(/\s+/g, " ").trim())))
+  const added = addedLines.length === 0 ? [] : [`<added_facts>\nCandidate-stated experience for this application only. The Candidate affirmed each line as work they have done.\n${addedLines.join("\n")}\n</added_facts>`]
   const blocks = [
     `<career_profile>\n${profile}\n</career_profile>`,
+    ...added,
     `<emphasis>\n${emphasis}\n</emphasis>`,
     `<ats_keywords>\n${atsTargets.map((target) => `${neutral(target.keyword)}: ${target.factIds.join(", ")}`).join("\n")}\n</ats_keywords>`,
   ]

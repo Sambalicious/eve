@@ -63,8 +63,8 @@ describe("v1.18.0 shared schemas (AC-1.1, 1.2, 1.6, 2.1)", () => {
     const at = codes.indexOf("posting_hidden")
     expect(at).toBeGreaterThan(0)
     expect(codes[at - 1]).toBe("rate_limited_global")
-    // v1.24.0 (apply anyway bounds) appends five after A2's code, v1.25.0 (EPIC-0002 B1) two more, v1.27.0 (EPIC-0010) nine, v1.28.0 (EPIC-0011) one, and v1.31.0 (EPIC-0014) one.
-    expect(codes.slice(at + 1)).toEqual(["feature_not_yet_available", "override_not_allowed", "override_acknowledgement_missing", "override_decision_changed", "override_application_state", "sample_not_allowed", "preferences_stale", "timezone_change_rate_limited", "job_description_too_short", "job_description_too_long", "job_title_required", "job_title_too_long", "company_required", "company_too_long", "employer_page_unreadable", "posting_still_checking", "manual_application_only", "advanced_locked", "outreach_reader_name_invalid"])
+    // v1.24.0 (apply anyway bounds) appends five after A2's code, v1.25.0 (EPIC-0002 B1) two more, v1.27.0 (EPIC-0010) nine, v1.28.0 (EPIC-0011) one, v1.31.0 (EPIC-0014) one, and v1.32.0 (FEAT-0017) eight.
+    expect(codes.slice(at + 1)).toEqual(["feature_not_yet_available", "override_not_allowed", "override_acknowledgement_missing", "override_decision_changed", "override_application_state", "sample_not_allowed", "preferences_stale", "timezone_change_rate_limited", "job_description_too_short", "job_description_too_long", "job_title_required", "job_title_too_long", "company_required", "company_too_long", "employer_page_unreadable", "posting_still_checking", "manual_application_only", "advanced_locked", "outreach_reader_name_invalid", "added_facts_frozen", "added_facts_busy", "added_facts_conflict", "added_facts_invalid", "added_facts_limit", "added_facts_not_lifted", "added_facts_confirmation_required", "documents_stale"])
   })
 
   it("the families query accepts every one of the 13 keys", () => {

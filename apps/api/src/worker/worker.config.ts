@@ -23,6 +23,8 @@ const workerEnvSchema = z.object({
   /** EPIC-0012: the worker runs document generation too, so it reads the same two flags (on only for "1"). */
   DOCUMENT_BRIDGES_ENABLED: z.string().optional(),
   DOCUMENT_DIRECTION_ENABLED: z.string().optional(),
+  /** FEAT-0017: Application added facts. On only for exactly "1", as in the api. */
+  ADDED_FACTS_ENABLED: z.string().optional(),
   /** JSON object: application host -> reviewed extra hosts its form needs. */
   SUBMISSION_REVIEWED_HOSTS_FILE: z.string().trim().min(1).optional(),
   /** Slice 6: the daily summary job is off unless this is exactly "1". */
@@ -54,6 +56,8 @@ export type WorkerConfig = Readonly<{
   documentBridgesEnabled?: boolean
   /** Off unless DOCUMENT_DIRECTION_ENABLED=1 (EPIC-0012 rule 4). */
   documentDirectionEnabled?: boolean
+  /** Off unless ADDED_FACTS_ENABLED=1 (FEAT-0017): the submit-time added-facts gate reads it. */
+  addedFactsEnabled?: boolean
   /** Null: no browser, so the worker cannot submit (the default). */
   browser?: BrowserConfig | null
   /** Slice 6. Null: no Gmail SMTP settings, so nothing is sent and outbox rows stay pending. */
@@ -88,6 +92,7 @@ export function parseWorkerConfig(env: Readonly<Record<string, string | undefine
     formAgentEnabled: result.data.SUBMISSION_FORM_AGENT_ENABLED === "1",
     documentBridgesEnabled: result.data.DOCUMENT_BRIDGES_ENABLED === "1",
     documentDirectionEnabled: result.data.DOCUMENT_DIRECTION_ENABLED === "1",
+    addedFactsEnabled: result.data.ADDED_FACTS_ENABLED === "1",
     browser:
       result.data.SUBMISSION_BROWSER_ENABLED === "1"
         ? {

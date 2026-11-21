@@ -39,6 +39,9 @@ const FIELD_ERROR_CODES: ReadonlySet<ApiErrorCode> = new Set<ApiErrorCode>([
   "company_required",
   "company_too_long",
   "employer_page_unreadable",
+  // v1.32.0: FEAT-0017 added facts carry per-field problems on 422.
+  "added_facts_invalid",
+  "added_facts_limit",
 ])
 
 /** Renders every error as the contract envelope. Never echoes internal details. */

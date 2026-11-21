@@ -1,6 +1,6 @@
 /** Application and its Tailored Documents as the dashboard uses them (CONTEXT.md: Application, Tailored Document). */
 
-import type { BlockedClaimCause } from "@eve/contracts"
+import type { AddedFactUsed, AddedFactsView, BlockedClaimCause } from "@eve/contracts"
 
 export type ApplicationState = "prepared" | "generating" | "documents_ready" | "documents_blocked" | "documents_failed"
 
@@ -28,6 +28,8 @@ export interface DocumentFiles {
   readonly docxUrl: string
   /** ATS match against the posting's keywords; resumes written since ATS scoring only, else null. */
   readonly ats: AtsMatch | null
+  /** v1.32.0 (FEAT-0017): added facts this document cited, as at generation. Absent while the flag is off. */
+  readonly addedFactsUsed?: readonly AddedFactUsed[]
 }
 
 /** A resume's ATS match: score 0 to 100, requirements met out of `total`, and the keyword lists. */
@@ -122,6 +124,8 @@ export interface ApplicationDetail extends Application {
   readonly posting: { readonly status: string; readonly hidden: boolean } | null
   /** v1.24.0 (B3a): the latest drop from the automatic queue, for C-AA-40 / C-AA-41. */
   readonly latestDrop: { readonly at: string; readonly reason: "closed" | "not_submittable" } | null
+  /** v1.32.0 (FEAT-0017): the Added facts view. Absent while `ADDED_FACTS_ENABLED` is off. */
+  readonly addedFacts?: AddedFactsView
 }
 
 export interface DocumentsListRow {

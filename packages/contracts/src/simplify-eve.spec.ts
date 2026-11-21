@@ -96,9 +96,9 @@ describe("v1.28.0 C2 GET /v1/me, PUT /v1/me/advanced, note dismissal", () => {
   })
 
   it("advanced_locked keeps its exact message after the v1.31.0 code", () => {
-    // v1.31.0 (EPIC-0014) appends `outreach_reader_name_invalid` after it.
-    expect(apiErrorCodeSchema.options.at(-2)).toBe("advanced_locked")
-    expect(apiErrorCodeSchema.options.at(-1)).toBe("outreach_reader_name_invalid")
+    // v1.31.0 (EPIC-0014) appends `outreach_reader_name_invalid` after it; v1.32.0 (FEAT-0017) appends eight more.
+    expect(apiErrorCodeSchema.options.at(-10)).toBe("advanced_locked")
+    expect(apiErrorCodeSchema.options.at(-9)).toBe("outreach_reader_name_invalid")
     expect(ADVANCED_ERROR_MESSAGES.advanced_locked).toBe("Advanced stays on while automatic applying is on. Turn off automatic applying first.")
     expect(
       apiErrorResponseSchema.safeParse({

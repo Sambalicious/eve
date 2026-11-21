@@ -35,7 +35,7 @@ const accessRequest = { trustProxy: 0, limits: { perIpHour: 3, perIpDay: 10, glo
 
 async function boot(accessLog: boolean): Promise<{ app: NestFastifyApplication; lines: () => string[] }> {
   const written: string[] = []
-  const config = { accessLog, accessRequest, publicOrigin: "https://dashboard.test" }
+  const config = { accessLog, accessRequest, publicOrigin: "https://dashboard.test", addedFactsEnabled: false }
   const module = await Test.createTestingModule({ controllers: [ProbeController] }).compile()
   const app = module.createNestApplication<NestFastifyApplication>(createFastifyAdapter(config, { write: (line) => void written.push(line) }))
   await configureHttpApp(app, config)

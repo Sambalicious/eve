@@ -152,6 +152,7 @@ export class NotificationSender {
         coverLetterStatus: facts.cover_letter_status,
         automaticToday: facts.submitted_local_day ? await this.repository.automaticCount(facts.submitted_local_day) : 0,
         override,
+        addedFactsUsed: facts.added_facts_used ?? [],
       },
       base
     )

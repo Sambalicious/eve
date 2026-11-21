@@ -217,6 +217,11 @@ const paragraphs = (letter: CoverLetterContent | undefined) => letter?.paragraph
 const eventsNamed = (events: readonly Record<string, unknown>[], name: string) => events.filter((e) => e.event === name)
 const NO_FLAGS: Flags = { bridges: false, direction: false }
 const BOTH: Flags = { bridges: true, direction: true }
+/** FEAT-0017 adds a third flag; these cases assert only the two EPIC-0012 ones. */
+const epic0012Flags = (service: unknown): Flags => {
+  const flags = (service as { flags: Flags & { addedFacts: boolean } }).flags
+  return { bridges: flags.bridges, direction: flags.direction }
+}
 
 /** A model draft full of adversarial lines. F1 pay, F2 wind, F3 ment, F4 jest. */
 const ADVERSARIAL = {
@@ -502,7 +507,7 @@ describe("0. wiring: the real config path", () => {
   it("an app built with no flag in its config has both flags off; one built with both set has both on", async () => {
     const plain = await createTestApp({ databaseUrl: database.url, clock, config: { candidateStorageDir: join(storage, "candidates"), anthropic: anthropicConfig(TEST_ANTHROPIC_KEY, TEST_ANTHROPIC_MODEL, "claude-sonnet-5-5") } })
     try {
-      expect((plain.get(DocumentsService) as unknown as { flags: Flags }).flags).toEqual(NO_FLAGS)
+      expect(epic0012Flags(plain.get(DocumentsService))).toEqual(NO_FLAGS)
     } finally {
       await plain.close()
     }
@@ -512,7 +517,7 @@ describe("0. wiring: the real config path", () => {
       config: { candidateStorageDir: join(storage, "candidates"), anthropic: anthropicConfig(TEST_ANTHROPIC_KEY, TEST_ANTHROPIC_MODEL, "claude-sonnet-5-5"), documentBridgesEnabled: true, documentDirectionEnabled: true },
     })
     try {
-      expect((flagged.get(DocumentsService) as unknown as { flags: Flags }).flags).toEqual(BOTH)
+      expect(epic0012Flags(flagged.get(DocumentsService))).toEqual(BOTH)
     } finally {
       await flagged.close()
     }

@@ -236,6 +236,15 @@ export class NotificationRepository {
           "application.override_skip_detail",
           "application.override_violated_rules",
           "application.details_deleted_at",
+          // FEAT-0017 (OD-18): the sent documents' own record; the Confirmed email lists the cited added facts.
+          sql<string[] | null>`(
+            select jsonb_agg(distinct available.value->>'text')
+            from tailored_document d
+            cross join lateral jsonb_array_elements(coalesce(d.added_facts->'available', '[]'::jsonb)) as available(value)
+            where d.candidate_id = application.candidate_id
+              and d.application_id = application.id
+              and coalesce(d.added_facts->'cited', '[]'::jsonb) ? (available.value->>'id')
+          )`.as("added_facts_used"),
         ])
         .where("application.candidate_id", "=", candidateId)
         .where("application.id", "=", applicationId)

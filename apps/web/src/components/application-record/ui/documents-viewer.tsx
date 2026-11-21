@@ -10,7 +10,7 @@ import {
 import { buttonVariants } from "@/shared/ui/button"
 import { Section } from "@/shared/ui/section"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
-import { AtsScoreCard } from "./ats-score-card"
+import { AtsScoreCard, type AtsAddedFactsProps } from "./ats-score-card"
 import { DocumentPreview } from "./document-preview"
 
 const KINDS: readonly DocumentKind[] = ["resume", "cover_letter"]
@@ -30,11 +30,14 @@ export function DocumentsViewer({
   coverLetterStatus,
   initialTab,
   name,
+  addedFacts,
 }: {
   documents: readonly TailoredDocument[]
   coverLetterStatus: Parameters<typeof coverLetterLine>[0]
   initialTab: DocumentKind
   name: string
+  /** FEAT-0017: the added-facts view and its tick save, when the flag is on (absent leaves the card unchanged). */
+  addedFacts?: AtsAddedFactsProps
 }) {
   const id = useId()
   return (
@@ -70,7 +73,7 @@ export function DocumentsViewer({
               {line && <p className="text-sm">{line}</p>}
               {document ? (
                 <>
-                  {document.ats && <AtsScoreCard ats={document.ats} />}
+                  {document.ats && <AtsScoreCard ats={document.ats} addedFacts={addedFacts} />}
                   <DownloadButtons document={document} />
                   <DocumentPreview
                     document={document}

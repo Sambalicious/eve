@@ -41,7 +41,7 @@ import { dropUnsupportedSentences, fallBackToFactWording, settleCappedLetter } f
 import { directionParagraphCount, dropOrphanDirection, isWholeParagraph, sentencesOfLine } from "./direction-sentences.js"
 import { hardFailCounts, letterBlocksOnlyOnUnjudged, needsMeaningCheck, refusedSentence, validateDocument } from "./document-validation.js"
 import { postingGuard } from "./posting-guard.js"
-import { type Draft, type GenerationRun, type Repaired, type Verdicts, atsTargetsOf } from "./generation-run.js"
+import { type Draft, type GenerationRun, type Repaired, type Verdicts, atsTargetsOf, claimSectionsOf } from "./generation-run.js"
 import { MEANING_CHECK_EFFORT, MEANING_CHECK_MAX_OUTPUT_TOKENS, MEANING_CHECK_PURPOSE, MEANING_CHECK_TIMEOUT_MS, type MeaningCheckItem, buildMeaningCheckPrompt, meaningCheckSchema, meaningCheckSystemPrompt, supportedTexts } from "./meaning-check.js"
 import {
   GENERATION_EFFORT,
@@ -59,12 +59,17 @@ import {
   toCoverLetterContent,
   toResumeContent,
   withoutContactFacts,
+  aliasAddedFacts,
 } from "./document-generation.js"
 import { type ContactHeader, type CoverLetterContent, type DocumentContent, type DocumentKind, type DocumentLine, type ResumeContent, plainTextOf } from "./document-model.js"
 import { headlineDecision } from "./headline.js"
 import { keywordDensity, repairDenseLines, resumeLineRefs } from "./keyword-density.js"
 import { capLetterKeywords } from "./letter-keyword-cap.js"
 import { STORAGE_NAME } from "./document-storage.js"
+import { citedAddedIds, keepBulletsUnderTheirRole, stripMisplacedSkillOnly } from "./added-fact-claims.js"
+import { generationAddedFacts } from "../added-facts/generation-facts.js"
+import { addedFactsView } from "../added-facts/view.js"
+import type { StoredAddedFactUsed } from "../db/schema.js"
 import { CandidateFiles } from "../files/candidate-files.js"
 import { CandidateScope } from "../db/candidate-scope.js"
 import { type CreateOutcome, DocumentsRepository, type StoredDocument } from "./documents.repository.js"
@@ -89,12 +94,13 @@ type DocumentsEvent =
   | "documents.keyword_density"
   | "documents.headline_unsupported"
   | "documents.ats_scored"
+  | "documents.skill_only_stripped"
 
 @Injectable()
 export class DocumentsService implements OnApplicationBootstrap {
   private readonly logger = new Logger(DocumentsService.name)
   private readonly inFlight = new Set<Promise<unknown>>()
-  private readonly flags: Readonly<{ bridges: boolean; direction: boolean }>
+  private readonly flags: Readonly<{ bridges: boolean; direction: boolean; addedFacts: boolean }>
 
   constructor(
     private readonly repository: DocumentsRepository,
@@ -105,7 +111,7 @@ export class DocumentsService implements OnApplicationBootstrap {
     @Inject(APP_CONFIG) config: SharedRuntimeConfig
   ) {
     // EPIC-0012 (Revision 2, 2.4): both flags are off unless the config says exactly so.
-    this.flags = { bridges: config.documentBridgesEnabled === true, direction: config.documentDirectionEnabled === true }
+    this.flags = { bridges: config.documentBridgesEnabled === true, direction: config.documentDirectionEnabled === true, addedFacts: config.addedFactsEnabled === true }
   }
 
   /**
@@ -182,9 +188,12 @@ export class DocumentsService implements OnApplicationBootstrap {
     const contact = await this.contactHeader()
     const facts = await this.repository.detailFacts(row, this.clock.now())
     const override = applicationOverride(row, facts.posting)
+    // FEAT-0017: the Added facts view is embedded so the page needs one fetch; absent with the flag off.
+    const addedFacts = this.flags.addedFacts ? await this.tenant.run((tx, candidateId) => addedFactsView(tx, candidateId, row, this.clock.now(), true)) : null
     return {
       ...summaryOf(row, await this.graceEnd(), override, await this.tenant.run((tx) => manualPostingIds(tx, [row.job_posting_id]))),
-      documents: sortKinds(documents).map((document) => documentView(document, contact)),
+      documents: sortKinds(documents).map((document) => documentView(document, contact, this.flags.addedFacts)),
+      ...(addedFacts === null ? {} : { addedFacts }),
       posting: row.details_deleted_at === null && facts.posting !== null ? { status: facts.posting.decision.status, hidden: facts.posting.hidden } : null,
       latestDrop: latestDropOf(row, override, facts.latestQueueEvent),
     }
@@ -199,8 +208,8 @@ export class DocumentsService implements OnApplicationBootstrap {
       const view = (kind: DocumentKind) => {
         const document = own.find((candidate) => candidate.kind === kind)
         if (!document) return null
-        const { kind: documentKind, careerProfileVersion, createdAt, pdfUrl, docxUrl, ats } = documentView(document, null)
-        return { kind: documentKind, careerProfileVersion, createdAt, pdfUrl, docxUrl, ats }
+        const { kind: documentKind, careerProfileVersion, createdAt, pdfUrl, docxUrl, ats, addedFactsUsed } = documentView(document, null, this.flags.addedFacts)
+        return { kind: documentKind, careerProfileVersion, createdAt, pdfUrl, docxUrl, ats, ...(addedFactsUsed === undefined ? {} : { addedFactsUsed }) }
       }
       return [
         {
@@ -283,8 +292,14 @@ export class DocumentsService implements OnApplicationBootstrap {
     const posting = await this.repository.findPosting(application.job_posting_id)
     const contact = await this.contactHeader()
     const sections = withoutContactFacts(profile.sections as StoredSection[], contact)
+    // FEAT-0017: the effective added facts (flag on), the counter this generation records, and their aliases after the
+    // profile's own, so the model sees one namespace of aliases and never an `added:` id.
+    const effective = this.flags.addedFacts ? generationAddedFacts(await this.repository.listAddedFacts(id), sections, contact) : { citable: [], available: [] }
+    const addedFactsVersion = this.flags.addedFacts ? application.added_facts_version : 0
+    const addedText = effective.citable.map((fact) => fact.text).join("\n")
     const promptTarget = { company: application.company, roleTitle: application.role_title, text: posting?.posting_text ?? "" }
     const aliased = aliasFacts(sections)
+    const aliasedAdded = aliasAddedFacts(sections.flatMap((section) => section.facts).length + 1, effective.citable)
     // ATS: the posting's keywords, and those the profile states with the (aliased) facts that state them.
     const keywords = atsKeywords(posting?.technologies ?? null, posting?.ats_skills ?? null, application.company)
     const profileText = sections.flatMap((section) => [section.title, ...section.facts.map((fact) => fact.text)]).join("\n")
@@ -309,24 +324,31 @@ export class DocumentsService implements OnApplicationBootstrap {
       direction
     )
     const letterTarget = { employer: application.company ?? "", roleTitle: application.role_title ?? "" }
-    const wording = new Map(sections.flatMap((section) => section.facts.map((fact) => [fact.id, fact.text] as const)))
+    const claimSections = claimSectionsOf(sections, effective)
+    const sectionOfFact = new Map(claimSections.flatMap((section) => section.facts.map((fact) => [fact.id, section.id] as const)))
+    const wording = new Map(claimSections.flatMap((section) => section.facts.map((fact) => [fact.id, fact.text] as const)))
     return {
       applicationId: id,
       profileVersion: profile.version,
       roleTitle: application.role_title,
       contact,
       sections,
+      effective,
+      addedFactsVersion,
+      addedText,
+      aliasedAdded,
+      claimSections,
       promptTarget,
       aliased,
       keywords,
-      atsTargets: atsTargetsOf(keywords, aliased),
+      atsTargets: atsTargetsOf(keywords, aliased, aliasedAdded.facts),
       profileText,
       direction,
-      sectionOfFact: new Map(sections.flatMap((section) => section.facts.map((fact) => [fact.id, section.id] as const))),
+      sectionOfFact,
       letterTarget,
       wording,
       claims: {
-        facts: new Map(sections.flatMap((section) => factsOf(section))),
+        facts: new Map(claimSections.flatMap((section) => factsOf(section))),
         target: letterTarget,
         contact,
         meaningChecked: new Set(),
@@ -340,8 +362,8 @@ export class DocumentsService implements OnApplicationBootstrap {
   private async draft(run: GenerationRun): Promise<Draft | null> {
     const result = await this.gateway.generateObject({
       purpose: GENERATION_PURPOSE,
-      system: generationSystemPrompt(this.flags),
-      prompt: buildGenerationPrompt(run.aliased.sections, run.promptTarget, emphasisThemes(run.aliased.sections), run.atsTargets, run.direction),
+      system: generationSystemPrompt({ ...this.flags, addedFacts: run.aliasedAdded.facts.length > 0 }),
+      prompt: buildGenerationPrompt(run.aliased.sections, run.promptTarget, emphasisThemes(run.aliased.sections), run.atsTargets, run.direction, run.aliasedAdded.facts),
       schema: generatedDocumentsSchema,
       maxOutputTokens: GENERATION_MAX_OUTPUT_TOKENS,
       tier: "documents",
@@ -361,11 +383,19 @@ export class DocumentsService implements OnApplicationBootstrap {
       await this.repository.markFailed(run.applicationId, result.failure, this.clock.now())
       return null
     }
-    const generated = resolveFactIds(result.object, run.aliased.realId)
-    return {
-      resume: withRoleHeadings(toResumeContent(generated.resume, (factId) => run.sectionOfFact.get(factId)), run.sections, run.contact),
-      letter: toCoverLetterContent(generated.coverLetter, run.promptTarget),
-    }
+    const generated = resolveFactIds(result.object, (alias) => {
+      // FEAT-0017: the added facts' aliases continue the profile's numbering; anything else is a profile alias.
+      const added = run.aliasedAdded.realId(alias)
+      return added === alias ? run.aliased.realId(alias) : added
+    })
+    const withHeadings = withRoleHeadings(toResumeContent(generated.resume, (factId) => run.sectionOfFact.get(factId)), run.claimSections, run.contact)
+    // FEAT-0017: a bullet citing a one-liner of another role is dropped, never printed under the wrong role (PRD 5.5).
+    const moved = keepBulletsUnderTheirRole(withHeadings, run.effective.citable, run.claimSections)
+    // FEAT-0017: a skill-only citation outside a Skills line or a skill-only letter paragraph is stripped before it can
+    // block; a line left with no ids is dropped, so nothing untrue is waved through and the hard fail stays the backstop.
+    const stripped = stripMisplacedSkillOnly(moved, toCoverLetterContent(generated.coverLetter, run.promptTarget))
+    if (stripped.stripped > 0) this.logEvent("documents.skill_only_stripped", { applicationId: run.applicationId, count: stripped.stripped })
+    return { resume: stripped.resume, letter: stripped.letter }
   }
 
   /** Counts the draft's hard fails, then asks the judge about its reworded lines and, for refused paragraphs, their sentences. */
@@ -398,7 +428,9 @@ export class DocumentsService implements OnApplicationBootstrap {
     const settledLetter = this.capLetter(run, orphaned.letter, tailoredLetter.checked)
     const resume = this.repairResumeKeywords(run, tailoredResume.resume)
     // Scored on exactly what will be stored and printed, after every check.
-    const ats = scoreAts(run.keywords, plainTextOf(resume, run.contact).join("\n"), run.profileText)
+    // FEAT-0017: scored with the profile plus the added text, so a ticked term is "missing" rather than a gap.
+    const stated = run.addedText === "" ? run.profileText : `${run.profileText}\n${run.addedText}`
+    const ats = scoreAts(run.keywords, plainTextOf(resume, run.contact).join("\n"), stated)
     this.logEvent("documents.ats_scored", { applicationId: id, score: ats.score, total: ats.total, missing: ats.missing.length, gaps: ats.gaps.length })
     return {
       documents: [
@@ -535,15 +567,27 @@ export class DocumentsService implements OnApplicationBootstrap {
   private async persist(run: GenerationRun, stored: readonly StoredDocument[]): Promise<GenerationOutcome> {
     const id = run.applicationId
     const written = stored.flatMap((done) => [done.pdfStorageName, done.docxStorageName])
-    let outcome: { recorded: boolean; remove: string[] }
+    // FEAT-0017: the added-fact ids each stored document actually cited, for the audit snapshot.
+    const citedByKind = (kind: DocumentKind): readonly string[] => {
+      const document = stored.find((done) => done.kind === kind)
+      return document === undefined ? [] : citedAddedIds(document.content)
+    }
+    let outcome: { recorded: boolean; remove: string[]; stale: boolean }
     try {
-      outcome = await this.repository.recordDocuments(id, run.profileVersion, stored, this.clock.now())
+      outcome = await this.repository.recordDocuments(id, run.profileVersion, stored, this.clock.now(), {
+        version: run.addedFactsVersion,
+        available: run.effective.available,
+        citedByKind: { resume: citedByKind("resume"), cover_letter: citedByKind("cover_letter") },
+        cas: this.flags.addedFacts,
+      })
     } catch (error) {
       // SEC-408: the transaction rolled back, so nothing references the new files.
       await this.removeFiles(written)
       throw error
     }
     await this.removeFiles(outcome.remove)
+    // FEAT-0017: a counter change during generation discards the files and marks the generation interrupted (retryable).
+    if (outcome.stale) await this.repository.markFailed(id, "interrupted", this.clock.now())
     // An automatic submission held below the ATS minimum goes back to the queue once its new resume reaches it.
     if (outcome.recorded) await this.repository.requeueAtsHeld(this.clock.now(), id)
     return outcome.recorded ? "ready" : "failed"
@@ -808,8 +852,10 @@ export function latestDropOf(
   return { at: event.created_at.toISOString(), reason: latestDropReasonOf(detail.success ? detail.data : null) }
 }
 
-function documentView(row: Selectable<TailoredDocumentTable>, contact: ContactHeader | null): TailoredDocument {
+function documentView(row: Selectable<TailoredDocumentTable>, contact: ContactHeader | null, withAddedFacts = false): TailoredDocument {
   const content = row.content as unknown as DocumentContent
+  const snapshot = (row.added_facts ?? { available: [], cited: [] }) as { available?: StoredAddedFactUsed[]; cited?: string[] }
+  const cited = Array.isArray(snapshot.cited) ? snapshot.cited : []
   return {
     kind: row.kind,
     careerProfileVersion: row.career_profile_version,
@@ -818,6 +864,8 @@ function documentView(row: Selectable<TailoredDocumentTable>, contact: ContactHe
     docxUrl: documentDownloadPath(row.application_id, row.kind, "docx"),
     previewText: contact === null ? [] : plainTextOf(content, contact),
     ats: content.kind === "resume" && content.ats ? content.ats : null,
+    // FEAT-0017 (PRD 5.10, E10): the added facts this document cited, as they read at generation.
+    ...(withAddedFacts ? { addedFactsUsed: Array.isArray(snapshot.available) ? snapshot.available.filter((fact) => cited.includes(fact.id)) : [] } : {}),
   }
 }
 
