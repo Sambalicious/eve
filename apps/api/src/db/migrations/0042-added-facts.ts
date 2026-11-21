@@ -132,7 +132,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     check (added_facts_version >= 0 and jsonb_typeof(added_facts) = 'object')`)
 
   // A-8: the two FEAT-0017 causes. NOT VALID then VALIDATE only avoids a long lock in its own transaction;
-  // here the migration is one transaction and the ADD CONSTRAINT above already holds ACCESS EXCLUSIVE on
+  // here the migration is one transaction and the DROP CONSTRAINT below takes ACCESS EXCLUSIVE on
   // application, so validating later in the same transaction takes no extra lock.
   await run(sql`alter table application drop constraint application_blocked_claim_cause_check`)
   await run(sql`alter table application add constraint application_blocked_claim_cause_check
