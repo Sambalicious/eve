@@ -56,6 +56,7 @@ const COPY = {
   outreachNote: "Texts you copy to send are written from your Career Profile only.", // C-AF-36
   profileStays: "Removing it here doesn't remove it from your Career Profile.", // C-AF-37
   formTitleAdd: "Add a fact", // C-AF-38
+  formRegionAdd: "Add a fact form", // the form's aria-label (C-AF-38 region)
   formTitleSentence: "Add a sentence", // C-AF-38b
   formTitleEdit: "Edit sentence", // C-AF-38c
   textLabel: "What you did", // C-AF-39
@@ -262,7 +263,9 @@ test.describe("added skills: tick gap terms (AC 1.1 to 1.9)", () => {
     await fillOneLiner(page, "Built a Storybook library at Acme", role)
     await affirm(page)
     await added(page).getByRole("button", { name: COPY.addFactButton, exact: true }).click()
-    await expect(added(page).getByText(COPY.errorOneLinerLimit, { exact: true })).toBeVisible()
+    // C-AF-55 renders twice in the steady state: the section's standing limit line (a status region, design review
+    // [6b]) and the form's own refusal. Assert the form's refusal, so the test does not pass on the standing line.
+    await expect(added(page).getByRole("form", { name: COPY.formRegionAdd }).getByRole("alert")).toHaveText(COPY.errorOneLinerLimit)
     await expect(added(page).getByLabel(COPY.textLabel)).toHaveValue("Built a Storybook library at Acme")
     expect(await addedFactsOf(seeded.applicationId)).toHaveLength(10)
   })
