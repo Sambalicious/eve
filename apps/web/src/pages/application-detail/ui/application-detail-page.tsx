@@ -55,6 +55,7 @@ import {
   AddedFactsLiftPanel,
   AddedFactsSection,
   AddedFactsStaleNotice,
+  addedFactsQueryKey,
   addedFactsQueryOptions,
   useAddedFactsActions,
 } from "@/features/added-facts"
@@ -160,6 +161,18 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
    */
   const addedFactsQuery = useQuery(addedFactsQueryOptions(app.id, app.addedFacts))
   const added = addedFactsQuery.data
+  /**
+   * FEAT-0017: only the detail query polls generation (`state === "generating"`), so the Added view is
+   * the one query that never learns when generation starts or ends. Refetch it whenever the
+   * Application's state changes: the section freezes as generation begins and comes back editable and
+   * current when it finishes, with no page reload. Its own poll then covers the time in between.
+   */
+  const previousState = useRef(app.state)
+  useEffect(() => {
+    if (previousState.current === app.state) return
+    previousState.current = app.state
+    void queryClient.invalidateQueries({ queryKey: addedFactsQueryKey(app.id) })
+  }, [app.id, app.state, queryClient])
   const addedActions = useAddedFactsActions(app.id)
   const [formRequest, setFormRequest] = useState<{ term: string | null; nonce: number } | null>(null)
   const requestForm = useCallback(
