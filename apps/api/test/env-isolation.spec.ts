@@ -36,6 +36,14 @@ function composeServices(text: string): Map<string, string[]> {
   return services
 }
 
+/** The value expression a service's `environment:` map gives `key`, if any. */
+function serviceValue(services: Map<string, string[]>, service: string, key: string): string | undefined {
+  return services
+    .get(service)
+    ?.map((line) => new RegExp(`^\\s+${key}:\\s*(.*?)\\s*$`).exec(line)?.[1])
+    .find((match) => match !== undefined)
+}
+
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
     const path = join(dir, entry)
@@ -68,11 +76,7 @@ describe("compose env isolation (AC 11.22)", () => {
  */
 describe("compose worker Anthropic env (EPIC-0006 AC-7.2)", () => {
   const services = composeServices(readFileSync(join(ROOT, "docker-compose.yml"), "utf8"))
-  const value = (service: string, key: string) =>
-    services
-      .get(service)
-      ?.map((line) => new RegExp(`^\\s+${key}:\\s*(.*?)\\s*$`).exec(line)?.[1])
-      .find((match) => match !== undefined)
+  const value = (service: string, key: string) => serviceValue(services, service, key)
 
   it.each([
     ["ANTHROPIC_API_KEY", "${ANTHROPIC_API_KEY:-}"],
@@ -80,6 +84,20 @@ describe("compose worker Anthropic env (EPIC-0006 AC-7.2)", () => {
   ])("%s is set on the worker with the same expression as the api", (key, expression) => {
     expect(value("worker", key)).toBe(expression)
     expect(value("api", key)).toBe(expression)
+  })
+})
+
+/**
+ * FEAT-0017. There is no `env_file` in docker-compose.yml, so a service only gets
+ * the keys in its own `environment:` map. Without this line the flag could not be
+ * turned on in the compose stack: the api path gate answers 404 and the worker
+ * never registers the job.
+ */
+describe("compose added-facts flag (FEAT-0017)", () => {
+  const services = composeServices(readFileSync(join(ROOT, "docker-compose.yml"), "utf8"))
+
+  it.each(["api", "worker"])("%s gets ADDED_FACTS_ENABLED, off by default", (service) => {
+    expect(serviceValue(services, service, "ADDED_FACTS_ENABLED")).toBe("${ADDED_FACTS_ENABLED:-0}")
   })
 })
 
