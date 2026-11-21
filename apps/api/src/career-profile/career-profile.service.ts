@@ -210,7 +210,10 @@ export class CareerProfileService implements OnApplicationBootstrap, OnApplicati
       })
     } catch {
       // The transaction rolled back, so the draft is unchanged; the Application's facts stay (PRD 6.3).
-      for (let index = 0; index < outcomes.length; index++) if (outcomes[index] === undefined) outcomes[index] = { outcome: "failed", draftVersion: null }
+      for (let index = 0; index < outcomes.length; index++) {
+        const outcome = outcomes[index]?.outcome
+        if (outcome !== "already_there" && outcome !== "draft_unavailable") outcomes[index] = { outcome: "failed", draftVersion: null }
+      }
     }
     return outcomes.map((outcome) => outcome ?? { outcome: "failed", draftVersion: null })
   }
