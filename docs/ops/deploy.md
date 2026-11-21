@@ -62,7 +62,7 @@ Order: backup, then `migrate`, then `storage-migrate`, then the api and worker.
 4. Keep the running image as the rollback target, then build the new image and apply the database migrations. A missing `eve-api:local` on a first install is fine to skip:
 
    ```sh
-   docker tag eve-api:local eve-api:rollback
+   docker tag "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q api)")" eve-api:rollback
    docker compose build && docker compose up migrate
    ```
 
@@ -115,7 +115,7 @@ Order: backup, then `migrate`, then `storage-migrate`, then the api and worker.
 Steps 3 and 5 together form the guard: `&& echo BACKUP_OK` shows that the backup succeeded, and the move runs only after that. To run both in one line, chain them so that the move cannot start after a failed backup. Keep the running image as the rollback target first; a missing `eve-api:local` on a first install is fine to skip:
 
 ```sh
-docker tag eve-api:local eve-api:rollback
+docker tag "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q api)")" eve-api:rollback
 scripts/backup/backup.sh --on-demand && docker compose build && docker compose up migrate && docker compose --profile storage-migrate run --rm storage-migrate && docker compose up -d api worker
 ```
 
@@ -199,7 +199,7 @@ Preconditions: CI green on the release commit, and `ADDED_FACTS_ENABLED` unset o
 2. **Build.** Keep the running image as the rollback target, then build. The running containers keep serving the old image. A missing `eve-api:local` on a first install is fine to skip:
 
    ```sh
-   docker tag eve-api:local eve-api:rollback
+   docker tag "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q api)")" eve-api:rollback
    docker compose build
    ```
 
