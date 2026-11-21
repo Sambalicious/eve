@@ -110,7 +110,7 @@ export class DocumentsService implements OnApplicationBootstrap {
     private readonly tenant: TenantDatabase,
     @Inject(APP_CONFIG) config: SharedRuntimeConfig
   ) {
-    // EPIC-0012 (Revision 2, 2.4): both flags are off unless the config says exactly so.
+    // EPIC-0012 (Revision 2, 2.4) and FEAT-0017: every flag is off unless the config says exactly so.
     this.flags = { bridges: config.documentBridgesEnabled === true, direction: config.documentDirectionEnabled === true, addedFacts: config.addedFactsEnabled === true }
   }
 
