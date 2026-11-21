@@ -165,6 +165,7 @@ export class AddedFactsRepository {
       .select(["kind", "career_profile_version", "added_facts_version", "added_facts", "content"])
       .where("candidate_id", "=", candidateId)
       .where("application_id", "=", applicationId)
+      .orderBy(sql`case when kind = 'resume' then 0 else 1 end`)
       .orderBy("kind")
       .execute()
     return rows.map((row) => {
