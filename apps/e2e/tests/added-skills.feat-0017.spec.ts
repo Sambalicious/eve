@@ -122,6 +122,12 @@ async function affirm(page: Page) {
   await added(page).getByRole("checkbox", { name: COPY.affirmation }).check()
 }
 
+// As every other spec here does, leave the shared database as this file found it: the last describe seeds ADA's
+// Application, and a leftover sample or blocked row would raise "Needs you" for the board and nav specs that follow.
+test.afterAll(async () => {
+  await resetAddedSkills()
+})
+
 test.describe("added skills: tick gap terms (AC 1.1 to 1.9)", () => {
   test.beforeEach(async ({ context }) => {
     await resetAddedSkills()
