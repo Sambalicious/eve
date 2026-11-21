@@ -40,7 +40,7 @@ export class SubmissionQueueRepository {
   constructor(
     private readonly tenant: TenantDatabase,
     /** FEAT-0017: the added-facts flag, read once by the owning repository. */
-    private readonly addedFactsEnabled = false
+    private readonly addedFactsEnabled: boolean
   ) {}
 
   /** Queued Applications with their ranking inputs, and the Candidate's tier map (EPIC-0002 B1), read in one transaction. */
