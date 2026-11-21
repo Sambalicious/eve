@@ -115,6 +115,8 @@ services:
       # EPIC-0012 rule 2 (posting terms) and rule 4 (quoted company direction): off unless exactly "1".
       DOCUMENT_BRIDGES_ENABLED: ${DOCUMENT_BRIDGES_ENABLED:-0}
       DOCUMENT_DIRECTION_ENABLED: ${DOCUMENT_DIRECTION_ENABLED:-0}
+      # FEAT-0017: off unless exactly "1".
+      ADDED_FACTS_ENABLED: ${ADDED_FACTS_ENABLED:-0}
       # EPIC-0003 public request access. The api never gets NOTIFY_TO or GMAIL_SMTP_*.
       ACCESS_REQUEST_SECRET: ${ACCESS_REQUEST_SECRET:?set in .env}
       # Reverse-proxy hops in front of the api (1 behind Caddy). 0: global cap only.
@@ -179,6 +181,8 @@ services:
       # EPIC-0012 rule 2 (posting terms) and rule 4 (quoted company direction): off unless exactly "1".
       DOCUMENT_BRIDGES_ENABLED: ${DOCUMENT_BRIDGES_ENABLED:-0}
       DOCUMENT_DIRECTION_ENABLED: ${DOCUMENT_DIRECTION_ENABLED:-0}
+      # FEAT-0017: off unless exactly "1".
+      ADDED_FACTS_ENABLED: ${ADDED_FACTS_ENABLED:-0}
       SUBMISSION_BROWSER_MCP_URL: http://browser:8931/mcp
       SUBMISSION_UPLOAD_DIR: /data/uploads
       SUBMISSION_UPLOAD_DIR_IN_BROWSER: /home/node/uploads
