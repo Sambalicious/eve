@@ -35,8 +35,8 @@ describe("v1.21.0 GET /v1/me", () => {
 describe("v1.21.0 feature_not_yet_available", () => {
   it("follows v1.18.0's posting_hidden in the code list", () => {
     const codes = apiErrorCodeSchema.options
-    // v1.24.0 (apply anyway bounds) appends five override codes after it, v1.25.0 (EPIC-0002 B1) two more, v1.27.0 (EPIC-0010) nine, v1.28.0 (EPIC-0011) one, and v1.31.0 (EPIC-0014) one.
-    expect(codes.slice(-20)).toEqual(["posting_hidden", "feature_not_yet_available", "override_not_allowed", "override_acknowledgement_missing", "override_decision_changed", "override_application_state", "sample_not_allowed", "preferences_stale", "timezone_change_rate_limited", "job_description_too_short", "job_description_too_long", "job_title_required", "job_title_too_long", "company_required", "company_too_long", "employer_page_unreadable", "posting_still_checking", "manual_application_only", "advanced_locked", "outreach_reader_name_invalid"])
+    // v1.24.0 (apply anyway bounds) appends five override codes after it, v1.25.0 (EPIC-0002 B1) two more, v1.27.0 (EPIC-0010) nine, v1.28.0 (EPIC-0011) one, v1.31.0 (EPIC-0014) one, and v1.32.0 (FEAT-0017) eight.
+    expect(codes.slice(-28)).toEqual(["posting_hidden", "feature_not_yet_available", "override_not_allowed", "override_acknowledgement_missing", "override_decision_changed", "override_application_state", "sample_not_allowed", "preferences_stale", "timezone_change_rate_limited", "job_description_too_short", "job_description_too_long", "job_title_required", "job_title_too_long", "company_required", "company_too_long", "employer_page_unreadable", "posting_still_checking", "manual_application_only", "advanced_locked", "outreach_reader_name_invalid", "added_facts_frozen", "added_facts_busy", "added_facts_conflict", "added_facts_invalid", "added_facts_limit", "added_facts_not_lifted", "added_facts_confirmation_required", "documents_stale"])
   })
 
   it("the envelope carries feature only as a converted feature", () => {

@@ -1,4 +1,4 @@
-import type { ApplicationDetail, JobPostingDetail, MeResponse, Submission } from "@eve/contracts"
+import type { AddedFactsView, ApplicationDetail, JobPostingDetail, MeResponse, Submission } from "@eve/contracts"
 import { inviteeMe, operatorMe } from "@/shared/testing/me-api"
 
 import { approvedState, defaultJobCriteria, version, type CareerSetupState } from "@/shared/testing/career-setup-api"
@@ -6,8 +6,18 @@ import { storedOverride } from "@/shared/testing/apply-anyway-fake"
 import { dated, pastedPosting, rankedPosting, strongMatch, UNDATED, type DiscoveryState } from "@/shared/testing/discovery-api"
 import { preferencesRecord, type PreferencesApiState } from "@/shared/testing/preferences-api"
 import { DEFAULT_ROLE_FAMILY_TIERS } from "@eve/contracts"
-import { readyApplication } from "@/shared/testing/documents-api"
-import { submission } from "@/shared/testing/submission-api"
+import { readyApplication, tailoredDocument } from "@/shared/testing/documents-api"
+import { submission, awaitingSample } from "@/shared/testing/submission-api"
+import {
+  atLimit,
+  busyGenerating,
+  confirmed as confirmedAddedFacts,
+  editableWithFacts,
+  freshLifted,
+  frozenSubmitted,
+  noAtsResult,
+  noRole,
+} from "@/shared/testing/added-facts-fixtures"
 import { FEED_A, FEED_B, HFEED_A, HFEED_B, storedFeed, storedPost, verifiedOn20Oct, type StackPostsApiState } from "@/shared/testing/stack-posts-api"
 
 /**
@@ -40,6 +50,8 @@ export interface PreviewScenario {
   readonly nextCreate?: "network" | "override_decision_changed" | "override_not_allowed" | "posting_hidden" | "override_application_state"
   /** The next remove-from-queue answers this way once. */
   readonly nextRemove?: "network" | "conflict"
+  /** FEAT-0017: one added-facts view per Application id, served by the five-route fake. */
+  readonly addedFacts?: Readonly<Record<string, AddedFactsView>>
 }
 
 /** The stored, hidden link the `paste-hidden` scenario answers as "already have". */
@@ -340,6 +352,94 @@ const e11Outcomes = [
   { applicationId: E11.employerAsked, type: "interview_invitation" },
   { applicationId: E11.employerAsked, type: "request_for_action" },
 ] as const
+
+/**
+ * FEAT-0017 (v1.32.0) preview: the added-facts states from api-contract.r1's E1, E2, E3, E8, E9 and
+ * E11, plus no ATS result, no role, the ten-sentence limit and the Activation Gate sample marker.
+ * Open `/applications/<id>` (or `/activation/<id>` for the sample) on the preview server.
+ */
+export const afIds = {
+  e1: "af000000-0000-4000-8000-000000000001",
+  e2: "af000000-0000-4000-8000-000000000002",
+  e3: "af000000-0000-4000-8000-000000000003",
+  e8: "af000000-0000-4000-8000-000000000008",
+  e9: "af000000-0000-4000-8000-000000000009",
+  noAts: "af000000-0000-4000-8000-00000000000a",
+  noRole: "af000000-0000-4000-8000-00000000000b",
+  flagOff: "af000000-0000-4000-8000-00000000000c",
+  limit: "af000000-0000-4000-8000-00000000000d",
+  sample: "af000000-0000-4000-8000-00000000000e",
+  blocked: "af000000-0000-4000-8000-00000000000f",
+} as const
+
+const AF_POSTING = "af100000-0000-4000-8000-000000000001"
+const AF_ATS = { score: 62, total: 9, matched: ["React", "TypeScript"], missing: ["GraphQL"], gaps: ["Storybook"] }
+
+function afPosting() {
+  return rankedPosting({
+    id: AF_POSTING,
+    title: "Senior Frontend Engineer",
+    company: "Northwind Labs",
+    status: "skipped",
+    rank: null,
+    skipReason: "weak_core_match",
+    match: { ...strongMatch(), verdict: "weak", weakReason: "coverage_below_threshold", coveredCount: 5, totalCount: 10 },
+    ...dated(3),
+  })
+}
+
+function citedOf(view: AddedFactsView) {
+  return view.addedFactsCited.map((fact) => ({
+    id: fact.id,
+    kind: fact.kind,
+    text: fact.text,
+    role: fact.role === null ? null : { title: fact.role.title, employer: fact.role.employer, period: fact.role.period },
+  }))
+}
+
+function afApp(id: string, view: AddedFactsView, overrides: Partial<ApplicationDetail> = {}): ApplicationDetail {
+  const normalized = { ...view, addedFactsCited: citedOf(view) }
+  return readyApplication({
+    id,
+    jobPostingId: AF_POSTING,
+    roleTitle: "Senior Frontend Engineer",
+    company: "Northwind Labs",
+    requisitionId: "R-AF-17",
+    careerProfileVersion: 4,
+    addedFacts: normalized,
+    documents: [
+      { ...tailoredDocument(id, "resume"), ats: AF_ATS, addedFactsUsed: citedOf(view) },
+      tailoredDocument(id, "cover_letter"),
+    ],
+    ...overrides,
+  })
+}
+
+function afScenario(
+  id: string,
+  view: AddedFactsView,
+  description: string,
+  options: { app?: Partial<ApplicationDetail>; submission?: Submission } = {}
+) {
+  const normalized: AddedFactsView = { ...view, addedFactsCited: citedOf(view) }
+  const app = afApp(id, view, options.app)
+  return {
+    description,
+    discovery: { postings: [afPosting()] },
+    applications: [{ app, submission: options.submission ?? submission() }],
+    addedFacts: { [id]: normalized },
+  } satisfies PreviewScenario
+}
+
+const afFlagOffApp = readyApplication({
+  id: afIds.flagOff,
+  jobPostingId: AF_POSTING,
+  roleTitle: "Senior Frontend Engineer",
+  company: "Northwind Labs",
+  requisitionId: "R-AF-17",
+  careerProfileVersion: 4,
+  documents: [{ ...tailoredDocument(afIds.flagOff, "resume"), ats: AF_ATS }, tailoredDocument(afIds.flagOff, "cover_letter")],
+})
 
 export const scenarios = {
   simple: {
@@ -676,6 +776,43 @@ export const scenarios = {
     applications: e11Applications(),
     emailFailure: "blocked_application" as const,
   },
+
+  // ── FEAT-0017: job added skills ──
+  "added-facts-e1": afScenario(afIds.e1, editableWithFacts(), "E1: two facts, documents stale, lifted, confirmation stale (ticks, rows, stale notice, disabled lift)"),
+  "added-facts-e2": afScenario(afIds.e2, freshLifted(), "E2: after Generate again, fresh and ready to confirm (voided notice, C-AF-68)"),
+  "added-facts-e3": afScenario(afIds.e3, confirmedAddedFacts(), "E3: confirmed at the current counter and queued (C-AF-66, Remove from queue)", {
+    submission: submission({ state: "queued", kind: "automatic", attemptNumber: 1 }),
+  }),
+  "added-facts-e8": afScenario(afIds.e8, frozenSubmitted(), "E8: a Confirmed Submission: facts read-only, no lift, no Add", {
+    submission: submission({ state: "confirmed", kind: "automatic", attemptNumber: 1, submittedAt: "2026-11-20T10:00:00.000Z", submittedWatDay: "2026-11-20" }),
+  }),
+  "added-facts-e9": afScenario(afIds.e9, busyGenerating({ postingGaps: { available: true, terms: ["Figma", "design systems"] } }), "E9: generating (busy): no controls, C-AF-14 and C-AF-35", {
+    app: { state: "generating", documents: [] },
+  }),
+  "added-facts-no-ats": afScenario(afIds.noAts, noAtsResult(), "AC 1.5: no documents, no gap list, free entry still works", {
+    app: { state: "prepared", documents: [] },
+  }),
+  "added-facts-no-role": afScenario(afIds.noRole, noRole(), "AC 2.4: an approved profile with no experience role; C-AF-43, ticks stay"),
+  "added-facts-limit": afScenario(afIds.limit, atLimit(), "AC 1.7: ten sentences; C-AF-55 under the count"),
+  "added-facts-flag-off": {
+    description: "E11: ADDED_FACTS_ENABLED off: today's ATS card, no Added section, no stale notice",
+    discovery: { postings: [afPosting()] },
+    applications: [{ app: afFlagOffApp, submission: submission() }],
+  },
+  "added-facts-sample": afScenario(afIds.sample, editableWithFacts(), "OD-16: a sample awaiting approval whose documents cite added facts (badge, read-only list, edit link)", {
+    submission: submission(awaitingSample()),
+  }),
+  "added-facts-blocked": afScenario(afIds.blocked, editableWithFacts(), "AC 2.7: a blocked cover letter with unsupported terms; the alert's C-AF-44 opens free entry with C-AF-41", {
+    app: {
+      state: "documents_blocked",
+      blockedDocument: "cover_letter",
+      blockedClaim: "I built the Storybook library at Acme from scratch.",
+      blockedClaimCause: "unsupported_terms",
+      blockedClaimTerms: ["Storybook", "design tokens"],
+      blockedClaimMoreTerms: 0,
+      documents: [],
+    },
+  }),
 } satisfies Record<string, PreviewScenario>
 
 export type ScenarioName = keyof typeof scenarios

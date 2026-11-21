@@ -1,13 +1,19 @@
 import { randomUUID } from "node:crypto"
 
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { sql } from "../db/sql.js"
+
+import type { Selectable } from "kysely"
 
 import { CandidateScope } from "../db/candidate-scope.js"
 import { type BoardOutcomeType, type OverrideDecision, isOverridableDecision, overrideDecisionsEqual } from "@eve/contracts"
 
 import { type VisibilityContext, visibilityContext, visibleSql } from "../discovery/visibility.js"
-import type { ApplicationState, JobPostingStatus } from "../db/schema.js"
+import type { ApplicationAddedFactTable, ApplicationState, JobPostingStatus, StoredAddedFactUsed } from "../db/schema.js"
+import { APP_CONFIG } from "../config/config.module.js"
+import type { SharedRuntimeConfig } from "../config/env.js"
+import { documentsStale } from "../added-facts/added-facts-gate.js"
+import { type RecordedDocument, toRecordedAddedFacts } from "../added-facts/document-records.js"
 import { type CandidateTx, TenantDatabase } from "../db/tenant-database.js"
 import { applyTransactionTimeouts, transactionTimeouts } from "../db/transaction-timeouts.js"
 import { describeBlock } from "./blocked-claim.js"
@@ -53,7 +59,51 @@ type ExistingRow = Readonly<{ id: string; submission_state: string | null; sampl
  */
 @Injectable()
 export class DocumentsRepository {
-  constructor(private readonly tenant: TenantDatabase) {}
+  private readonly addedFactsEnabled: boolean
+
+  constructor(
+    private readonly tenant: TenantDatabase,
+    @Inject(APP_CONFIG) config: SharedRuntimeConfig
+  ) {
+    this.addedFactsEnabled = config.addedFactsEnabled === true
+  }
+
+  /** FEAT-0017: this Application's added facts, in creation order (the generation's read). */
+  listAddedFacts(applicationId: string): Promise<Array<Pick<Selectable<ApplicationAddedFactTable>, "id" | "kind" | "text" | "role_section_id" | "role_snapshot">>> {
+    return this.tenant.run((tx, candidateId) =>
+      tx
+        .selectFrom("application_added_fact")
+        .select(["id", "kind", "text", "role_section_id", "role_snapshot"])
+        .where("candidate_id", "=", candidateId)
+        .where("application_id", "=", applicationId)
+        .orderBy("created_at")
+        .orderBy("id")
+        .execute()
+    )
+  }
+
+  /** The current documents' recorded counter and snapshot, resume first. */
+  recordedDocuments(applicationId: string): Promise<RecordedDocument[]> {
+    return this.tenant.run(async (tx, candidateId) => {
+      const rows = await tx
+        .selectFrom("tailored_document")
+        .select(["kind", "career_profile_version", "added_facts_version", "added_facts"])
+        .where("candidate_id", "=", candidateId)
+        .where("application_id", "=", applicationId)
+        .orderBy("kind")
+        .execute()
+      return rows.map((row) => {
+        const snapshot = (row.added_facts ?? { available: [], cited: [] }) as { available?: StoredAddedFactUsed[]; cited?: string[] }
+        return {
+          kind: row.kind,
+          careerProfileVersion: row.career_profile_version,
+          version: row.added_facts_version,
+          cited: Array.isArray(snapshot.cited) ? snapshot.cited : [],
+          available: Array.isArray(snapshot.available) ? snapshot.available : [],
+        }
+      })
+    })
+  }
 
   /** The ATS minimum (0030); 40, the column default, when the Candidate has no settings row. */
   readAtsMinimum(): Promise<number> {
@@ -85,12 +135,36 @@ export class DocumentsRepository {
       let held = tx
         .selectFrom("application as a")
         .innerJoin("tailored_document as d", (join) => join.onRef("d.application_id", "=", "a.id").on("d.kind", "=", "resume"))
-        .select(["a.id", sql<number | null>`(d.content->'ats'->>'score')::int`.as("score")])
+        .select(["a.id", "a.added_facts_version", sql<number | null>`(d.content->'ats'->>'score')::int`.as("score")])
         .where("a.candidate_id", "=", candidateId)
         .where("a.submission_state", "=", "blocked")
         .where("a.blocked_reason", "=", "ats_below_minimum")
       if (applicationId !== undefined) held = held.where("a.id", "=", applicationId)
-      const release = (await held.execute()).filter((row) => minimum === 0 || (row.score !== null && row.score >= minimum)).map((row) => row.id)
+      const rows = await held.execute()
+      if (rows.length === 0) return 0
+      const documents = await tx
+        .selectFrom("tailored_document")
+        .select(["application_id", "kind", "added_facts_version", "added_facts"])
+        .where("candidate_id", "=", candidateId)
+        .where("application_id", "in", rows.map((row) => row.id))
+        .execute()
+      // FEAT-0017: a held Application whose documents are stale stays held (the Candidate regenerates first), on the A-11 r1 rule.
+      const stale = new Set(
+        rows
+          .filter((row) =>
+            documentsStale({
+              flagOn: this.addedFactsEnabled,
+              applicationVersion: row.added_facts_version,
+              documents: toRecordedAddedFacts(
+                documents
+                  .filter((document) => document.application_id === row.id)
+                  .map((document) => ({ kind: document.kind, careerProfileVersion: 0, version: document.added_facts_version, cited: ((document.added_facts ?? {}) as { cited?: string[] }).cited ?? [], available: [] }))
+              ),
+            })
+          )
+          .map((row) => row.id)
+      )
+      const release = rows.filter((row) => !stale.has(row.id)).filter((row) => minimum === 0 || (row.score !== null && row.score >= minimum)).map((row) => row.id)
       if (release.length === 0) return 0
       const result = await tx
         .updateTable("application")
@@ -463,9 +537,21 @@ export class DocumentsRepository {
    * when the details were deleted while the documents were generated (SEC-701),
    * the new ones, which are then not recorded.
    */
-  async recordDocuments(id: string, version: number, documents: readonly StoredDocument[], at: Date): Promise<{ recorded: boolean; remove: string[] }> {
+  async recordDocuments(
+    id: string,
+    version: number,
+    documents: readonly StoredDocument[],
+    at: Date,
+    added: Readonly<{ version: number; available: readonly StoredAddedFactUsed[]; citedByKind: Readonly<Record<DocumentKind, readonly string[]>>; cas: boolean }>
+  ): Promise<{ recorded: boolean; remove: string[]; stale: boolean }> {
     return this.tenant.run(async (trx, candidateId) => {
-      if (!(await lockLive(trx, candidateId, id))) return { recorded: false, remove: documents.flatMap((document) => [document.pdfStorageName, document.docxStorageName]) }
+      if (!(await lockLive(trx, candidateId, id))) return { recorded: false, remove: documents.flatMap((document) => [document.pdfStorageName, document.docxStorageName]), stale: false }
+      // FEAT-0017 (architecture generation step 9): the counter read at the start must still hold, else the new files are
+      // discarded and the generation is marked interrupted (retryable). Mutations are refused while generating, so this is defence only.
+      if (added.cas) {
+        const current = await trx.selectFrom("application").select("added_facts_version").where("candidate_id", "=", candidateId).where("id", "=", id).executeTakeFirstOrThrow()
+        if (current.added_facts_version !== added.version) return { recorded: false, remove: documents.flatMap((document) => [document.pdfStorageName, document.docxStorageName]), stale: true }
+      }
       const previous = await trx
         .selectFrom("tailored_document")
         .select(["pdf_storage_name", "docx_storage_name"])
@@ -488,6 +574,8 @@ export class DocumentsRepository {
             pdf_sha256: document.pdfSha256,
             docx_sha256: document.docxSha256,
             created_at: at,
+            added_facts_version: added.version,
+            added_facts: JSON.stringify({ available: added.available, cited: added.citedByKind[document.kind] }),
           })
           .execute()
       }
@@ -497,7 +585,7 @@ export class DocumentsRepository {
         .where("candidate_id", "=", candidateId)
         .where("id", "=", id)
         .execute()
-      return { recorded: true, remove: previous.flatMap((row) => [row.pdf_storage_name, row.docx_storage_name]) }
+      return { recorded: true, remove: previous.flatMap((row) => [row.pdf_storage_name, row.docx_storage_name]), stale: false }
     })
   }
 

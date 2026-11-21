@@ -42,8 +42,8 @@ const summary = {
 const reddit = { blockedClaimCause: "unsupported_terms", blockedClaimTerms: ["remote"], blockedClaimMoreTerms: 0 }
 const zeta = Array.from({ length: 20 }, (_, i) => `Zeta${i}word`)
 
-describe("blocked claim fields (v1.30.0, EPIC-0009)", () => {
-  it("lists exactly the seven stored causes, in order, and the three terms causes", () => {
+describe("blocked claim fields (v1.30.0, EPIC-0009; v1.32.0 adds the two FEAT-0017 causes)", () => {
+  it("lists exactly the nine stored causes, in order, and the three terms causes", () => {
     expect(blockedClaimCauseSchema.options).toEqual([
       "unsupported_terms",
       "number_order",
@@ -52,6 +52,9 @@ describe("blocked claim fields (v1.30.0, EPIC-0009)", () => {
       "names_target",
       "unknown_fact",
       "not_confirmed",
+      // v1.32.0 (FEAT-0017): no terms on either.
+      "skill_only_in_bullet",
+      "added_fact_hedge",
     ])
     expect([...BLOCKED_CLAIM_CAUSES]).toEqual(blockedClaimCauseSchema.options)
     expect([...BLOCKED_CLAIM_TERMS_CAUSES]).toEqual(["unsupported_terms", "number_order", "no_fact"])

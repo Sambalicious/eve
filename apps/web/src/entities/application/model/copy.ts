@@ -38,6 +38,11 @@ export const applicationCopy = {
         `Part of the ${document} cited a fact that wasn't among the approved facts Eve wrote from. The Application didn't go ahead.`,
       notConfirmed: (document: BlockedDocumentLabel) =>
         `Eve couldn't confirm the meaning of this part of the ${document}, so the Application didn't go ahead. A new run can give a different result.`,
+      // v1.32.0 (FEAT-0017, OD-16, copy deck Addendum r1): a ticked skill used as a bullet; hedge wording on an added fact.
+      skillOnlyInBullet: (document: BlockedDocumentLabel) =>
+        `Part of the ${document} used a skill you added with only a tick as if it were work at a job, so the Application didn't go ahead.`,
+      addedFactHedge: (document: BlockedDocumentLabel) =>
+        `Part of the ${document} described an added skill as something you're learning or familiar with, which your fact doesn't say, so the Application didn't go ahead.`,
       fallback: (document: BlockedDocumentLabel) =>
         `The ${document} didn't pass one of Eve's checks, so the Application didn't go ahead. This page can't say which one.`,
     },
@@ -50,6 +55,9 @@ export const applicationCopy = {
       other: (count: number) => `${count} flagged items aren't shown.`,
     },
     claimLabel: "The part that was blocked",
+    /** v1.32.0 (FEAT-0017, PRD 2.7): the alert's one action; the first listed term, or none (C-AF-44 / C-AF-45). */
+    addFact: "Add a fact",
+    addFactAbout: (term: string) => `Add a fact about ${term}`,
   },
   /** C-DOC-4. */
   empty: {

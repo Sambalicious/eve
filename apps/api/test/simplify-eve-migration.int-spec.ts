@@ -32,9 +32,9 @@ async function addCandidate(email: string, state: string): Promise<string> {
   return (await sql<{ id: string }>`insert into candidate (email, google_sub, role, state) values (${email}, ${`sub-${email}`}, 'candidate', ${state}) returning id::text as id`.execute(admin)).rows[0]!.id
 }
 
-/** Row checksums of every table except those created after 0032 (0033's, 0038's `lead`, 0040's `outreach_message`), for UPG:11. */
+/** Row checksums of every table except those created after 0032 (0033's, 0038's `lead`, 0040's `outreach_message`, 0042's `application_added_fact`), for UPG:11. */
 async function checksums(): Promise<Record<string, string>> {
-  const tables = (await sql<{ t: string }>`select tablename as t from pg_tables where schemaname = 'public' and tablename not in ('candidate_view_setting', 'lead', 'outreach_message', 'kysely_migration', 'migration_marker') order by 1`.execute(admin)).rows
+  const tables = (await sql<{ t: string }>`select tablename as t from pg_tables where schemaname = 'public' and tablename not in ('candidate_view_setting', 'lead', 'outreach_message', 'application_added_fact', 'kysely_migration', 'migration_marker') order by 1`.execute(admin)).rows
   const out: Record<string, string> = {}
   for (const { t } of tables) out[t] = (await sql<{ h: string }>`select coalesce(md5(string_agg(x::text, '|' order by x::text)), '') as h from ${sql.table(t)} x`.execute(admin)).rows[0]!.h
   return out
@@ -70,9 +70,9 @@ const settings = async () => (await sql<{ id: string; advanced_enabled: boolean;
 describe("migration 0033-simplify-eve", () => {
   let before: Record<string, string>
 
-  it("is registered ninth to last (0034 to 0041 follow it) with its schema marker", () => {
-    expect(Object.keys(ALL).at(-9)).toBe(SIMPLIFY_EVE_MARKER)
-    expect(SCHEMA_MARKERS.at(-9)).toBe(SIMPLIFY_EVE_MARKER)
+  it("is registered tenth to last (0034 to 0042 follow it) with its schema marker", () => {
+    expect(Object.keys(ALL).at(-10)).toBe(SIMPLIFY_EVE_MARKER)
+    expect(SCHEMA_MARKERS.at(-10)).toBe(SIMPLIFY_EVE_MARKER)
   })
 
   it("UPG:18, :24, :36 seeds the Operator on with no note and every other active Candidate off with the note due; UPG:11 changes no other table", async () => {
@@ -136,7 +136,8 @@ describe("migration 0033-simplify-eve", () => {
 
   it("UPG:47 a rerun (up after down) never overwrites a flag a user set; the marker is recorded once", async () => {
     await sql`update candidate_view_setting set advanced_enabled = true, simpler_note_due = false where candidate_id = ${ids.active}::uuid`.execute(admin)
-    // Step off the later 0034 to 0041 first, then down 0033 refuses while an offer Outcome exists.
+    // Step off the later 0034 to 0042 first, then down 0033 refuses while an offer Outcome exists.
+    expect((await migrator().migrateDown()).error).toBeUndefined()
     expect((await migrator().migrateDown()).error).toBeUndefined()
     expect((await migrator().migrateDown()).error).toBeUndefined()
     expect((await migrator().migrateDown()).error).toBeUndefined()

@@ -62,8 +62,8 @@ describe("v1.25.0 paths, limits and enums", () => {
   })
 
   it("adds two error codes, two skip reasons and the excluded_family tab (plus the manual tab in v1.28.0)", () => {
-    // v1.27.0 (EPIC-0010) appends nine codes, v1.28.0 (EPIC-0011) one more and v1.31.0 (EPIC-0014) one more after these two.
-    expect(apiErrorCodeSchema.options.slice(-13, -11)).toEqual(["preferences_stale", "timezone_change_rate_limited"])
+    // v1.27.0 (EPIC-0010) appends nine codes, v1.28.0 (EPIC-0011) one more v1.31.0 (EPIC-0014) one more and v1.32.0 (FEAT-0017) eight more after these two.
+    expect(apiErrorCodeSchema.options.slice(-21, -19)).toEqual(["preferences_stale", "timezone_change_rate_limited"])
     expect(skipReasonSchema.options.slice(-2)).toEqual(["excluded_role_family", "keyword_mismatch"])
     expect(postingsTabSchema.options).toEqual(["ranked", "manual", "skipped", "excluded_family", "all"])
     expect(postingsTabSchema.safeParse("excluded").success).toBe(false)

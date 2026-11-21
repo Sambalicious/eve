@@ -51,6 +51,14 @@ import { expiryNote, fillCopy, retentionCopy } from "@/entities/retention"
 import { ClearRecordButton } from "@/features/clear-requisition-record"
 import { DeleteRecordsMenu } from "@/features/delete-detailed-records"
 import { GenerateDocumentsButton } from "@/features/generate-documents"
+import {
+  AddedFactsLiftPanel,
+  AddedFactsSection,
+  AddedFactsStaleNotice,
+  addedFactsQueryKey,
+  addedFactsQueryOptions,
+  useAddedFactsActions,
+} from "@/features/added-facts"
 import { OutcomesList } from "@/features/record-outcome"
 import { RemoveFromQueue, useRemoveFromQueue } from "@/features/remove-from-queue"
 import { FormAnswersPanel } from "@/features/review-sample"
@@ -146,6 +154,47 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
   const line = submission ? statusLine(app, submission) : null
   const initialTab = useHashTab()
   const queryClient = useQueryClient()
+  /**
+   * FEAT-0017: the view is embedded in the detail (one fetch) and the query keeps it current
+   * (`GET …/added-facts`, replaced by every write's response). With the flag off it is absent and the
+   * page is unchanged: today's ATS card, no Added section, no stale notice, no lift panel.
+   */
+  const addedFactsQuery = useQuery(addedFactsQueryOptions(app.id, app.addedFacts))
+  const added = addedFactsQuery.data
+  /**
+   * FEAT-0017: only the detail query polls generation (`state === "generating"`), so the Added view is
+   * the one query that never learns when generation starts or ends. Refetch it whenever the
+   * Application's state changes: the section freezes as generation begins and comes back editable and
+   * current when it finishes, with no page reload. Its own poll then covers the time in between.
+   */
+  const previousState = useRef(app.state)
+  useEffect(() => {
+    if (previousState.current === app.state) return
+    previousState.current = app.state
+    void queryClient.invalidateQueries({ queryKey: addedFactsQueryKey(app.id) })
+  }, [app.id, app.state, queryClient])
+  const addedActions = useAddedFactsActions(app.id)
+  const [formRequest, setFormRequest] = useState<{ term: string | null; nonce: number } | null>(null)
+  const requestForm = useCallback(
+    (term: string | null) => setFormRequest((current) => ({ term, nonce: (current?.nonce ?? 0) + 1 })),
+    []
+  )
+  const tickProps =
+    added === undefined
+      ? undefined
+      : {
+          view: added,
+          announce: addedActions.announce,
+          onSaveTicks: async (items: readonly { term: string; saveToProfile: boolean }[]) => {
+            const result = await addedActions.addFacts({
+              expectedVersion: added.version,
+              items: items.map((item) => ({ kind: "skill_only" as const, term: item.term, affirmed: true, saveToProfile: item.saveToProfile })),
+            })
+            return result.ok ? { ok: true as const, added: items.length } : { ok: false as const, failure: result.failure }
+          },
+        }
+  /** The sent documents' record of cited added facts, de-duplicated by id (C-AF-89). */
+  const addedFactsUsed = [...new Map(app.documents.flatMap((document) => (document.addedFactsUsed ?? []).map((fact) => [fact.id, fact] as const))).values()]
   // A 404 from any outreach route means the details are gone: the record read decides what shows,
   // and focus follows to the minimal view's title (AC 12.1).
   const outreachUnavailable = useCallback(() => {
@@ -269,7 +318,7 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
       {warning && <PastedWarningPanel warning={warning} body={pastedApplicationCopy.warningBody} />}
       {/* The show rules need the submission state, so nothing shows until it has loaded. */}
       {submission && <OverrideNotice app={app} submission={submission} />}
-      {submission && <SubmissionEvidence submission={submission} plain={!advanced} />}
+      {submission && <SubmissionEvidence submission={submission} plain={!advanced} addedFactsUsed={addedFactsUsed} />}
       {app.blocked && (
         <DocumentBlockedAlert
           document={app.blocked.document}
@@ -277,7 +326,11 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
           cause={app.blocked.cause}
           terms={app.blocked.terms}
           moreTerms={app.blocked.moreTerms}
+          onAddFact={added?.editable === true && added.busyReason === null ? requestForm : undefined}
         />
+      )}
+      {added?.editable === true && added.documentsStale && (
+        <AddedFactsStaleNotice showQueueLine={added.match?.lifted === true || added.confirmation.voided} />
       )}
       {app.state === "documents_failed" ? (
         <FailureAlert app={app} />
@@ -313,6 +366,16 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
           </a>
         </nav>
       )}
+      {added?.editable === true && added.match?.lifted === true && (
+        <AddedFactsLiftPanel
+          match={added.match}
+          facts={added.facts}
+          confirmation={added.confirmation}
+          isConfirming={addedActions.isConfirming}
+          showOverrideNote={app.override !== null}
+          onConfirm={() => addedActions.confirm(added.version)}
+        />
+      )}
       <div className="grid gap-x-12 gap-y-7 xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-7 xl:col-span-7">
           <DocumentsViewer
@@ -320,6 +383,7 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
             coverLetterStatus={app.coverLetterStatus}
             initialTab={initialTab}
             name={applicationName(app)}
+            addedFacts={tickProps}
           />
           {/* Design r2 B3 (DR-03): a manual-only Application's form is never read, so no Answers used card. */}
           {!app.manualOnly && (
@@ -327,6 +391,33 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-7 border-t pt-7 xl:col-span-5 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-8">
+          <AddedFactsSection
+            view={added}
+            formRequest={formRequest}
+            isAdding={addedActions.isAdding}
+            isEditing={addedActions.isEditing}
+            isRemoving={addedActions.isRemoving}
+            announcement={addedActions.announcement}
+            announce={addedActions.announce}
+            onAdd={(values) =>
+              addedActions.addFacts({
+                expectedVersion: added?.version ?? 0,
+                items: [
+                  {
+                    kind: "one_liner",
+                    text: values.text,
+                    roleSectionId: values.roleSectionId,
+                    affirmed: values.affirmed,
+                    saveToProfile: values.saveToProfile,
+                  },
+                ],
+              })
+            }
+            onEdit={(fact, values) =>
+              addedActions.editFact({ factId: fact.id, expectedVersion: added?.version ?? 0, text: values.text, roleSectionId: values.roleSectionId })
+            }
+            onRemove={(fact) => addedActions.removeFact({ factId: fact.id, expectedVersion: added?.version ?? 0 })}
+          />
           <OutreachSection
             applicationId={app.id}
             applicationName={applicationName(app)}
@@ -337,7 +428,13 @@ function ApplicationRecord({ app, onDetailsDeleted }: { app: ApplicationDetail; 
           {posting.data?.eligibility && (
             <EligibilityPanel eligibility={posting.data.eligibility} employmentType={posting.data.employmentType} />
           )}
-          {posting.data?.match && <MatchPanel match={posting.data.match} />}
+          {posting.data?.match && (
+            <MatchPanel
+              match={posting.data.match}
+              added={added?.match ? { match: added.match, facts: added.facts } : null}
+              overrideNote={app.override !== null && added?.match?.lifted === true}
+            />
+          )}
           <OutcomesList applicationId={app.id} />
         </div>
       </div>

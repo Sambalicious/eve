@@ -43,6 +43,12 @@ describe("parseWorkerConfig browser settings (ADR 0008)", () => {
     const direction = parseWorkerConfig({ ...BASE, DOCUMENT_DIRECTION_ENABLED: "1" })
     expect([direction.documentBridgesEnabled, direction.documentDirectionEnabled]).toEqual([false, true])
   })
+  it.each([[undefined], ["0"], [""], ["true"], [" 1"]])("ADDED_FACTS_ENABLED=%j leaves added facts off (FEAT-0017)", (value) => {
+    expect(parseWorkerConfig({ ...BASE, ...(value === undefined ? {} : { ADDED_FACTS_ENABLED: value }) }).addedFactsEnabled).toBe(false)
+  })
+  it("ADDED_FACTS_ENABLED=1 turns added facts on in the worker too", () => {
+    expect(parseWorkerConfig({ ...BASE, ADDED_FACTS_ENABLED: "1" }).addedFactsEnabled).toBe(true)
+  })
 
   it("refuses a browser URL other than an http URL", () => {
     expect(() => parseWorkerConfig({ ...BASE, SUBMISSION_BROWSER_ENABLED: "1", SUBMISSION_BROWSER_MCP_URL: "file:///etc/passwd" })).toThrow(/SUBMISSION_BROWSER_MCP_URL/)

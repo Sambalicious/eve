@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom"
 
+import type { AddedFactUsed } from "@eve/contracts"
+
 import {
   blockedReasonLabel,
   CaptchaAfterSubmitBadge,
@@ -8,6 +10,7 @@ import {
   submissionCopy,
   type Submission,
 } from "@/entities/application"
+import { addedFactsCopy, atsAddedCopy } from "@/features/added-facts"
 import { plainWords } from "@/shared/lib/plain-words"
 import { formatWatDateTime } from "@/shared/lib/format-wat"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
@@ -21,8 +24,19 @@ const u = submissionCopy.uncertain
  * C-UNC-1, C-UNC-5 (with the badge) or C-UNC-8; for a Blocked Application the
  * reason and its detail line, with a link to the list that resolves it.
  * Nothing before submission.
+ *
+ * FEAT-0017: a sent Application also lists the added facts its documents cited
+ * (`C-AF-89`, AC 5.10 and 9.5).
  */
-export function SubmissionEvidence({ submission, plain = false }: { submission: Submission; plain?: boolean }) {
+export function SubmissionEvidence({
+  submission,
+  plain = false,
+  addedFactsUsed = [],
+}: {
+  submission: Submission
+  plain?: boolean
+  addedFactsUsed?: readonly AddedFactUsed[]
+}) {
   const body = evidenceBody(submission, plain ? plainWords : (text) => text)
   if (!body) return null
   return (
@@ -32,7 +46,24 @@ export function SubmissionEvidence({ submission, plain = false }: { submission: 
           <h2 className="text-lg font-semibold">{d.evidenceTitle}</h2>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 text-sm text-pretty">{body}</CardContent>
+      <CardContent className="flex flex-col gap-2 text-sm text-pretty">
+        {body}
+        {addedFactsUsed.length > 0 && (
+          <div className="flex flex-col gap-1.5 border-t pt-2">
+            <h3 className="font-medium">{addedFactsCopy.evidence.heading}</h3>
+            <ul className="flex flex-col gap-1">
+              {addedFactsUsed.map((fact) => (
+                <li key={fact.id} className="flex flex-wrap items-baseline gap-x-1.5 [overflow-wrap:anywhere]">
+                  <bdi>{fact.text}</bdi>
+                  <span className="text-[13px] text-muted-foreground">
+                    {fact.kind === "skill_only" ? atsAddedCopy.kind.skillOnly : atsAddedCopy.kind.oneLiner}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </CardContent>
     </Card>
   )
 }

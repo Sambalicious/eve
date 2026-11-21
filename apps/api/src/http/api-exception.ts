@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from "@nestjs/common"
 import type { AccessRequestFieldCode, ApiErrorCode, ApiFieldError, ConvertedFeature, PasteFieldError, ResumeRefusalReason } from "@eve/contracts"
-import { ADVANCED_ERROR_MESSAGES, APPLY_ANYWAY_ERROR_MESSAGES, OUTREACH_ERROR_MESSAGES, PASTE_DESCRIPTION_ERROR_MESSAGES, pasteFieldErrorCode } from "@eve/contracts"
+import { ADDED_FACTS_ERROR_MESSAGES, ADVANCED_ERROR_MESSAGES, APPLY_ANYWAY_ERROR_MESSAGES, OUTREACH_ERROR_MESSAGES, PASTE_DESCRIPTION_ERROR_MESSAGES, pasteFieldErrorCode } from "@eve/contracts"
 
 const STATUS_BY_CODE: Record<ApiErrorCode, HttpStatus> = {
   unauthenticated: HttpStatus.UNAUTHORIZED,
@@ -73,6 +73,15 @@ const STATUS_BY_CODE: Record<ApiErrorCode, HttpStatus> = {
   manual_application_only: HttpStatus.CONFLICT,
   // v1.31.0: EPIC-0014 outreach
   outreach_reader_name_invalid: HttpStatus.UNPROCESSABLE_ENTITY,
+  // v1.32.0: FEAT-0017 added facts
+  added_facts_frozen: HttpStatus.CONFLICT,
+  added_facts_busy: HttpStatus.CONFLICT,
+  added_facts_conflict: HttpStatus.CONFLICT,
+  added_facts_invalid: HttpStatus.UNPROCESSABLE_ENTITY,
+  added_facts_limit: HttpStatus.UNPROCESSABLE_ENTITY,
+  added_facts_not_lifted: HttpStatus.CONFLICT,
+  added_facts_confirmation_required: HttpStatus.CONFLICT,
+  documents_stale: HttpStatus.CONFLICT,
 }
 
 /** Message text for each error code. These strings are part of the API contract. */
@@ -137,6 +146,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   ...ADVANCED_ERROR_MESSAGES,
   // v1.31.0: EPIC-0014 copy deck C-OM-37, byte for byte from @eve/contracts.
   ...OUTREACH_ERROR_MESSAGES,
+  // v1.32.0: FEAT-0017 added facts, byte for byte from @eve/contracts.
+  ...ADDED_FACTS_ERROR_MESSAGES,
 }
 
 /** An HTTP error carrying a contract error code. The filter renders it. */

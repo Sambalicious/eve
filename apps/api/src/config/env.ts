@@ -89,6 +89,8 @@ const envSchema = z.object({
   DOCUMENT_BRIDGES_ENABLED: z.string().optional(),
   /** EPIC-0012 (Revision 2, 2.4): tailoring rule 4, quoting the employer's own forward-looking words. On only for "1". */
   DOCUMENT_DIRECTION_ENABLED: z.string().optional(),
+  /** FEAT-0017: Application added facts (tick a gap term, write a one-liner). On only for exactly "1". */
+  ADDED_FACTS_ENABLED: z.string().optional(),
   /** EPIC-0003: HMAC root for the access-request IP hash and fill-time proof. At least 32 bytes. */
   ACCESS_REQUEST_SECRET: z.string().refine((value) => Buffer.byteLength(value, "utf8") >= 32),
   /** Access log (method, path, status, time, request id; never headers, query or bodies). On unless "0"; always off in NODE_ENV=test. */
@@ -117,6 +119,8 @@ export type AppConfig = Readonly<{
   documentBridgesEnabled: boolean
   /** Off unless DOCUMENT_DIRECTION_ENABLED=1 (EPIC-0012 rule 4). */
   documentDirectionEnabled: boolean
+  /** Off unless ADDED_FACTS_ENABLED=1 (FEAT-0017). */
+  addedFactsEnabled: boolean
   /** Slice 7: ceiling, prices and caps from the server environment (`SPEND_*`). */
   spend?: SpendConfig
   /** EPIC-0003: the public request-access endpoint. */
@@ -138,7 +142,7 @@ export type AccessRequestConfig = Readonly<{
 }>
 
 /** The part of the config shared by the api and the worker: what ModelGateway and DatabaseModule read. */
-export type SharedRuntimeConfig = Pick<AppConfig, "databaseUrl" | "anthropic" | "statementTimeoutMs"> & Readonly<{ formAgentEnabled?: boolean; documentBridgesEnabled?: boolean; documentDirectionEnabled?: boolean; spend?: SpendConfig }>
+export type SharedRuntimeConfig = Pick<AppConfig, "databaseUrl" | "anthropic" | "statementTimeoutMs"> & Readonly<{ formAgentEnabled?: boolean; documentBridgesEnabled?: boolean; documentDirectionEnabled?: boolean; addedFactsEnabled?: boolean; spend?: SpendConfig }>
 
 /**
  * The key is held in a closure, so serialising or logging the config never
@@ -198,6 +202,7 @@ export function parseConfig(env: Readonly<Record<string, string | undefined>>): 
     formAgentEnabled: parsed.SUBMISSION_FORM_AGENT_ENABLED === "1",
     documentBridgesEnabled: parsed.DOCUMENT_BRIDGES_ENABLED === "1",
     documentDirectionEnabled: parsed.DOCUMENT_DIRECTION_ENABLED === "1",
+    addedFactsEnabled: parsed.ADDED_FACTS_ENABLED === "1",
     spend,
     accessLog: parsed.NODE_ENV !== "test" && parsed.ACCESS_LOG !== "0",
     accessRequest: {

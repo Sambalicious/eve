@@ -93,7 +93,15 @@ export const applicationOverrideSchema = z
 export type ApplicationOverride = z.infer<typeof applicationOverrideSchema>
 
 /** `submission_event.detail` for `queued_posting_dropped` (v1.24.0). Events before v1.24.0 have null. */
-export const queuedPostingDroppedDetailSchema = z.enum(["closed", "hidden", "override_mismatch", "not_ranked"])
+export const queuedPostingDroppedDetailSchema = z.enum([
+  "closed",
+  "hidden",
+  "override_mismatch",
+  "not_ranked",
+  // v1.32.0 (FEAT-0017): documents written against an older added-facts set, and a lifted Application queued without its confirmation.
+  "documents_stale",
+  "added_facts_unconfirmed",
+])
 export type QueuedPostingDroppedDetail = z.infer<typeof queuedPostingDroppedDetailSchema>
 
 /** `ApplicationDetail.latestDrop.reason`: `closed` picks C-AA-40, everything else C-AA-41. */

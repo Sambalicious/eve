@@ -33,7 +33,7 @@ import type { WorkerConfig } from "./worker.config.js"
  * Discovery's providers inject nothing else from APP_CONFIG.
  */
 export function workerAppConfig(config: WorkerConfig): SharedRuntimeConfig & FilesConfig {
-  return { databaseUrl: config.databaseUrl, statementTimeoutMs: WORKER_STATEMENT_TIMEOUT_MS, anthropic: config.anthropic, candidateStorageDir: config.candidateStorageDir, formAgentEnabled: config.formAgentEnabled === true, documentBridgesEnabled: config.documentBridgesEnabled === true, documentDirectionEnabled: config.documentDirectionEnabled === true, ...(config.spend ? { spend: config.spend } : {}) }
+  return { databaseUrl: config.databaseUrl, statementTimeoutMs: WORKER_STATEMENT_TIMEOUT_MS, anthropic: config.anthropic, candidateStorageDir: config.candidateStorageDir, formAgentEnabled: config.formAgentEnabled === true, documentBridgesEnabled: config.documentBridgesEnabled === true, documentDirectionEnabled: config.documentDirectionEnabled === true, addedFactsEnabled: config.addedFactsEnabled === true, ...(config.spend ? { spend: config.spend } : {}) }
 }
 
 /** The `worker` process: scheduled and queued jobs (slice 3: discovery and posting evaluation; slice 5: submission; slice 6: notifications; EPIC-0005: Stack posts reads; automatic 12-month expiry; hourly auth table housekeeping). */

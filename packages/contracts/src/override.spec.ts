@@ -199,7 +199,7 @@ describe("v1.24.0 schemas", () => {
   })
 
   it("drop details map to the detail page reason", () => {
-    expect(queuedPostingDroppedDetailSchema.options).toEqual(["closed", "hidden", "override_mismatch", "not_ranked"])
+    expect(queuedPostingDroppedDetailSchema.options).toEqual(["closed", "hidden", "override_mismatch", "not_ranked", "documents_stale", "added_facts_unconfirmed"])
     expect(latestDropReasonOf("closed")).toBe("closed")
     for (const detail of ["hidden", "override_mismatch", "not_ranked", null] as const) expect(latestDropReasonOf(detail)).toBe("not_submittable")
   })

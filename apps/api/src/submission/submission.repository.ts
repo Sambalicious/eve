@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { sql } from "../db/sql.js"
 
 import type { QueuedPostingDroppedDetail } from "@eve/contracts"
@@ -7,6 +7,8 @@ import type { BlockedReason, BlockedSubReason, EvidenceKind, SubmissionState } f
 import { type CandidateTx, TenantDatabase } from "../db/tenant-database.js"
 import { normaliseApplicationUrl, isWebUrl, locateAts } from "../discovery/application-url.js"
 import { readPreferences } from "../preferences/preferences-read.js"
+import { APP_CONFIG } from "../config/config.module.js"
+import type { SharedRuntimeConfig } from "../config/env.js"
 import type { AnswerSources } from "./answer-assignment.js"
 import { roleLocationOf, workContextOf } from "./work-context.js"
 import type { FormControl } from "./form-session.js"
@@ -55,9 +57,15 @@ export type MatchedApplicationRow = Readonly<{ id: string; company: string | nul
 export class SubmissionRepository {
   private readonly attempts: SubmissionAttemptsRepository
   private readonly queue: SubmissionQueueRepository
+  /** FEAT-0017: the added-facts flag, read once; the queue rules pass it on. */
+  private readonly addedFactsEnabled: boolean
 
-  constructor(private readonly tenant: TenantDatabase) {
-    this.queue = new SubmissionQueueRepository(tenant)
+  constructor(
+    private readonly tenant: TenantDatabase,
+    @Inject(APP_CONFIG) config: SharedRuntimeConfig
+  ) {
+    this.addedFactsEnabled = config.addedFactsEnabled === true
+    this.queue = new SubmissionQueueRepository(tenant, this.addedFactsEnabled)
     this.attempts = new SubmissionAttemptsRepository(tenant, this.queue)
   }
 
@@ -351,6 +359,20 @@ export class SubmissionRepository {
    */
   dropQueuedUnlessRanked(applicationId: string, at: Date): Promise<boolean> {
     return this.queue.dropQueuedUnlessRanked(applicationId, at)
+  }
+
+  /** FEAT-0017: the stale-documents rule for `queue`, `sample` and `sample/approve` (both flag states, A-11 r1). */
+  addedFactsDocumentsStale(trx: Db, applicationId: string): Promise<boolean> {
+    return this.queue.addedFactsDocumentsStale(trx, applicationId)
+  }
+
+  /**
+   * FEAT-0017 `POST …/queue` refusals after the existing ones: `documents_stale`
+   * (both flag states) and `added_facts_confirmation_required` (flag on, lifted,
+   * not confirmed for the current counter).
+   */
+  addedFactsQueueRefusal(trx: Db, applicationId: string, at: Date): Promise<"documents_stale" | "added_facts_confirmation_required" | null> {
+    return this.queue.addedFactsQueueRefusal(trx, applicationId, at)
   }
 
   /**

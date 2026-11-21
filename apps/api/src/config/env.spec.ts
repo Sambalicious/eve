@@ -111,6 +111,12 @@ describe("parseConfig", () => {
     const direction = parseConfig({ ...validEnv, DOCUMENT_DIRECTION_ENABLED: "1" })
     expect([direction.documentBridgesEnabled, direction.documentDirectionEnabled]).toEqual([false, true])
   })
+  it.each([[undefined], ["0"], [""], ["true"], ["yes"], [" 1"]])("ADDED_FACTS_ENABLED=%j leaves added facts off (FEAT-0017)", (value) => {
+    expect(parseConfig({ ...validEnv, ...(value === undefined ? {} : { ADDED_FACTS_ENABLED: value }) }).addedFactsEnabled).toBe(false)
+  })
+  it("ADDED_FACTS_ENABLED=1 turns added facts on", () => {
+    expect(parseConfig({ ...validEnv, ADDED_FACTS_ENABLED: "1" }).addedFactsEnabled).toBe(true)
+  })
 
   it("never exposes the Anthropic key when the config is serialised or inspected", async () => {
     const key = "sk-ant-api03-SECRET-SENTINEL-1234567890"

@@ -105,7 +105,8 @@ export async function deleteDetailsLocked(trx: CandidateTx, candidateId: string,
     .execute()
   const documents = await trx.selectFrom("tailored_document").select(["pdf_storage_name", "docx_storage_name"]).where("candidate_id", "=", candidateId).where("application_id", "in", targets).execute()
   // EPIC-0014 D3: `outreach_message` holds the Outreach texts, names, causes and the first failed sentence.
-  for (const table of ["tailored_document", "application_form_read", "outcome", "notification_outbox", "submission_event", "outreach_message"] as const) {
+  // FEAT-0017: `application_added_fact` holds the Candidate's added facts; they go regardless of the feature flag.
+  for (const table of ["tailored_document", "application_form_read", "outcome", "notification_outbox", "submission_event", "outreach_message", "application_added_fact"] as const) {
     await trx.deleteFrom(table).where("candidate_id", "=", candidateId).where("application_id", "in", targets).execute()
   }
   for (const row of rows) {
@@ -128,6 +129,11 @@ export async function deleteDetailsLocked(trx: CandidateTx, candidateId: string,
         sample_reject_reason: null,
         declined_reason: null,
         failure: null,
+        // FEAT-0017 (DevOps blocker): the added-fact confirmation and Match audit go with the facts; the counter is inert
+        // once no fact exists and the documents are gone, so it is left as it is.
+        added_facts_confirmed_version: null,
+        added_facts_confirmed_at: null,
+        added_facts_match: null,
         // v1.24.0 (AA-7.1, SEC-AA-05): the minimal record keeps no override.
         candidate_override_at: null,
         override_created_at: null,

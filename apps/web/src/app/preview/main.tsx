@@ -10,6 +10,7 @@ import { setupWorker } from "msw/browser"
 // Direct module imports: the testing index also loads the msw/node server, which can't run in a browser.
 // contract-handlers comes first, as in the testing index: it imports the other fakes, which only call it lazily.
 import { apiErrorResponse, logoutEndpoint, signedInSession } from "@/shared/testing/contract-handlers"
+import { createAddedFactsApi } from "@/shared/testing/added-facts-api"
 import { createCareerSetupApi } from "@/shared/testing/career-setup-api"
 import { createControlsApi } from "@/shared/testing/controls-api"
 import { createDiscoveryApi } from "@/shared/testing/discovery-api"
@@ -18,6 +19,7 @@ import { linkFakes } from "@/shared/testing/apply-anyway-fake"
 import { createHiringSearchInputsApi, OPERATOR_PREFERENCES } from "@/shared/testing/hiring-search-inputs-api"
 import { createStackPostsApi } from "@/shared/testing/stack-posts-api"
 import { freshNotificationHandlers, notificationFailure, notificationStatusHandler } from "@/shared/testing/notifications-api"
+import { freshOutreachHandlers } from "@/shared/testing/outreach-api"
 import { createSubmissionApi } from "@/shared/testing/submission-api"
 import { createMeApi, operatorMe } from "@/shared/testing/me-api"
 import { createPreferencesApi } from "@/shared/testing/preferences-api"
@@ -53,6 +55,8 @@ async function start() {
   const discovery = createDiscoveryApi(scenario.discovery)
   const seeded = "applications" in scenario ? scenario.applications : []
   const documents = createDocumentsApi({ applications: seeded.map((e) => ({ ...e.app })) })
+  // FEAT-0017: the five added-facts routes, one view per seeded Application (the detail carries it too).
+  const addedFacts = createAddedFactsApi({ views: "addedFacts" in scenario && scenario.addedFacts ? { ...scenario.addedFacts } : {} })
   linkFakes(discovery, documents)
   const controls = createControlsApi()
   controls.state.outcomes.push(
@@ -101,13 +105,17 @@ async function start() {
     ...me.handlers,
     ...discovery.handlers,
     ...documents.handlers,
+    ...addedFacts.handlers,
     ...createSubmissionApi(documents, { submissions }).handlers,
     ...createStackPostsApi("stack" in scenario ? scenario.stack : {}).handlers,
     ...createHiringSearchInputsApi({ preferences: OPERATOR_PREFERENCES }).handlers,
     ...freshNotificationHandlers,
+    ...freshOutreachHandlers,
     ...createPreferencesApi({ now: () => new Date(), ...("preferences" in scenario ? scenario.preferences : {}) }).handlers
   )
-  await worker.start({ quiet: true })
+  // `bypass` keeps a page navigation out of the warning stream: the worker sees the document request
+  // and hands it to the dev server, which serves preview.html.
+  await worker.start({ quiet: true, onUnhandledFrame: "bypass" })
   // Drop the scenario parameter so the app sees its own URL; the choice stays in sessionStorage for reloads.
   const url = new URL(window.location.href)
   url.searchParams.delete("scenario")

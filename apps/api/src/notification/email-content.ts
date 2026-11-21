@@ -104,6 +104,11 @@ export type ConfirmedEmailInput = Readonly<{
   automaticToday: number
   /** v1.24.0 (AA-4.6): the stored override's short reason; null or absent for no override or a legacy one. */
   override?: OverrideFact | null
+  /**
+   * FEAT-0017 (OD-18, AC 9.5): the added facts the sent documents cited, as they read at generation. This
+   * email is the one place added-fact text appears; no other email, the daily summary or a log carries it.
+   */
+  addedFactsUsed?: readonly string[]
 }>
 
 /** v1.24.0: `{reason}` is the copy deck's short form (`overrideReasonShort`). */
@@ -148,9 +153,13 @@ export function renderConfirmed(raw: ConfirmedEmailInput, base: string): Rendere
           { kind: "link", label: "View the stored cover letter", href: applicationUrl(base, input.applicationId, "#cover-letter"), style: "colon" },
         ]
       : [{ kind: "link", label: "View the cover letter used", href: applicationUrl(base, input.applicationId, "#cover-letter"), style: "colon" }]
+  // OD-18: one short list, and only for the facts the sent documents actually cited. Text is Candidate-written, so
+  // it goes through the same defanging every untrusted string does and the renderer escapes it for HTML.
+  const addedFactsUsed = (raw.addedFactsUsed ?? []).filter((text) => text.trim() !== "")
   const blocks: Block[] = [
     { kind: "p", text: "Your Application was submitted and the employer's receipt is confirmed." },
     { kind: "lines", lines: facts },
+    ...(addedFactsUsed.length === 0 ? [] : [{ kind: "p", text: `Added facts used: ${addedFactsUsed.map((text) => untrusted(text)).join("; ")}.` } as const]),
     { kind: "p", text: "Exactly what was sent:" },
     { kind: "link", label: "View the resume used", href: applicationUrl(base, input.applicationId, "#resume"), style: "colon" },
     ...coverLetter,

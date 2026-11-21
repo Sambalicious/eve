@@ -30,6 +30,7 @@ import { lockActivation, upsertAdvanced } from "../me/view-setting.js"
 import { capabilityFor } from "../shared/converted-features.js"
 import { CLOCK, type Clock } from "../shared/clock.js"
 import { SubmissionRepository } from "./submission.repository.js"
+import { queuePreconditions } from "./queue-preconditions.js"
 import { SampleSubmissionQueue } from "./sample-submission-queue.js"
 import { nextWatDay, watDay } from "./wat-day.js"
 
@@ -158,6 +159,8 @@ export class SubmissionStateService {
       if (row.override_created_at !== null || row.candidate_override_at !== null) throw new ApiException("sample_not_allowed")
       const posting = await trx.selectFrom("candidate_posting").select("status").where("candidate_id", "=", candidateId).where("job_posting_id", "=", row.job_posting_id).executeTakeFirst()
       if (posting?.status !== "ranked") throw new ApiException("sample_not_allowed")
+      // FEAT-0017: a sample may not be made from stale documents (both flag states).
+      if (await this.repository.addedFactsDocumentsStale(trx, id)) throw new ApiException("documents_stale")
       if (row.state !== "documents_ready" || row.submission_state !== null) throw new ApiException("application_state_conflict")
       await trx.updateTable("application").set({ sample_state: "awaiting_review", updated_at: this.clock.now() }).where("candidate_id", "=", candidateId).where("id", "=", id).execute()
     })
@@ -183,6 +186,8 @@ export class SubmissionStateService {
       if (await this.repository.manualOnly(trx, row)) throw new ApiException("manual_application_only")
       if (row.sample_state === "approved") return "already" as const
       if (row.sample_state !== "awaiting_review") throw new ApiException("not_a_sample")
+      // FEAT-0017: approving sends the chosen documents, so they may not be stale (both flag states).
+      if (await this.repository.addedFactsDocumentsStale(trx, id)) throw new ApiException("documents_stale")
       const control = await trx.selectFrom("control_state").select(["global_paused", "cost_paused"]).executeTakeFirstOrThrow()
       if (control.global_paused || control.cost_paused) return "paused" as const
       // v1.24.0 (AA-3.2): the posting check reads the current status under the Job criteria share lock.
@@ -221,14 +226,16 @@ export class SubmissionStateService {
     await this.repository.run(async (trx, candidateId) => {
       const row = await trx.selectFrom("application").selectAll().where("candidate_id", "=", candidateId).where("id", "=", id).forUpdate().executeTakeFirst()
       if (!row) throw new ApiException("not_found")
+      // SEC-R04: the preconditions are shared with the added-facts confirm route, so neither can drift.
+      const preconditions = queuePreconditions(row, await this.repository.manualOnly(trx, row))
       // v1.27.0 (PD-4.1): a manual-only Application is never queued, whatever its state; nothing changes.
-      if (await this.repository.manualOnly(trx, row)) throw new ApiException("manual_application_only")
+      if (preconditions.manualOnly) throw new ApiException("manual_application_only")
       if (row.submission_state === "queued") return
-      if (row.submission_state === "blocked" && row.blocked_reason === "automation_incomplete") throw new ApiException("automation_incomplete_not_requeueable")
-      const fromBlocked = row.submission_state === "blocked" && row.blocked_reason !== "same_company_review"
-      if (row.state !== "documents_ready" || !(row.submission_state === null || fromBlocked) || row.sample_state !== null) {
-        throw new ApiException("application_state_conflict")
-      }
+      if (preconditions.automationIncomplete) throw new ApiException("automation_incomplete_not_requeueable")
+      if (preconditions.notDocumentsReady || preconditions.notResumable) throw new ApiException("application_state_conflict")
+      // FEAT-0017: stale documents and an unconfirmed lift are refused after the existing checks (api-contract v1.32.0).
+      const addedFactsRefusal = await this.repository.addedFactsQueueRefusal(trx, id, this.clock.now())
+      if (addedFactsRefusal !== null) throw new ApiException(addedFactsRefusal)
       await trx
         .updateTable("application")
         .set({ submission_state: "queued", submission_kind: "automatic", blocked_reason: null, blocked_sub_reason: null, blocked_detail: null, blocked_question: null, blocked_at: null, updated_at: this.clock.now() })

@@ -1,4 +1,5 @@
 export * from "./access-request.js"
+export * from "./added-facts.js"
 export * from "./ai-provider.js"
 export * from "./application-board.js"
 export * from "./approved-answers.js"

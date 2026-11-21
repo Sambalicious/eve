@@ -472,6 +472,11 @@ export interface ApplicationTable {
   override_skip_reason: Generated<string | null>
   override_skip_detail: Generated<string | null>
   override_violated_rules: ColumnType<string[] | null, string[] | null | undefined, string[] | null>
+  // Migration 0042 (FEAT-0017): the added-facts counter, the confirmation it covers and the Match audit snapshot (A-6).
+  added_facts_version: Generated<number>
+  added_facts_confirmed_version: Generated<number | null>
+  added_facts_confirmed_at: Generated<Date | null>
+  added_facts_match: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null>
 }
 
 /** Who deleted an Application's detailed records (E6.1). */
@@ -713,6 +718,50 @@ export interface TailoredDocumentTable {
   pdf_sha256: string
   docx_sha256: string
   created_at: Date
+  // Migration 0042 (FEAT-0017, PRD 5.10): the counter this document was generated against and its frozen snapshot.
+  added_facts_version: Generated<number>
+  added_facts: ColumnType<StoredAddedFactsSnapshot, string | undefined, string>
+}
+
+/**
+ * v1.32.0 FEAT-0017: an added fact as a document recorded it at generation (PRD 5.10).
+ * `role` is the snapshot `{title, employer, period}`, null for a skill-only fact.
+ */
+export type StoredAddedFactUsed = {
+  id: string
+  kind: "skill_only" | "one_liner"
+  text: string
+  role: { title: string; employer: string | null; period: string | null } | null
+}
+
+/** `tailored_document.added_facts`: the facts available at generation and the ids each document cited. */
+export type StoredAddedFactsSnapshot = {
+  available: StoredAddedFactUsed[]
+  cited: string[]
+}
+
+/**
+ * v1.32.0 FEAT-0017 (migration 0042): one row per fact the Candidate added to one
+ * Application. `text_key` is `lower(btrim(text))` and carries the duplicate rule.
+ */
+export interface ApplicationAddedFactTable {
+  id: string
+  /** EPIC-0002 A1: the owning Candidate, named on every write; forced RLS keys on it (0042). */
+  candidate_id: string
+  application_id: string
+  kind: "skill_only" | "one_liner"
+  text: string
+  text_key: string
+  /** The gap term the fact answers, as the posting words it; null for free entry. */
+  term: string | null
+  role_section_id: string | null
+  role_snapshot: ColumnType<{ title: string; employer: string | null; period: string | null } | null, string | null | undefined, string | null>
+  role_profile_version: number | null
+  affirmed_at: Date
+  save_to_profile: Generated<boolean>
+  profile_draft_version: number | null
+  created_at: Date
+  updated_at: Date
 }
 
 export type CandidateRole = "operator" | "candidate"
@@ -821,6 +870,7 @@ export interface Database {
   retention_run: RetentionRunTable
   lead: LeadTable
   outreach_message: OutreachMessageTable
+  application_added_fact: ApplicationAddedFactTable
 }
 
 /** v1.29.0 lead pipeline (migration 0038): the Candidate's own stage for a posting they hold. */

@@ -2,6 +2,7 @@ import { type DynamicModule, Module } from "@nestjs/common"
 import { APP_FILTER } from "@nestjs/core"
 
 import { AccessRequestModule } from "./access-request/access-request.module.js"
+import { AddedFactsModule } from "./added-facts/added-facts.module.js"
 import { AiModule } from "./ai/ai.module.js"
 import { AnswersModule } from "./answers/answers.module.js"
 import { AuthModule } from "./auth/auth.module.js"
@@ -52,6 +53,7 @@ export class AppModule {
         SubmissionModule,
         NotificationModule,
         AccessRequestModule,
+        AddedFactsModule,
         ControlsModule,
         RecordsModule,
         StackPostsModule,

@@ -17,6 +17,9 @@ export type HardFailCode =
   | "claim_word"
   | "names_target"
   | "unsourced_quote"
+  // FEAT-0017: a skill-only fact cited outside a Skills line, and a hedged added fact.
+  | "skill_only_in_bullet"
+  | "added_fact_hedge"
 
 export type DocumentValidation =
   | Readonly<{ ok: true }>

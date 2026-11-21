@@ -134,8 +134,9 @@ export function readyApplication(overrides: Partial<ApplicationDetail> = {}): Ap
 }
 
 function summaryOf(app: ApplicationDetail): ApplicationSummary {
+  // v1.32.0: the added-facts view is a detail key; `applicationSummarySchema` is strict.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { documents, posting, latestDrop, ...summary } = app
+  const { documents, posting, latestDrop, addedFacts, ...summary } = app
   return summary
 }
 

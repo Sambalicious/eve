@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { addedFactsViewSchema, addedFactUsedSchema } from "./added-facts.js"
 import { applicationOverrideSchema, applicationPostingStateSchema, createApplicationAcknowledgementSchema, latestDropSchema } from "./override.js"
 
 /** v1.5.0 (slice 4): Applications in the prepared state and Tailored Documents. */
@@ -71,12 +72,15 @@ export const tailoredDocumentSchema = z
     previewText: z.array(z.string()),
     /** Resumes only, and only those written after ATS scoring shipped; otherwise null. */
     ats: atsScoreSchema.nullable(),
+    /** v1.32.0 (FEAT-0017, PRD 5.10): added facts this document cited, as at generation. Sent (possibly empty) when ADDED_FACTS_ENABLED=1; absent otherwise. */
+    addedFactsUsed: z.array(addedFactUsedSchema).optional(),
   })
   .strict()
 export type TailoredDocument = z.infer<typeof tailoredDocumentSchema>
 
 /**
- * v1.30.0 (EPIC-0009 D2, OD-1): why a blocked paragraph was blocked. The seven stored causes.
+ * v1.30.0 (EPIC-0009 D2, OD-1): why a blocked paragraph was blocked. The nine stored causes
+ * (v1.32.0 adds the last two).
  * `fallback` is not a value: the web shows it for a null, absent or unrecognised cause.
  * Used for api typing and for narrowing in the web. Never used as the wire type (see `blockedClaimCause`).
  */
@@ -88,6 +92,10 @@ export const BLOCKED_CLAIM_CAUSES = [
   "names_target",
   "unknown_fact",
   "not_confirmed",
+  // v1.32.0 (FEAT-0017): a skill-only added fact cited outside a Skills line or a skill-only letter paragraph;
+  // and a line that hedged an added fact ("familiar with", "learning"). Neither carries terms.
+  "skill_only_in_bullet",
+  "added_fact_hedge",
 ] as const
 export const blockedClaimCauseSchema = z.enum(BLOCKED_CLAIM_CAUSES)
 export type BlockedClaimCause = z.infer<typeof blockedClaimCauseSchema>
@@ -184,6 +192,8 @@ export const applicationDetailSchema = applicationSummarySchema
     posting: applicationPostingStateSchema.nullable(),
     /** v1.24.0 (AA-2.5, design B3a): the latest drop from the automatic queue, for C-AA-40 / C-AA-41; null when none applies. */
     latestDrop: latestDropSchema.nullable(),
+    /** v1.32.0 (FEAT-0017): the Added facts view. Present when ADDED_FACTS_ENABLED=1, absent otherwise. */
+    addedFacts: addedFactsViewSchema.optional(),
   })
   .strict()
 export type ApplicationDetail = z.infer<typeof applicationDetailSchema>

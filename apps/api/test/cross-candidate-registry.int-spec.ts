@@ -63,7 +63,7 @@ const NEVER: Record<ForeignResource, string> = {
   "career-profile-version": "999",
 }
 const OPERATOR_TABLES = [
-  "application", "outcome", "tailored_document", "approved_answer", "gross_salary_answer", "preferred_net_pay", "candidate_setting", "candidate_contact",
+  "application", "application_added_fact", "outcome", "tailored_document", "approved_answer", "gross_salary_answer", "preferred_net_pay", "candidate_setting", "candidate_contact",
   "career_profile_version", "candidate_posting", "match_evidence", "alert_feed", "existing_application", "activation_state", "ai_terms_approval", "job_criteria",
   // F-SEC-40: EPIC-0007's four Candidate tables (0021-hiring-posts HIRING_TABLES).
   "hiring_alert_feed", "hiring_post", "hiring_post_run", "hiring_feed_verification",
@@ -102,6 +102,8 @@ async function seedOperatorRows(): Promise<void> {
     await writeFile(join(candidateDir(storage, op, "documents"), `${fileId}.docx`), SENTINEL)
     await database.db.insertInto("tailored_document").values({ id: randomUUID(), candidate_id: op, application_id: A.application, kind, career_profile_version: 1, content: JSON.stringify({ text: SENTINEL }), pdf_storage_name: `${fileId}.pdf`, docx_storage_name: `${fileId}.docx`, pdf_sha256: "x", docx_sha256: "x", created_at: at }).execute()
   }
+  // FEAT-0017: A's own added fact, sentinel-marked, so B's five routes are checked over HTTP.
+  await database.db.insertInto("application_added_fact").values({ id: randomUUID(), candidate_id: op, application_id: A.application, kind: "skill_only", text: `${SENTINEL} skill`, text_key: `${SENTINEL} skill`.toLowerCase(), term: `${SENTINEL} skill`, role_section_id: null, role_snapshot: null, role_profile_version: null, affirmed_at: at, save_to_profile: false, profile_draft_version: null, created_at: at, updated_at: at }).execute()
   await database.db.insertInto("approved_answer").values({ candidate_id: op, id: A["approved-answer"], answer_group: "standard", topic: "notice_period", skill: null, question: null, answer_key: "standard:notice_period", value: SENTINEL, created_at: at, updated_at: at }).execute()
   await database.db.insertInto("gross_salary_answer").values({ candidate_id: op, kind: "gross_salary_policy", amount: "98765.00", currency: "NGN", period: "year", updated_at: at }).execute()
   await database.db.insertInto("preferred_net_pay").values({ candidate_id: op, amount: "87654.00", currency: "NGN", updated_at: at }).execute()
@@ -196,7 +198,8 @@ describe("foreign ID: B's call with A's ID answers as a never-existed ID, and A'
     const foreign = await send(kofi, entry, concretePath(entry, viaPath ? A[resource] : undefined), entry.body?.(A[resource]))
     const never = await send(kofi, entry, concretePath(entry, viaPath ? NEVER[resource] : undefined), entry.body?.(NEVER[resource]))
     expect(await snapshotOfA()).toBe(before)
-    const expected = entry.guarded ? 409 : (entry.status ?? 404)
+    // An explicit status wins: FEAT-0017 confirm is guarded, but its path gate answers 404 for a foreign id first.
+    const expected = entry.status ?? (entry.guarded ? 409 : 404)
     expect(foreign.status).toBe(expected)
     expect(foreign.body).toEqual(never.body)
     expect(stableHeaders(foreign.headers)).toEqual(stableHeaders(never.headers))

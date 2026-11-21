@@ -131,11 +131,20 @@ function toDetail(body: ApplicationDetailBody): ApplicationDetail {
     documents: body.documents.map((d) => ({ ...toFiles(d), previewText: [...d.previewText] })),
     posting: body.posting && { status: body.posting.status, hidden: body.posting.hidden },
     latestDrop: body.latestDrop && { at: body.latestDrop.at, reason: body.latestDrop.reason },
+    addedFacts: body.addedFacts,
   }
 }
 
 function toFiles(d: Omit<TailoredDocumentBody, "previewText">): DocumentFiles {
-  return { kind: d.kind, careerProfileVersion: d.careerProfileVersion, createdAt: d.createdAt, pdfUrl: d.pdfUrl, docxUrl: d.docxUrl, ats: d.ats ?? null }
+  return {
+    kind: d.kind,
+    careerProfileVersion: d.careerProfileVersion,
+    createdAt: d.createdAt,
+    pdfUrl: d.pdfUrl,
+    docxUrl: d.docxUrl,
+    ats: d.ats ?? null,
+    addedFactsUsed: d.addedFactsUsed,
+  }
 }
 
 function toRow(row: DocumentsListResponse["rows"][number]): DocumentsListRow {

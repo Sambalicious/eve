@@ -1688,7 +1688,7 @@ describe("migration 0026-apply-anyway-bounds (AA-2.7, AA-7.6)", () => {
     const name = Object.keys(all).find((key) => NAME_PATTERN.test(key))
     expect(name, "a migration named NNNN-apply-anyway-bounds (api-contract.md v1.24.0, 0026 unless renumbered at merge, D19)").toBeDefined()
     // Merge with main 0422b14 (D19): EPIC-0002 B1's 0027-preferences-version merged after it and is the only later one.
-    expect(Object.keys(all).sort().filter((key) => key > name!), "only B1's 0027 and ATS 0028 to 0030 and EPIC-0010 0031 and stuck checking 0032 and EPIC-0011 0033 and EPIC-0012 0034 follow the bounds migration").toEqual(["0027-preferences-version", "0028-ats-skills", "0029-ats-fit", "0030-ats-minimum", "0031-pasted-description", "0032-stuck-checking", "0033-simplify-eve", "0034-forward-statements", "0035-manual-apply-lane", "0036-retry-failed-checks", "0037-retry-backfill", "0038-lead-pipeline", "0039-blocked-claim-cause", "0040-outreach-messages", "0041-lead-policy-binding"])
+    expect(Object.keys(all).sort().filter((key) => key > name!), "only B1's 0027 and ATS 0028 to 0030 and EPIC-0010 0031 and stuck checking 0032 and EPIC-0011 0033 and EPIC-0012 0034 follow the bounds migration").toEqual(["0027-preferences-version", "0028-ats-skills", "0029-ats-fit", "0030-ats-minimum", "0031-pasted-description", "0032-stuck-checking", "0033-simplify-eve", "0034-forward-statements", "0035-manual-apply-lane", "0036-retry-failed-checks", "0037-retry-backfill", "0038-lead-pipeline", "0039-blocked-claim-cause", "0040-outreach-messages", "0041-lead-policy-binding", "0042-added-facts"])
     return { name: name!, module: all[name!]! }
   }
 

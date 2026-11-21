@@ -33,7 +33,7 @@ const OWNER_SUB = "google-sub-qa-0001"
  * EPIC-0002 B1's 0027-preferences-version, tested by preferences-version-migration.int-spec.ts.
  * Before the renumbers (runs a2e and a2i) A2's migrations were 0020 and 0021.
  */
-const OTHER_EPICS = new Set(["0020-role-relevance", "0021-hiring-posts", "0024-alert-feed-candidate-verification", "0025-apply-anyway", "0026-apply-anyway-bounds", "0027-preferences-version", "0028-ats-skills", "0029-ats-fit", "0030-ats-minimum", "0031-pasted-description", "0032-stuck-checking", "0033-simplify-eve", "0034-forward-statements", "0035-manual-apply-lane", "0036-retry-failed-checks", "0037-retry-backfill", "0038-lead-pipeline", "0039-blocked-claim-cause", "0040-outreach-messages", "0041-lead-policy-binding"])
+const OTHER_EPICS = new Set(["0020-role-relevance", "0021-hiring-posts", "0024-alert-feed-candidate-verification", "0025-apply-anyway", "0026-apply-anyway-bounds", "0027-preferences-version", "0028-ats-skills", "0029-ats-fit", "0030-ats-minimum", "0031-pasted-description", "0032-stuck-checking", "0033-simplify-eve", "0034-forward-statements", "0035-manual-apply-lane", "0036-retry-failed-checks", "0037-retry-backfill", "0038-lead-pipeline", "0039-blocked-claim-cause", "0040-outreach-messages", "0041-lead-policy-binding", "0042-added-facts"])
 const throughEpic0002 = (migrations: ReturnType<typeof migrationsFor>) => Object.fromEntries(Object.entries(migrations).filter(([name]) => !OTHER_EPICS.has(name)))
 const ALL = throughEpic0002(migrationsFor({ operatorGoogleSub: OWNER_SUB }))
 const BEFORE = Object.fromEntries(Object.entries(ALL).filter(([name]) => name < "0016"))

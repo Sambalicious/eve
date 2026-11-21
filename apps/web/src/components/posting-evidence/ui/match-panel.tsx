@@ -1,11 +1,14 @@
 import { useId } from "react"
 import { Check, CircleCheck, CircleMinus, Minus, X } from "lucide-react"
 
+import type { AddedFact, ApplicationMatch } from "@eve/contracts"
+
 import {
   jobPostingCopy,
   type Match,
   type MatchItem,
 } from "@/entities/job-posting"
+import { addedFactsCopy } from "@/features/added-facts"
 import { Badge } from "@/shared/ui/badge"
 import { Section } from "@/shared/ui/section"
 import { matchLines } from "../model/match-lines"
@@ -14,12 +17,25 @@ import { matchLines } from "../model/match-lines"
  * Match panel: verdict badge, coverage and weak-reason lines (described by the
  * badge), the C-MATCH-1 rule in muted 12px text, then three groups. The UI
  * shows the backend's verdict and never computes it.
+ *
+ * FEAT-0017: with the Application Match (`added`), the coverage line becomes the
+ * two fixed numbers (C-AF-80 / C-AF-81) and "What your added facts cover"
+ * (C-AF-83). Without it the panel is exactly as before.
  */
-export function MatchPanel({ match }: { match: Match }) {
+export function MatchPanel({
+  match,
+  added = null,
+  overrideNote = false,
+}: {
+  match: Match
+  added?: Readonly<{ match: ApplicationMatch; facts: readonly AddedFact[] }> | null
+  /** C-AF-84: an Override stays as the Candidate saw it, even when the facts make the Match strong. */
+  overrideNote?: boolean
+}) {
   const id = useId()
   const lines = matchLines(match)
   const describedBy = [
-    lines.coverage && `${id}-coverage`,
+    (added !== null || lines.coverage) && `${id}-coverage`,
     lines.reason && `${id}-reason`,
   ]
     .filter(Boolean)
@@ -40,10 +56,44 @@ export function MatchPanel({ match }: { match: Match }) {
             ? jobPostingCopy.strongMatch
             : jobPostingCopy.weakMatch}
         </Badge>
-        {lines.coverage && (
-          <p id={`${id}-coverage`} className="text-sm tabular-nums">
-            {lines.coverage}
-          </p>
+        {added !== null ? (
+          <>
+            <p id={`${id}-coverage`} className="text-sm tabular-nums">
+              {addedFactsCopy.match.profile(added.match.posting.covered, added.match.posting.total)}
+            </p>
+            <p className="text-sm tabular-nums">
+              {addedFactsCopy.match.withAdded(added.match.withAdded.covered, added.match.withAdded.total)}
+            </p>
+            {added.match.covers.length > 0 && (
+              <div className="flex w-full flex-col gap-1.5">
+                <h3 className="text-xs font-medium text-muted-foreground">{addedFactsCopy.match.coverageHeading}</h3>
+                <ul className="flex flex-col gap-1.5 text-sm">
+                  {added.match.covers.map((cover) => {
+                    const fact = added.facts.find((candidate) => candidate.id === cover.factId)
+                    return (
+                      <li key={`${cover.factId}-${cover.requirement}`} className="flex flex-wrap items-baseline gap-x-1.5 [overflow-wrap:anywhere]">
+                        {fact !== undefined && <span className="font-medium">{fact.text}</span>}
+                        {fact !== undefined && <span aria-hidden="true">→</span>}
+                        <span className="min-w-0">{cover.requirement}</span>
+                        {cover.kind === "skill_only" && (
+                          <span className="text-[13px] text-muted-foreground">
+                            (<span>{addedFactsCopy.match.skillOnly}</span>)
+                          </span>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
+            {overrideNote && <p className="text-[13px] text-muted-foreground text-pretty">{addedFactsCopy.match.overrideNote}</p>}
+          </>
+        ) : (
+          lines.coverage && (
+            <p id={`${id}-coverage`} className="text-sm tabular-nums">
+              {lines.coverage}
+            </p>
+          )
         )}
         {match.atsFit !== null && match.atsFit !== undefined && (
           <p className="text-sm tabular-nums">

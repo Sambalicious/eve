@@ -78,9 +78,9 @@ async function stuckAt(db: Db, postingId: string, now: Date): Promise<boolean> {
 describe("migration 0032-stuck-checking (AC-7.12)", () => {
   it("is registered after 0031 with its schema marker", () => {
     const names = Object.keys(ALL())
-    expect(names.at(-10)).toBe(MIGRATION)
-    expect(names.at(-11)).toBe("0031-pasted-description")
-    expect(SCHEMA_MARKERS.at(-10)).toBe(MIGRATION)
+    expect(names.at(-11)).toBe(MIGRATION)
+    expect(names.at(-12)).toBe("0031-pasted-description")
+    expect(SCHEMA_MARKERS.at(-11)).toBe(MIGRATION)
   })
 
   it("stuck:171 / :187 existing checking rows get checking_since = the migration's now(), keep their status, and become stuck 15 minutes after ship", async () => {
