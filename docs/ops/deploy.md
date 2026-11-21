@@ -59,9 +59,10 @@ Order: backup, then `migrate`, then `storage-migrate`, then the api and worker.
 
    This archives both flat volumes, which still hold every file. If it does not print `BACKUP_OK`, stop here and restart the old stack with `docker compose start api worker`.
 
-4. Build the new image and apply the database migrations:
+4. Keep the running image as the rollback target, then build the new image and apply the database migrations. A missing `eve-api:local` on a first install is fine to skip:
 
    ```sh
+   docker tag eve-api:local eve-api:rollback
    docker compose build && docker compose up migrate
    ```
 
@@ -111,9 +112,10 @@ Order: backup, then `migrate`, then `storage-migrate`, then the api and worker.
 
 7. Check the files. Open a stored resume and a Tailored Document in the dashboard.
 
-Steps 3 and 5 together form the guard: `&& echo BACKUP_OK` shows that the backup succeeded, and the move runs only after that. To run both in one line, chain them so that the move cannot start after a failed backup:
+Steps 3 and 5 together form the guard: `&& echo BACKUP_OK` shows that the backup succeeded, and the move runs only after that. To run both in one line, chain them so that the move cannot start after a failed backup. Keep the running image as the rollback target first; a missing `eve-api:local` on a first install is fine to skip:
 
 ```sh
+docker tag eve-api:local eve-api:rollback
 scripts/backup/backup.sh --on-demand && docker compose build && docker compose up migrate && docker compose --profile storage-migrate run --rm storage-migrate && docker compose up -d api worker
 ```
 
@@ -127,9 +129,9 @@ After the first nightly run following A2, check that its `backup.log` line has `
 
 The A2 code cannot read the flat layout, and the pre-A2 code cannot read the per-Candidate layout. Roll back the image and the files together.
 
-- **storage-migrate failed with a problem list** (exit 1, `storage:migrate problem <kind>: ...` lines, no `storage:migrate failed: <ErrorName>` line). It deleted nothing and the flat volumes are unchanged. Check out the previous release, then run `docker compose build && docker compose up -d api worker`. Keep `job-assistant_candidate-data`; the old release does not read it.
+- **storage-migrate failed with a problem list** (exit 1, `storage:migrate problem <kind>: ...` lines, no `storage:migrate failed: <ErrorName>` line). It deleted nothing and the flat volumes are unchanged. Check out the previous release, then start the rollback image: `docker tag eve-api:rollback eve-api:local && docker compose up -d api worker`. Keep `job-assistant_candidate-data`; the old release does not read it.
 - **storage-migrate failed with an exception** (exit 1, `storage:migrate failed: <ErrorName>`). Some originals may already be deleted, and their only copies are in `job-assistant_candidate-data`. Do not start the old release on the flat volumes as they are: it would miss those files. Rerun `storage-migrate` until it prints `completed` and then roll back as "After a completed move" below, or restore the step 3 set into the flat volumes before you start the old release. Keep `job-assistant_candidate-data` either way.
-- **After a completed move.** Stop the api and worker. Check out the previous release, then restore the step 3 set into the flat volumes (`backups.md`, "Real disaster: restoring over the live stack"). The step 3 set has no candidates archive, so the restore does not need a candidates target. Files that Candidates uploaded after the move exist only in `job-assistant_candidate-data`, under `<candidate_id>/resumes` and `<candidate_id>/documents`. Copy them back into the flat volumes by file name before you start the old stack. Then start the api and worker.
+- **After a completed move.** Stop the api and worker. Check out the previous release, then restore the step 3 set into the flat volumes (`backups.md`, "Real disaster: restoring over the live stack"). The step 3 set has no candidates archive, so the restore does not need a candidates target. Files that Candidates uploaded after the move exist only in `job-assistant_candidate-data`, under `<candidate_id>/resumes` and `<candidate_id>/documents`. Copy them back into the flat volumes by file name, then start the rollback image: `docker tag eve-api:rollback eve-api:local && docker compose up -d api worker`.
 - Never delete `job-assistant_candidate-data` during a rollback. It is the only copy of files written after the move.
 
 #### Rolling back the database migrations (0016 to 0023)
@@ -137,7 +139,7 @@ The A2 code cannot read the flat layout, and the pre-A2 code cannot read the per
 The migrations have no down step. `0022-candidate-binding` replaces every Candidate row policy, and the previous release does not call `bind_candidate`, so it shows no Candidate rows on a migrated database. The image and the database must move back together:
 
 1. Stop the api and worker: `docker compose stop api worker`.
-2. Check out the previous release and run `docker compose build`.
+2. Check out the previous release and point the image at the rollback target: `docker tag eve-api:rollback eve-api:local`.
 3. Restore the step 3 set over the live stack (`backups.md`, "Real disaster: restoring over the live stack"). Restore the files too if `storage-migrate` completed (see above).
 4. Run `docker compose run --rm migrate`. The previous release has no 0022 or 0023, so it applies nothing and re-applies its own grants. Its `provision-roles` step, which `migrate` depends on, grants the runtime role `TEMPORARY` again, as that release expects. The restored database has no 0023 marker.
 5. Start the api and worker: `docker compose up -d api worker`.
@@ -194,9 +196,10 @@ Preconditions: CI green on the release commit, and `ADDED_FACTS_ENABLED` unset o
 
    The change is additive and rolls back by images, but an on-demand backup is the rule before any migration that touches live data. If it does not print `BACKUP_OK`, stop here.
 
-2. **Build.** The running containers keep serving the old image:
+2. **Build.** Keep the running image as the rollback target, then build. The running containers keep serving the old image. A missing `eve-api:local` on a first install is fine to skip:
 
    ```sh
+   docker tag eve-api:local eve-api:rollback
    docker compose build
    ```
 
@@ -264,7 +267,7 @@ Before:
 - The new web bundle is live and reloaded in the owner's browser (hash checked).
 - The QA, Security and code review gates for this feature are closed; flag on is the first time the feature is reachable.
 - No Application is `generating`, `submit_claimed` or `submitting`. A flip does not break one, but flipping while idle keeps the first test clean.
-- The previous good image commit hash is recorded as the rollback target.
+- `eve-api:rollback` holds the previous good image: step 2 ran `docker tag eve-api:local eve-api:rollback` before the build.
 
 Flip:
 
@@ -342,10 +345,10 @@ Required only for a code defect, not a data one. The old build does not enforce 
 
    Do not start the old image until every count is 0. A non-zero count means a Candidate was missed or a row was written since: repeat the loop.
 
-4. Roll the **api and worker** back first: check out the previous good commit, then rebuild and start them. The old build ignores the extra marker and columns:
+4. Roll the **api and worker** back first: check out the previous good commit, then tag and start the rollback image. The old build ignores the extra marker and columns:
 
    ```sh
-   docker compose build && docker compose up -d api worker
+   docker tag eve-api:rollback eve-api:local && docker compose up -d api worker
    ```
 
 5. Then roll the **web** back to the previous bundle (outside the repository). The api goes first, so nothing that sends the new keys is live under an older web; with the flag off the keys are absent anyway.
