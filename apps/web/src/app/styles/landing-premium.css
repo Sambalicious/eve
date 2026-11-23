@@ -171,10 +171,11 @@
     transform: translateY(3px);
   }
   .landing-root .landing-inline-link {
-    background-size: 100% 1px;
+    background-size: 0 1px;
   }
   .landing-root .landing-inline-link:hover {
     color: var(--persuade-ink);
+    background-size: 100% 1px;
   }
 }
 
@@ -227,7 +228,7 @@
   border-left: 0;
   gap: 8px;
   border-top: 1px solid var(--border);
-  transition: padding-inline-start 520ms var(--ease-out);
+  transition: transform 520ms var(--ease-out);
 }
 .landing-root .landing-steps > .landing-step:first-child {
   border-top: 1px solid var(--border);
@@ -274,7 +275,7 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .landing-root .landing-steps > .landing-step:hover {
-    padding-inline-start: 12px;
+    transform: translateX(12px);
   }
   .landing-root .landing-steps > .landing-step:hover > .landing-step-number {
     color: var(--persuade-ink);
@@ -288,7 +289,7 @@
 .landing-root .landing-stop {
   align-items: baseline;
   padding-block: 18px;
-  transition: padding-inline-start 420ms var(--ease-out);
+  transition: transform 420ms var(--ease-out);
 }
 .landing-root .landing-stop::before {
   content: "";
@@ -380,6 +381,6 @@ html.motion-ok.motion-ready .landing-root [data-reveal] .reveal-item {
     transform: none;
   }
   .landing-root .landing-steps > .landing-step:hover {
-    padding-inline-start: 0;
+    transform: none;
   }
 }
