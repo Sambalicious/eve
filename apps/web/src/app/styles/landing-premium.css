@@ -1,0 +1,373 @@
+/* Landing premium layer. Scoped to .landing-root, loaded after landing.css.
+   Direction (Mobbin refs: Trawelt numerals + hairlines, Symbolic paper + serif,
+   Jack & Jill restraint): warm paper, Eve's cobalt primary kept as the only
+   accent, a serif display voice, no gradient blobs, no floating chips, no icon discs.
+   Motion is transform/opacity only and is switched off for reduced motion. */
+
+.landing-root {
+  --serif: "Newsreader Variable", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --paper: oklch(0.975 0.007 85);
+  --paper-2: oklch(0.955 0.01 82);
+  --ink: oklch(0.2 0.01 60);
+  --accent: var(--primary);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --muted-foreground: oklch(0.45 0.012 70);
+  --border: oklch(0.87 0.01 80);
+  --popover: oklch(0.99 0.004 85);
+  --persuade-tint: var(--paper-2);
+  --persuade-tint-strong: oklch(0.93 0.025 262);
+  --hero-field-a: 0%;
+  --hero-field-b: 0%;
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.dark .landing-root {
+  --paper: oklch(0.17 0.008 60);
+  --paper-2: oklch(0.205 0.01 60);
+  --ink: oklch(0.95 0.008 85);
+  --muted-foreground: oklch(0.72 0.012 75);
+  --border: oklch(0.95 0.01 85 / 12%);
+  --popover: oklch(0.22 0.01 60);
+}
+
+/* ── Type: serif display, italic accent line ─────────────────── */
+.landing-root .landing-h1,
+.landing-root .landing-h2 {
+  font-family: var(--serif);
+  font-weight: 380;
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.landing-root .landing-h1 {
+  font-size: clamp(44px, 6.4vw + 8px, 104px);
+  line-height: 0.98;
+}
+.landing-root .landing-h1-ink {
+  font-style: italic;
+  font-weight: 340;
+  color: var(--persuade-ink);
+}
+.landing-root .landing-h2 {
+  font-size: clamp(32px, 2.8vw + 16px, 56px);
+  line-height: 1.04;
+}
+.landing-root .landing-h3 {
+  font-weight: 550;
+  letter-spacing: -0.005em;
+}
+
+/* ── Hero: left-set, no field, no floating chips ─────────────── */
+.landing-root .landing-hero::before {
+  background: radial-gradient(70% 55% at 50% 0%, color-mix(in oklch, var(--paper) 40%, white), transparent 70%);
+}
+.dark .landing-root .landing-hero::before {
+  background: none;
+}
+.landing-root .hero-frags {
+  display: none;
+}
+@media (min-width: 768px) {
+  .landing-root .landing-hero-text {
+    margin-inline: 0;
+    text-align: left;
+    max-width: 980px;
+  }
+  .landing-root .landing-subhead {
+    margin-inline: 0;
+    max-width: 520px;
+    font-size: 19px;
+  }
+  .landing-root .landing-hero-actions {
+    justify-content: flex-start;
+  }
+  .landing-root .landing-hero .landing-note {
+    text-align: left;
+  }
+}
+.landing-root .landing-hero .landing-note {
+  max-width: 520px;
+}
+
+/* Primary action: ink pill, arrow glides in, warm sweep on hover. */
+.landing-root .landing-primary {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  gap: 10px;
+  height: 48px;
+  padding-inline: 26px;
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  transition:
+    transform 320ms var(--ease-out),
+    box-shadow 320ms var(--ease-out);
+}
+.landing-root .landing-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--persuade-ink);
+  transform: translateY(101%);
+  border-radius: inherit;
+  transition: transform 420ms var(--ease-out);
+}
+.landing-root .landing-primary::after {
+  content: "→";
+  display: inline-block;
+  transition: transform 320ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-root .landing-primary:hover {
+    background-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -10px color-mix(in oklch, var(--primary) 60%, transparent);
+  }
+  .landing-root .landing-primary:hover::before {
+    transform: translateY(0);
+  }
+  .landing-root .landing-primary:hover::after {
+    transform: translateX(4px);
+  }
+}
+.landing-root .landing-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Quiet links: hairline underline that draws left to right. */
+.landing-root .landing-hero-jump,
+.landing-root .landing-inline-link {
+  color: var(--foreground);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  transition: background-size 380ms var(--ease-out), color 200ms ease;
+}
+.landing-root .landing-hero-jump {
+  align-self: center;
+  min-height: 0;
+  padding-block: 4px;
+  background-size: 0 1px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-root .landing-hero-jump:hover {
+    background-size: 100% 1px;
+  }
+  .landing-root .landing-hero-jump:hover .landing-jump-arrow {
+    transform: translateY(3px);
+  }
+  .landing-root .landing-inline-link {
+    background-size: 100% 1px;
+  }
+  .landing-root .landing-inline-link:hover {
+    color: var(--persuade-ink);
+  }
+}
+
+/* ── Product frame: paper card, layered shadow, gentle lift ──── */
+.landing-root .hf {
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 1px 2px color-mix(in oklch, var(--ink) 6%, transparent),
+    0 24px 60px -24px color-mix(in oklch, var(--ink) 28%, transparent);
+}
+.landing-root .hero-demo {
+  transition: transform 700ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-root .hero-demo:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* ── Sections: grounds become paper tones, rules stay hairline ── */
+.landing-root .landing-section[data-ground="tint"],
+.landing-root #access.landing-section[data-ground="tint"] {
+  background: var(--paper-2);
+}
+.landing-root .landing-section {
+  padding-block: clamp(72px, 9vw, 144px);
+}
+
+/* Steps: oversized serif numerals on hairlines (Trawelt). */
+.landing-root .illo-step,
+.landing-root .landing-stops-art,
+.landing-root .landing-limits-art,
+.landing-root .landing-stop-disc {
+  display: none;
+}
+.landing-root .landing-steps {
+  margin-top: clamp(32px, 5vw, 64px);
+  border-bottom: 1px solid var(--border);
+}
+.landing-root .landing-steps {
+  grid-template-columns: minmax(0, 1fr);
+}
+.landing-root .landing-steps > .landing-step,
+.landing-root .landing-steps > .landing-step:first-child {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+  padding-block: 28px;
+  padding-inline: 0;
+  border-left: 0;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  transition: padding-inline-start 520ms var(--ease-out);
+}
+.landing-root .landing-steps > .landing-step:first-child {
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+}
+.landing-root .landing-steps > .landing-step > .landing-step-number {
+  font-family: var(--serif);
+  font-size: clamp(48px, 6vw, 96px);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: color-mix(in oklch, var(--foreground) 22%, transparent);
+  transition: color 420ms ease, transform 520ms var(--ease-out);
+}
+.landing-root .landing-steps > .landing-step .landing-h3 {
+  font-family: var(--serif);
+  font-size: clamp(22px, 1.6vw + 12px, 30px);
+  font-weight: 420;
+  letter-spacing: -0.015em;
+}
+.landing-root .landing-step .landing-small {
+  font-size: 16px;
+  max-width: 560px;
+}
+.dark .landing-root .landing-steps > .landing-step > .landing-step-number {
+  color: color-mix(in oklch, var(--foreground) 38%, transparent);
+}
+@media (min-width: 768px) {
+  .landing-root .landing-steps > .landing-step,
+  .landing-root .landing-steps > .landing-step:first-child {
+    grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1.6fr);
+    align-items: start;
+    column-gap: 32px;
+    padding-block: 36px;
+  }
+  .landing-root .landing-steps > .landing-step > .landing-step-number {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .landing-root .landing-steps > .landing-step > div:not(.illo) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-root .landing-steps > .landing-step:hover {
+    padding-inline-start: 12px;
+  }
+  .landing-root .landing-steps > .landing-step:hover > .landing-step-number {
+    color: var(--persuade-ink);
+  }
+}
+
+/* Stops: two hairline columns, a small accent tick instead of discs. */
+.landing-root .landing-stops-wrap {
+  display: block;
+}
+.landing-root .landing-stop {
+  align-items: baseline;
+  padding-block: 18px;
+  transition: padding-inline-start 420ms var(--ease-out);
+}
+.landing-root .landing-stop::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: var(--accent);
+  transform: translateY(-4px);
+  transition: width 420ms var(--ease-out);
+}
+.landing-root .landing-stop > .landing-small {
+  padding-top: 0;
+  font-size: 16px;
+}
+.landing-root .landing-stops-close {
+  font-family: var(--serif);
+  font-size: clamp(20px, 1.2vw + 14px, 28px);
+  font-weight: 380;
+  font-style: italic;
+  line-height: 1.3;
+  margin-top: 40px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-root .landing-stop:hover::before {
+    width: 28px;
+  }
+}
+
+/* Limits: term on the left in serif, value on the right. */
+.landing-root .landing-limit dt {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 420;
+}
+.landing-root .landing-limit dd {
+  font-size: 16px;
+}
+
+/* Access */
+.landing-root .landing-access .landing-para {
+  font-size: 18px;
+  color: var(--muted-foreground);
+}
+.landing-root .landing-access .landing-para:first-of-type {
+  color: var(--foreground);
+}
+
+/* ── Scroll progress hairline (native scroll timeline only) ──── */
+@supports (animation-timeline: scroll()) {
+  @keyframes landing-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  html.motion-ok .landing-root::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 60;
+    height: 2px;
+    background: var(--accent);
+    transform-origin: left center;
+    pointer-events: none;
+    animation: landing-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+/* Softer, longer reveals to match the pace. */
+html.motion-ok.motion-ready .landing-root [data-reveal] .reveal-item {
+  transition-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-root .landing-primary,
+  .landing-root .landing-primary::before,
+  .landing-root .landing-primary::after,
+  .landing-root .hero-demo,
+  .landing-root .landing-step,
+  .landing-root .landing-stop,
+  .landing-root .landing-stop::before {
+    transition: none;
+  }
+  .landing-root .landing-primary:hover,
+  .landing-root .hero-demo:hover {
+    transform: none;
+  }
+}
