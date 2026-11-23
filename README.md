@@ -5,6 +5,20 @@
 
 Eve is a personal assistant, built with Mastra AI, that works for one Candidate. It finds remote and relocation software jobs, tailors truthful application documents from the Candidate's approved Career Profile, applies through employer career sites, and reports every submission by email. Eve is open source and self-hosted: one Candidate per installation, your data on your machine. Product rules and domain language are in [CONTEXT.md](CONTEXT.md).
 
+## Screenshots
+
+Landing page:
+
+| Light | Dark |
+| --- | --- |
+| ![Eve landing page, light](docs/screenshots/landing-light.png) | ![Eve landing page, dark](docs/screenshots/landing-dark.png) |
+
+Dashboard (sample data from the designer preview):
+
+| Light | Dark |
+| --- | --- |
+| ![Eve dashboard, light](docs/screenshots/dashboard-light.png) | ![Eve dashboard, dark](docs/screenshots/dashboard-dark.png) |
+
 ## Quick start
 
 ```sh
