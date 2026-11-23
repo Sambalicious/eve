@@ -282,8 +282,8 @@ async function insertFact(id: string, fact: { kind: "skill_only" | "one_liner"; 
 }
 
 async function appRow(id: string) {
-  const rows = await sql<{ added_facts_version: number; added_facts_confirmed_version: number | null; submission_state: string | null; state: string; added_facts_match: unknown }>`
-    select added_facts_version, added_facts_confirmed_version, submission_state, state, added_facts_match from application where id = ${id}`.execute(database.db)
+  const rows = await sql<{ added_facts_version: number; added_facts_confirmed_version: number | null; submission_state: string | null; blocked_reason: string | null; state: string; added_facts_match: unknown }>`
+    select added_facts_version, added_facts_confirmed_version, submission_state, blocked_reason, state, added_facts_match from application where id = ${id}`.execute(database.db)
   return rows.rows[0]!
 }
 
@@ -678,6 +678,44 @@ describe("FEAT-0017 backend: SEC-R05 named tests", () => {
     await offCandidate.put("/v1/candidate-settings/ats").send({ minAtsPercent: 0 }).expect(200)
     expect(await appRow(stale.id)).toMatchObject({ submission_state: "blocked" })
     expect(await appRow(fine.id)).toMatchObject({ submission_state: "queued" })
+    await candidate.put("/v1/candidate-settings/ats").send({ minAtsPercent: 40 }).expect(200)
+  })
+
+  /**
+   * CR-4: the claim holds a lifted Application at `blocked/ats_below_minimum`. `requeueAtsHeld` must apply the
+   * same confirmation gate `queue()` does, so a regenerated resume at the minimum does not put a row whose
+   * confirmation an edit voided back in the queue to be dropped as `added_facts_unconfirmed`.
+   */
+  const heldBelowMinimum = async (id: string, version: number): Promise<void> => {
+    await database.db.updateTable("application").set({ submission_state: "blocked", submission_kind: "automatic", blocked_reason: "ats_below_minimum", blocked_detail: "ATS match 62% is below your minimum.", blocked_at: clock.now() }).where("id", "=", id).execute()
+    // The regenerated documents record the current counter; the fixture's resume scores 62 against the 61 set below.
+    await setDocumentsVersion(id, version, [], [])
+  }
+  const confirmedAndHeld = async (): Promise<{ id: string; version: number }> => {
+    const { id } = await application({ postingStatus: "skipped", postingSkip: "weak_core_match" })
+    for (const fact of LIFTING) await insertFact(id, fact)
+    await setDocumentsVersion(id, LIFTING.length, [], [])
+    await candidate.post(confirmPath(id)).send({ expectedVersion: LIFTING.length }).expect(200)
+    await heldBelowMinimum(id, LIFTING.length)
+    return { id, version: LIFTING.length }
+  }
+
+  it("with the flag on requeueAtsHeld keeps a held Application whose edit voided its confirmation (CR-4)", async () => {
+    const { id, version } = await confirmedAndHeld()
+    // The Candidate edits an added fact: the counter moves and the confirmation covers the old one only.
+    await insertFact(id, { kind: "skill_only", text: "Jest", term: "Jest" })
+    await heldBelowMinimum(id, version + 1)
+
+    await candidate.put("/v1/candidate-settings/ats").send({ minAtsPercent: 61 }).expect(200)
+    expect(await appRow(id)).toMatchObject({ added_facts_version: version + 1, added_facts_confirmed_version: version, submission_state: "blocked", blocked_reason: "ats_below_minimum" })
+    await candidate.put("/v1/candidate-settings/ats").send({ minAtsPercent: 40 }).expect(200)
+  })
+
+  it("with the flag on requeueAtsHeld requeues a held Application whose confirmation still covers the counter", async () => {
+    const { id, version } = await confirmedAndHeld()
+
+    await candidate.put("/v1/candidate-settings/ats").send({ minAtsPercent: 61 }).expect(200)
+    expect(await appRow(id)).toMatchObject({ added_facts_version: version, added_facts_confirmed_version: version, submission_state: "queued", blocked_reason: null })
     await candidate.put("/v1/candidate-settings/ats").send({ minAtsPercent: 40 }).expect(200)
   })
 

@@ -9,9 +9,8 @@ import { recordSchemaMarker } from "./schema-markers.js"
  *
  * - `application_added_fact`: one row per fact the Candidate added to one
  *   Application. Candidate data: forced RLS with the 0022-form `_candidate`
- *   policy. `text_key` is computed in SQL as `lower(btrim(text))` by the
- *   repository (`added-facts.repository.ts`), not by application code (the
- *   tests seed it), and the unique key
+ *   policy. `text_key` is computed in SQL as `lower(btrim(text))` (see
+ *   `added-facts.repository.ts`; the tests seed it), and the unique key
  *   `(candidate_id, application_id, text_key)` is the duplicate rule and the
  *   leading-`candidate_id` index ADR 0009 asks for.
  * - The kind carries its own shape: a skill-only fact has a term and no role,
@@ -77,7 +76,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     application_id uuid not null,
     kind text not null,
     text text not null,
-    -- lower(btrim(text)), computed in SQL by the repository: the duplicate rule and the unique key.
+    -- lower(btrim(text)), computed in SQL by added-facts.repository.ts: the duplicate rule and the unique key.
     text_key text not null,
     term text null,
     role_section_id text null,
@@ -132,8 +131,9 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   await run(sql`alter table tailored_document add constraint tailored_document_added_facts_check
     check (added_facts_version >= 0 and jsonb_typeof(added_facts) = 'object')`)
 
-  // A-8: the two FEAT-0017 causes. NOT VALID then VALIDATE is kept for the pattern; inside this
-  // migration's one transaction it gives no lock benefit.
+  // A-8: the two FEAT-0017 causes. NOT VALID then VALIDATE only avoids a long lock in its own transaction;
+  // here the migration is one transaction and the DROP CONSTRAINT below takes ACCESS EXCLUSIVE on
+  // application, so validating later in the same transaction takes no extra lock.
   await run(sql`alter table application drop constraint application_blocked_claim_cause_check`)
   await run(sql`alter table application add constraint application_blocked_claim_cause_check
     check (blocked_claim_cause is null or blocked_claim_cause in ${CAUSES}) not valid`)

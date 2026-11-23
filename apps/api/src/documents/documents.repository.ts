@@ -12,8 +12,9 @@ import { type VisibilityContext, visibilityContext, visibleSql } from "../discov
 import type { ApplicationAddedFactTable, ApplicationState, JobPostingStatus, StoredAddedFactUsed } from "../db/schema.js"
 import { APP_CONFIG } from "../config/config.module.js"
 import type { SharedRuntimeConfig } from "../config/env.js"
-import { documentsStale } from "../added-facts/added-facts-gate.js"
+import { confirmationRequired, documentsStale } from "../added-facts/added-facts-gate.js"
 import { type RecordedDocument, toRecordedAddedFacts } from "../added-facts/document-records.js"
+import { readApplicationMatch } from "../added-facts/match-read.js"
 import { type CandidateTx, TenantDatabase } from "../db/tenant-database.js"
 import { applyTransactionTimeouts, transactionTimeouts } from "../db/transaction-timeouts.js"
 import { describeBlock } from "./blocked-claim.js"
@@ -126,7 +127,9 @@ export class DocumentsRepository {
 
   /**
    * Puts Applications held below the ATS minimum (all, or one) back in the automatic queue when their
-   * resume's ATS score now reaches the Candidate's minimum, or the minimum is 0. Returns how many moved.
+   * resume's ATS score now reaches the Candidate's minimum, or the minimum is 0. A lifted Application
+   * whose confirmation no longer covers the current counter stays held, as `queue()` refuses it, so the
+   * Candidate sees the confirmation state instead of a queued row the claim drops. Returns how many moved.
    */
   requeueAtsHeld(at: Date, applicationId?: string): Promise<number> {
     return this.tenant.run(async (tx, candidateId) => {
@@ -135,7 +138,7 @@ export class DocumentsRepository {
       let held = tx
         .selectFrom("application as a")
         .innerJoin("tailored_document as d", (join) => join.onRef("d.application_id", "=", "a.id").on("d.kind", "=", "resume"))
-        .select(["a.id", "a.added_facts_version", sql<number | null>`(d.content->'ats'->>'score')::int`.as("score")])
+        .select(["a.id", "a.added_facts_version", "a.added_facts_confirmed_version", "a.job_posting_id", "a.requisition_id", "a.details_deleted_at", sql<number | null>`(d.content->'ats'->>'score')::int`.as("score")])
         .where("a.candidate_id", "=", candidateId)
         .where("a.submission_state", "=", "blocked")
         .where("a.blocked_reason", "=", "ats_below_minimum")
@@ -164,7 +167,14 @@ export class DocumentsRepository {
           )
           .map((row) => row.id)
       )
-      const release = rows.filter((row) => !stale.has(row.id)).filter((row) => minimum === 0 || (row.score !== null && row.score >= minimum)).map((row) => row.id)
+      // FEAT-0017: the confirmation gate `queue()` applies. Requeuing a lifted row whose confirmation the
+      // current counter does not cover would only have the claim drop it as `added_facts_unconfirmed`.
+      const eligible = rows.filter((row) => !stale.has(row.id)).filter((row) => minimum === 0 || (row.score !== null && row.score >= minimum))
+      const release: string[] = []
+      for (const row of eligible) {
+        const match = this.addedFactsEnabled ? await readApplicationMatch(tx, candidateId, row, at) : null
+        if (!confirmationRequired({ flagOn: this.addedFactsEnabled, applicationVersion: row.added_facts_version, confirmedVersion: row.added_facts_confirmed_version, match })) release.push(row.id)
+      }
       if (release.length === 0) return 0
       const result = await tx
         .updateTable("application")
