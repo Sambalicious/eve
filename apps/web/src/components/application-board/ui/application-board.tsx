@@ -61,7 +61,7 @@ export function ApplicationBoard({ applications, advanced }: { applications: rea
         role="region"
         aria-label={c.boardAria}
         tabIndex={wide ? 0 : undefined}
-        className={wide ? "grid gap-4 overflow-x-auto pb-2" : "flex flex-col gap-3"}
+        className={wide ? "relative grid gap-4 overflow-x-auto pb-2" : "flex flex-col gap-3"}
         style={wide ? { gridTemplateColumns: `repeat(${board.columns.length}, minmax(220px, 1fr))` } : undefined}
       >
         {board.columns.map((column) => (
