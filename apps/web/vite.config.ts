@@ -89,6 +89,8 @@ export default defineConfig({
     manifest: true,
   },
   server: {
+    port: 5173,
+    strictPort: true,
     proxy: {
       "/v1": { target: apiProxyTarget, xfwd: true },
     },

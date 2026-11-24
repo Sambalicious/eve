@@ -24,13 +24,30 @@
   background-color: var(--paper);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
+/* Light: the brand primary stays on the action, the logo and the focus ring; only the tinted fills are warm paper tones. */
+:root:not(.dark) .landing-root {
+  --muted: var(--paper-2);
+  --persuade-tint-strong: oklch(0.925 0.012 80);
+  --illo-fill: oklch(0.945 0.01 82);
+  --illo-fill-2: oklch(0.915 0.014 80);
+  --persuade-ink: var(--ink);
+  --persuade-accent: oklch(0.5 0.02 70);
+}
 .dark .landing-root {
-  --paper: oklch(0.17 0.008 60);
-  --paper-2: oklch(0.205 0.01 60);
-  --ink: oklch(0.95 0.008 85);
-  --muted-foreground: oklch(0.72 0.012 75);
-  --border: oklch(0.95 0.01 85 / 12%);
-  --popover: oklch(0.22 0.01 60);
+  /* Cool neutrals (hue ~260, same as the app's dark theme) so the blue accent
+     sits on a matching ground instead of fighting a warm brown paper. */
+  --paper: oklch(0.175 0.008 260);
+  --paper-2: oklch(0.205 0.009 260);
+  --ink: oklch(0.95 0.004 255);
+  --muted-foreground: oklch(0.72 0.012 258);
+  --border: oklch(0.95 0.01 255 / 12%);
+  --popover: oklch(0.22 0.009 260);
+  --persuade-tint-strong: oklch(0.26 0.03 262);
+  --illo-fill: oklch(0.26 0.03 262);
+  --illo-fill-2: oklch(0.3 0.04 262);
+  --persuade-ink: oklch(0.82 0.07 250);
+  --hero-field-a: 10%;
+  --hero-field-b: 8%;
 }
 
 /* ── Type: serif display, italic accent line ─────────────────── */
@@ -47,9 +64,8 @@
   line-height: 0.98;
 }
 .landing-root .landing-h1-ink {
-  font-style: italic;
-  font-weight: 340;
-  color: var(--persuade-ink);
+  font-weight: 380;
+  color: var(--muted-foreground);
 }
 .landing-root .landing-h2 {
   font-size: clamp(32px, 2.8vw + 16px, 56px);
@@ -184,8 +200,7 @@
   border-radius: 18px;
   box-shadow:
     0 0 0 1px var(--border),
-    0 1px 2px color-mix(in oklch, var(--ink) 6%, transparent),
-    0 24px 60px -24px color-mix(in oklch, var(--ink) 28%, transparent);
+    0 1px 2px color-mix(in oklch, var(--ink) 6%, transparent);
 }
 .landing-root .hero-demo {
   transition: transform 700ms var(--ease-out);
@@ -383,4 +398,8 @@ html.motion-ok.motion-ready .landing-root [data-reveal] .reveal-item {
   .landing-root .landing-steps > .landing-step:hover {
     transform: none;
   }
+}
+
+.landing-root .hf-dots {
+  display: none;
 }

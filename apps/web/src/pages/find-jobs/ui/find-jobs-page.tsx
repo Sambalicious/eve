@@ -18,6 +18,7 @@ import {
 import {
   BROAD_HIRING_SEARCH_SECTION_ID,
   BroadHiringSearchSection,
+  HiringCafeSearchSection,
   HIRING_SEARCH_LINKS_SECTION_ID,
   HiringSearchLinksSection,
   SearchLinksSection,
@@ -187,6 +188,7 @@ function FindJobsSections() {
                   onFeedsLink={() => tabs.goTo(HIRING_ALERT_FEEDS_SECTION_ID)}
                 />
               )}
+              {criteria.data && <HiringCafeSearchSection targets={criteria.data.targetRoleFamilies} />}
               <CheckThisJobSection hintShown={links.state.kind === "ready"} />
               <SearchLinksSection
                 groups={groups}
