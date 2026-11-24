@@ -100,7 +100,7 @@ export const landingCopy = {
   stops: {
     title: "When Eve stops and asks",
     intro:
-      "Some answers belong to you. When Eve reaches one, it pauses that Application, marks it Blocked and emails you. It doesn't guess.",
+      "When a form asks for something only you can answer, Eve pauses that Application, marks it Blocked and emails you.",
     reasons: [
       "A required question with no Approved Answer yet",
       "A login to an employer site",
@@ -116,9 +116,9 @@ export const landingCopy = {
   },
   limits: {
     title: "Limits you control",
-    intro: "Nothing goes out on its own until you've checked Eve's work.",
+    intro: "Eve sends nothing by itself until you've checked its work.",
     items: [
-      { term: "Daily cap", value: "Up to five automatic Applications a day. It's a ceiling, not a target." },
+      { term: "Daily cap", value: "Up to five automatic Applications a day." },
       {
         term: "Activation Gate",
         value: "You approve your Career Profile and five complete sample Applications before Eve sends anything by itself.",
