@@ -76,7 +76,7 @@ describe("Hiring view frame (hiring-view.feature, Phase 2)", () => {
     }
   )
 
-  it("HV:104 @ac-1.2 R5: the tabs in order, each holding its sections: Search (Hiring search links, Broad hiring search, Check this job, Search links), Hiring posts, Posts from your field, Set up alerts (inside it, Hiring alert feeds)", async () => {
+  it("HV:104 @ac-1.2 R5: the tabs in order, each holding its sections: Search (Hiring search links, Broad hiring search, Search HiringCafe, Check this job, Search links), Hiring posts, Posts from your field, Set up alerts (inside it, Hiring alert feeds)", async () => {
     const { user } = openHiringFeeds({ criteria: { frameworks: ["React"] } })
     await screen.findByRole("heading", { name: "Hiring alert feeds" })
     const tabs = within(screen.getByRole("tablist", { name: "Find jobs" })).getAllByRole("tab")
@@ -86,7 +86,7 @@ describe("Hiring view frame (hiring-view.feature, Phase 2)", () => {
     expect(headings()).toEqual(["Set up alerts", "Alert feeds", "Hiring alert feeds"])
     await user.click(screen.getByRole("tab", { name: "Search" }))
     await screen.findAllByRole("link", { name: /^LinkedIn posts for/ })
-    expect(headings()).toEqual(["Hiring search links", "Broad hiring search", "Check this job", "Search links"])
+    expect(headings()).toEqual(["Hiring search links", "Broad hiring search", "Search HiringCafe", "Check this job", "Search links"])
     await user.click(screen.getByRole("tab", { name: "Hiring posts" }))
     expect(headings()).toEqual(["Hiring posts"])
     await user.click(screen.getByRole("tab", { name: "Posts from your field" }))

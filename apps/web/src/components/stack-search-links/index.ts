@@ -5,3 +5,4 @@ export {
   type HiringSearchLinksState,
 } from "./ui/hiring-search-links-section"
 export { BROAD_HIRING_SEARCH_SECTION_ID, BroadHiringSearchSection } from "./ui/broad-hiring-search-section"
+export { HiringCafeSearchSection } from "./ui/hiringcafe-search-section"
